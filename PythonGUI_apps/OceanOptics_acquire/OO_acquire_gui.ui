@@ -20,7 +20,7 @@
       <x>20</x>
       <y>30</y>
       <width>251</width>
-      <height>171</height>
+      <height>201</height>
      </rect>
     </property>
     <property name="font">
@@ -46,7 +46,7 @@
       </font>
      </property>
      <property name="minimum">
-      <number>100</number>
+      <number>3</number>
      </property>
      <property name="maximum">
       <number>3000</number>
@@ -102,6 +102,9 @@
        <pointsize>10</pointsize>
       </font>
      </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
     </widget>
     <widget class="QLabel" name="label_2">
      <property name="geometry">
@@ -121,6 +124,27 @@
       <string>Scans to Average</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="correct_dark_counts_checkBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>160</y>
+       <width>201</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Correct Dark Counts</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
    <widget class="PlotWidget" name="plot">
     <property name="geometry">
@@ -130,6 +154,61 @@
       <width>981</width>
       <height>571</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="live_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>150</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Live</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="close_connection_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>480</y>
+      <width>221</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Close Connection</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>390</y>
+      <width>401</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>20</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>ALWAYS CLOSE CONNECTION!!!
+BEFORE EXITING APP</string>
     </property>
    </widget>
   </widget>
