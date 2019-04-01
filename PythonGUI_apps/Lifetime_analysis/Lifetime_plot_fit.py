@@ -8,7 +8,16 @@ Created on Wed Mar 27 16:50:26 2019
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 import numpy as np
+import matplotlib.pyplot as plt
 from Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
+
+"""Recylce params for plotting"""
+plt.rc('xtick', labelsize = 20)
+plt.rc('xtick.major', pad = 3)
+plt.rc('ytick', labelsize = 20)
+plt.rc('lines', lw = 2.5, markersize = 7.5)
+plt.rc('legend', fontsize = 20)
+plt.rc('axes', linewidth=3.5)
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
@@ -37,6 +46,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.log_pushButton.clicked.connect(self.make_semilog)
         self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
+        self.ui.export_plot_pushButton.clicked.connect(self.pub_ready_plot_export)
         
         self.file = None
         self.out = None # output file after fitting
@@ -133,6 +143,21 @@ class MainWindow(TemplateBaseClass):
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Time', units='ns')
         return self.out
+    
+    def pub_ready_plot_export(self):
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
+        
+        plt.figure(figsize=(8,6))
+        plt.tick_params(direction='out', length=8, width=3.5)
+        plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]))
+        plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),'k')
+        plt.yscale('log')
+        plt.xlabel("Time (ns)", fontsize=20, fontweight='bold')
+        plt.ylabel("Intensity (norm.)", fontsize=20, fontweight='bold')
+        plt.tight_layout()
+        
+        plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+        plt.close()
     
     def close_application(self):
         choice = QtGui.QMessageBox.question(self, 'EXIT!',
