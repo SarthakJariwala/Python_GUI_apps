@@ -33,7 +33,7 @@ class Spectra_Fit(object):
         y = self.data[:, 1] # intensity
         yref = self.ref[:, 1]
         y = y - yref # background correction
-        y = y - np.mean(y[(x>600) & (x<700)]) # removing any remaining bckgrnd
+        # y = y - np.mean(y[(x>600) & (x<700)]) # removing any remaining bckgrnd
         return [x,y]
 
 class Single_Gaussian(Spectra_Fit):

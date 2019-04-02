@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1158</width>
-    <height>846</height>
+    <width>1349</width>
+    <height>886</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -130,23 +130,25 @@ Ref File</string>
      <rect>
       <x>370</x>
       <y>30</y>
-      <width>771</width>
-      <height>521</height>
+      <width>961</width>
+      <height>571</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="plot_pushButton">
     <property name="geometry">
      <rect>
-      <x>90</x>
+      <x>30</x>
       <y>260</y>
-      <width>121</width>
+      <width>181</width>
       <height>51</height>
      </rect>
     </property>
     <property name="font">
      <font>
       <pointsize>15</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
      </font>
     </property>
     <property name="text">
@@ -197,8 +199,8 @@ Ref File</string>
    <widget class="QPushButton" name="clear_pushButton">
     <property name="geometry">
      <rect>
-      <x>790</x>
-      <y>570</y>
+      <x>1180</x>
+      <y>620</y>
       <width>151</width>
       <height>61</height>
      </rect>
@@ -219,8 +221,13 @@ Ref File</string>
       <x>10</x>
       <y>500</y>
       <width>341</width>
-      <height>301</height>
+      <height>331</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
     </property>
    </widget>
    <widget class="QCheckBox" name="norm_checkBox">
@@ -241,13 +248,32 @@ Ref File</string>
      <string>Normalize</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="export_fig_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>620</y>
+      <width>211</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Export Publication
+Ready Figure</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1158</width>
+     <width>1349</width>
      <height>21</height>
     </rect>
    </property>

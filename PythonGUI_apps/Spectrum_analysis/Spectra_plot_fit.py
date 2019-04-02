@@ -9,7 +9,16 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets#, QColorDialog
 import numpy as np
 import sys
-#from Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
+from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian
+import matplotlib.pyplot as plt
+
+"""Recylce params for plotting"""
+plt.rc('xtick', labelsize = 20)
+plt.rc('xtick.major', pad = 3)
+plt.rc('ytick', labelsize = 20)
+plt.rc('lines', lw = 1.5, markersize = 7.5)
+plt.rc('legend', fontsize = 20)
+plt.rc('axes', linewidth=3.5)
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
@@ -27,7 +36,7 @@ class MainWindow(TemplateBaseClass):
         self.ui = WindowTemplate()
         self.ui.setupUi(self)
         
-#        self.ui.FittingFunc_comboBox.addItems(["Strected Exponential","Double Exponential", "Single Exponential"])
+        self.ui.fitFunc_comboBox.addItems(["Single Gaussian","Double Gaussian", "Multiple Gaussians"])
         
 #        self.ui.actionSave.triggered.connect(self.save_file)
 #        self.ui.actionExit.triggered.connect(self.close_application)
@@ -36,9 +45,9 @@ class MainWindow(TemplateBaseClass):
         self.ui.importBck_pushButton.clicked.connect(self.open_bck_file)
         self.ui.importWLRef_pushButton.clicked.connect(self.open_wlref_file)
         self.ui.plot_pushButton.clicked.connect(self.plot)
-        
-#        self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
+        self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
+        self.ui.export_fig_pushButton.clicked.connect(self.pub_ready_plot_export)
         
         self.file = None
         self.bck_file = None
@@ -75,7 +84,7 @@ class MainWindow(TemplateBaseClass):
         np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
 
     def plot(self):
-#        x,y = self.acquire_settings()
+        
         self.x = self.file[:,0]
         self.y = self.file[:,1]
         
@@ -102,11 +111,36 @@ class MainWindow(TemplateBaseClass):
     
     def normalize(self):
         self.y = (self.y) / np.amax(self.y)
-        
     
     def clear_plot(self):
         self.ui.plot.clear()
 #        self.ui.Result_textBrowser.clear()
+    
+    def fit_and_plot(self):
+        fit_func = self.ui.fitFunc_comboBox.currentText()
+        
+        if fit_func == "Single Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+            
+            single_gauss = Single_Gaussian(self.file, self.bck_file)
+            self.result = single_gauss.gaussian_model()
+            self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
+            self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+            self.ui.result_textBrowser.setText(self.result.fit_report())
+    
+    def pub_ready_plot_export(self):
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
+        
+        plt.figure(figsize=(8,6))
+        plt.tick_params(direction='out', length=8, width=3.5)
+        plt.plot(self.x, self.y)
+        plt.plot(self.x, self.result.best_fit,'k')
+        plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
+        plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
+        plt.tight_layout()
+        
+        plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+        plt.close()
+            
     
     def close_application(self):
         choice = QtGui.QMessageBox.question(self, 'EXIT!',
@@ -119,9 +153,16 @@ class MainWindow(TemplateBaseClass):
         
         
 win = MainWindow()
+#def main():
+#    app = QtGui.QApplication(sys.argv)
+#    main = MainWindow()
+#    main.show()
+#    sys.exit(app.exec_())
+#
+#if __name__ == '__main__':
+#    main()
 
-
-## Start Qt event loop unless running in interactive mode or using pyside.
+# Start Qt event loop unless running in interactive mode or using pyside.
 if __name__ == '__main__':
     import sys
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
