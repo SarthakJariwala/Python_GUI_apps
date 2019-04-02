@@ -26,19 +26,17 @@ class MainWindow(TemplateBaseClass):
         # Create the main window
         self.ui = WindowTemplate()
         self.ui.setupUi(self)
-               
-#        self.ui.actionSave.triggered.connect(self.save_file)
-#        self.ui.actionExit.triggered.connect(self.close_application)
-        
         
         self.ui.live_pushButton.clicked.connect(self.live)
         self.ui.close_connection_pushButton.clicked.connect(self.close_connection)
+        self.ui.save_pushButton.clicked.connect(self.save_file_location)
         
 #        self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         
         self.spec = sb.Spectrometer(sb.list_devices()[0])
         
-#        self.spec = None
+        self.save_filename = None
+        self.y = None
         
         self.show()
     
@@ -47,9 +45,9 @@ class MainWindow(TemplateBaseClass):
         self.spec = sb.Spectrometer(devices[0])
         
     
-    def save_file(self):
-        filename = QtWidgets.QFileDialog.getSaveFileName(self)
-        np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
+    def save_file_location(self):
+        filename = QtWidgets.QFileDialog.getSaveFileName(self, caption="NO EXTENSION IN FILENAME")
+        self.save_filename = filename[0]
 
     def live(self):
             
@@ -58,19 +56,29 @@ class MainWindow(TemplateBaseClass):
         
         scans_to_avg = self.ui.scan_to_avg_spinBox.value()
         Int_array = np.zeros(shape=(2048,scans_to_avg))
+        save_array = np.zeros(shape=(2048,2))
         
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Wavelength', units='nm')
-        
+        j = 0
         while self.ui.connect_checkBox.isChecked(): # this while loop works!
             for i in range(scans_to_avg):
         
                 data = self.spec.spectrum(correct_dark_counts=self.ui.correct_dark_counts_checkBox.isChecked())
                 Int_array[:,i] = data[1]
+                self.y = np.mean(Int_array, axis=-1)
+                save_array[:,0] = self.spec.wavelengths()
+                save_array[:,1] = self.y
             
-            self.ui.plot.plot(self.spec.wavelengths(), np.mean(Int_array, axis=-1), pen='r', clear=True)
+            self.ui.plot.plot(self.spec.wavelengths(), self.y, pen='r', clear=True)
+            
+            if self.ui.save_every_spec_checkBox.isChecked():
+                np.savetxt(self.save_filename+str(j)+".txt", save_array, fmt = '%.5f', header = 'Wavelength (nm), Intensity (counts)', delimiter = ' ')
+            
             pg.QtGui.QApplication.processEvents()
-    
+            j += 1
+            
+            
     def close_connection(self):
          self.spec.close()
     
