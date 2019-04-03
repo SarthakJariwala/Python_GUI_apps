@@ -29,11 +29,12 @@ class MainWindow(TemplateBaseClass):
         
         self.ui.live_pushButton.clicked.connect(self.live)
         self.ui.close_connection_pushButton.clicked.connect(self.close_connection)
-        self.ui.save_pushButton.clicked.connect(self.save_file_location)
-        
+        self.ui.config_save_pushButton.clicked.connect(self.save_file_location)
+        self.ui.save_single_spec_pushButton.clicked.connect(self.save_single_spec)
 #        self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         
         self.spec = sb.Spectrometer(sb.list_devices()[0])
+        self.ui.status_textBrowser.setText("Ocean Optics Device Connection Initiated\n\n Device:\n\n"+str(sb.list_devices()[0]))
         
         self.save_filename = None
         self.y = None
@@ -46,8 +47,16 @@ class MainWindow(TemplateBaseClass):
         
     
     def save_file_location(self):
-        filename = QtWidgets.QFileDialog.getSaveFileName(self, caption="NO EXTENSION IN FILENAME")
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,
+                                                         caption="NO EXTENSION IN FILENAME")
         self.save_filename = filename[0]
+    
+    def save_single_spec(self):
+        save_array = np.zeros(shape=(2048,2))
+        save_array[:,0] = self.spec.wavelengths()
+        save_array[:,1] = self.y
+        np.savetxt(self.save_filename+".txt", save_array, fmt = '%.5f', 
+                   header = 'Wavelength (nm), Intensity (counts)', delimiter = ' ')
 
     def live(self):
             
@@ -73,7 +82,8 @@ class MainWindow(TemplateBaseClass):
             self.ui.plot.plot(self.spec.wavelengths(), self.y, pen='r', clear=True)
             
             if self.ui.save_every_spec_checkBox.isChecked():
-                np.savetxt(self.save_filename+str(j)+".txt", save_array, fmt = '%.5f', header = 'Wavelength (nm), Intensity (counts)', delimiter = ' ')
+                np.savetxt(self.save_filename+str(j)+".txt", save_array, fmt = '%.5f', 
+                           header = 'Wavelength (nm), Intensity (counts)', delimiter = ' ')
             
             pg.QtGui.QApplication.processEvents()
             j += 1
@@ -81,6 +91,7 @@ class MainWindow(TemplateBaseClass):
             
     def close_connection(self):
          self.spec.close()
+         self.ui.status_textBrowser.setText("Ocean Optics Device Disconnected")
     
     def close_application(self):
         choice = QtGui.QMessageBox.question(self, 'EXIT!',
