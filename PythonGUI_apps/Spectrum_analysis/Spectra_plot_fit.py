@@ -92,14 +92,15 @@ class MainWindow(TemplateBaseClass):
             bck_y = self.bck_file[:,1]
             self.y = self.y - bck_y
         
-        elif self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() ==True:
+        elif self.ui.WLRef_checkBox.isChecked() == True:
+            wlref_y = self.wlref_file[:,1]
+            self.y = (self.y)/wlref_y
+        
+        if self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() ==True:
             bck_y = self.bck_file[:,1]
             wlref_y = self.wlref_file[:,1]
             self.y = (self.y-bck_y)/wlref_y
         
-        elif self.ui.WLRef_checkBox.isChecked() == True:
-            wlref_y = self.wlref_file[:,1]
-            self.y = (self.y)/wlref_y
         
         if self.ui.norm_checkBox.isChecked():
             self.normalize()
@@ -126,20 +127,29 @@ class MainWindow(TemplateBaseClass):
             self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
             self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
             self.ui.result_textBrowser.setText(self.result.fit_report())
+        
+        elif fit_func == "Double Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+            self.ui.result_textBrowser.setText("Not Implemented Yet!")
+        
+        elif fit_func == "Multiple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
+            self.ui.result_textBrowser.setText("Not Implemented Yet!")
     
     def pub_ready_plot_export(self):
         filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
-        
-        plt.figure(figsize=(8,6))
-        plt.tick_params(direction='out', length=8, width=3.5)
-        plt.plot(self.x, self.y)
-        plt.plot(self.x, self.result.best_fit,'k')
-        plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
-        plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
-        plt.tight_layout()
-        
-        plt.savefig(filename[0],bbox_inches='tight', dpi=300)
-        plt.close()
+        try:
+            plt.figure(figsize=(8,6))
+            plt.tick_params(direction='out', length=8, width=3.5)
+            plt.plot(self.x, self.y)
+            plt.plot(self.x, self.result.best_fit,'k')
+            plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
+            plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
+            plt.tight_layout()
+            
+            plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+            plt.close()
+            
+        except AttributeError:
+            self.ui.result_textBrowser.setText("Need to fit the data first!")
             
     
     def close_application(self):
