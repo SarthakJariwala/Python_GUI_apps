@@ -10,6 +10,7 @@ from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 import numpy as np
 import matplotlib.pyplot as plt
 from Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
+from picoharp_phd import read_picoharp_phd
 
 """Recylce params for plotting"""
 plt.rc('xtick', labelsize = 20)
@@ -35,7 +36,7 @@ class MainWindow(TemplateBaseClass):
         self.ui = WindowTemplate()
         self.ui.setupUi(self)
         self.ui.Res_comboBox.addItems(["0.004","0.008","0.016","0.032","0.064","0.128","0.256","0.512"])
-        self.ui.Channel_comboBox.addItems(["0","1","2","3","4","5","6","7"])
+        self.ui.Channel_comboBox.addItems(["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"])
         self.ui.FittingFunc_comboBox.addItems(["Stretched Exponential","Double Exponential", "Single Exponential"])
         
         self.ui.actionOpen.triggered.connect(self.open_file)
@@ -55,7 +56,10 @@ class MainWindow(TemplateBaseClass):
         
     def open_file(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(self)
-        self.file = np.loadtxt(filename[0], skiprows=10)
+        try:
+            self.file = np.loadtxt(filename[0], skiprows=10)
+        except:
+            self.file = read_picoharp_phd(filename[0])
     
     def save_file(self):
         filename = QtWidgets.QFileDialog.getSaveFileName(self)
@@ -64,7 +68,14 @@ class MainWindow(TemplateBaseClass):
     def acquire_settings(self):
         resolution = float(self.ui.Res_comboBox.currentText())
         channel = int(self.ui.Channel_comboBox.currentText())
-        y = self.file[:,channel]
+        try:
+            y = self.file[:,channel]
+        except:
+            res, y = self.file.get_curve(channel)
+            # TO DO - check if res read in is the same as selected
+            time_window = int(np.floor(self.file.get_time_window_in_ns(channel)))
+            y = y[0:time_window]
+        
         length = np.shape(y)[0]
         x = np.arange(0, length, 1) * resolution
         return x,y
