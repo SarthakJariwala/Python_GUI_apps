@@ -402,3 +402,7 @@ class PicoharpParser(object):
                     w("RtChan_CFDZeroCross  : %d" % curve.RtChan_CFDZeroCross)
 
         return '\n'.join(r)
+
+def read_picoharp_phd(datafile):
+    parser = PicoharpParser(datafile)
+    return parser
