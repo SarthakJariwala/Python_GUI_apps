@@ -88,15 +88,15 @@ class MainWindow(TemplateBaseClass):
         self.x = self.file[:,0]
         self.y = self.file[:,1]
         
-        if self.ui.subtract_bck_checkBox.isChecked() == True:
+        if self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
             bck_y = self.bck_file[:,1]
             self.y = self.y - bck_y
         
-        elif self.ui.WLRef_checkBox.isChecked() == True:
+        elif self.ui.subtract_bck_checkBox.isChecked() == False and self.ui.WLRef_checkBox.isChecked() == True:
             wlref_y = self.wlref_file[:,1]
             self.y = (self.y)/wlref_y
         
-        if self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() ==True:
+        elif self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == True:
             bck_y = self.bck_file[:,1]
             wlref_y = self.wlref_file[:,1]
             self.y = (self.y-bck_y)/wlref_y
