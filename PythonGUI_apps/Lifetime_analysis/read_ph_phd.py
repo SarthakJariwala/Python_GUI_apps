@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 
 def read_picoharp_phd(datafile):
-    parser = picoharp.PicoharpParser(datafile)
+    parser = picoharp_phd.PicoharpParser(datafile)
     return parser
 
 def phd_to_csv(datafile):
@@ -29,7 +29,7 @@ def phd_to_csv(datafile):
         curve = curve[0:time_window]
         y.append(curve)
 
-parser = picoharp.PicoharpParser(datafile)
+parser = picoharp_phd.PicoharpParser(datafile)
 name, ext = datafile.rsplit('.', 1)
 
 #for i in range(parser.no_of_curves()):

@@ -9,7 +9,7 @@ import numpy as np
 from scipy.optimize import differential_evolution
 from scipy.special import gamma
 
-def stretch_exp_fit(TRPL, t, Tc = (1,1e5), Beta = (0,1), A = (0,1e6)):
+def stretch_exp_fit(TRPL, t, Tc = (0,1e5), Beta = (0,1), A = (0,1e6)):
 
     def exp_stretch(t, tc, beta, a):
         return (a * np.exp(-((1.0 / tc) * t) ** beta)) 
