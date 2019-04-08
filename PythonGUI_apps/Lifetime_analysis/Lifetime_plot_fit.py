@@ -37,7 +37,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.setupUi(self)
         self.ui.Res_comboBox.addItems(["0.004","0.008","0.016","0.032","0.064","0.128","0.256","0.512"])
         self.ui.Channel_comboBox.addItems(["0","1","2","3","4","5","6","7"])
-        self.ui.FittingFunc_comboBox.addItems(["Strected Exponential","Double Exponential", "Single Exponential"])
+        self.ui.FittingFunc_comboBox.addItems(["Stretched Exponential","Double Exponential", "Single Exponential"])
         
         self.ui.actionOpen.triggered.connect(self.open_file)
         self.ui.actionSave.triggered.connect(self.save_file)
@@ -114,7 +114,7 @@ class MainWindow(TemplateBaseClass):
         fit_func = self.ui.FittingFunc_comboBox.currentText()
         self.ui.plot.plot(t, y, clear=True, pen='r')
         
-        if fit_func == "Strected Exponential":
+        if fit_func == "Stretched Exponential":
             tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
             self.out = np.empty((len(t), 3))
             self.out[:,0] = t #time
