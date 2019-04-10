@@ -5,12 +5,23 @@ Created on Wed Mar 27 16:50:26 2019
 @author: Sarthak
 """
 
+# system imports
+import sys
+from pathlib import Path
+
+# module imports
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 import numpy as np
 import matplotlib.pyplot as plt
-from Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
-from picoharp_phd import read_picoharp_phd
+
+# local module imports
+try:
+    from Lifetime_analysis.Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
+    from Lifetime_analysis.picoharp_phd import read_picoharp_phd
+except:
+    from Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
+    from picoharp_phd import read_picoharp_phd
 
 """Recylce params for plotting"""
 plt.rc('xtick', labelsize = 20)
@@ -23,7 +34,10 @@ plt.rc('axes', linewidth=3.5)
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
 
-uiFile = "Lifetime_analysis_gui_layout.ui"
+base_path = Path(__file__).parent
+file_path = (base_path / "Lifetime_analysis_gui_layout.ui").resolve()
+
+uiFile = file_path
 
 WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 
@@ -184,12 +198,11 @@ class MainWindow(TemplateBaseClass):
         else:
             pass
         
-        
-win = MainWindow()
 
+def run():
+    win = MainWindow()
+    QtGui.QApplication.instance().exec_()
+    return win
 
-## Start Qt event loop unless running in interactive mode or using pyside.
-if __name__ == '__main__':
-    import sys
-    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-        QtGui.QApplication.instance().exec_()
+#Uncomment below if you want to run this as standalone
+#run()
