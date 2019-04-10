@@ -85,6 +85,11 @@ class MainWindow(TemplateBaseClass):
         self.ui.plot.plot(x, y, clear=False, pen='r')
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Time', units='ns')
+        try:
+            self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
+                    self.file.get_integral_counts(int(self.ui.Channel_comboBox.currentText()))))
+        except:
+            self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(np.sum(y)))
     
     def make_semilog(self):
         self.ui.plot.setLogMode(False,True)
