@@ -12,6 +12,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 
 from Lifetime_analysis import Lifetime_plot_fit
+from Spectrum_analysis import Spectra_plot_fit
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
@@ -42,9 +43,13 @@ class MainWindow(TemplateBaseClass):
         analysis_software = self.ui.select_comboBox.currentText()
         
         if analysis_software == "Lifetime Analysis":
-            self.window = Lifetime_plot_fit.MainWindow()
-            self.window.show()
+            self.lifetime_window = Lifetime_plot_fit.MainWindow()
+            self.lifetime_window.show()
         
+        elif analysis_software == "Spectrum Analysis":
+            self.spectrum_window = Spectra_plot_fit.MainWindow()
+            self.spectrum_window.show()
+            
         else:
             print("not yet linked -- coming soon")
 
