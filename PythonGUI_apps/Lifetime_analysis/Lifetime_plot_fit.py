@@ -71,6 +71,8 @@ class MainWindow(TemplateBaseClass):
     def open_file(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
+            self.file = np.loadtxt(filename[0], skiprows=0)
+        except ValueError:
             self.file = np.loadtxt(filename[0], skiprows=10)
         except:
             self.file = read_picoharp_phd(filename[0])
@@ -208,4 +210,4 @@ def run():
     return win
 
 #Uncomment below if you want to run this as standalone
-#run()
+run()
