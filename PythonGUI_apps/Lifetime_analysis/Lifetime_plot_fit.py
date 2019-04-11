@@ -179,8 +179,11 @@ class MainWindow(TemplateBaseClass):
         
         plt.figure(figsize=(8,6))
         plt.tick_params(direction='out', length=8, width=3.5)
-        plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]))
-        plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),'k')
+        try:
+            plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]))
+            plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),'k')
+        except:
+            plt.plot(self.acquire_settings()[0],self.acquire_settings()[1]/np.max(self.acquire_settings()[1]))
         plt.yscale('log')
         plt.xlabel("Time (ns)", fontsize=20, fontweight='bold')
         plt.ylabel("Intensity (norm.)", fontsize=20, fontweight='bold')
