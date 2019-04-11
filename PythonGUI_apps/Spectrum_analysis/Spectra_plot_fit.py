@@ -5,10 +5,13 @@ Created on Wed Mar 27 16:50:26 2019
 @author: Sarthak
 """
 
+import sys
+from pathlib import Path
+
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets#, QColorDialog
 import numpy as np
-import sys
+
 from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian
 import matplotlib.pyplot as plt
 
@@ -23,7 +26,10 @@ plt.rc('axes', linewidth=3.5)
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
 
-uiFile = "Spectra_plot_fit_gui.ui"
+base_path = Path(__file__).parent
+file_path = (base_path / "Spectra_plot_fit_gui.ui").resolve()
+
+uiFile = file_path
 
 WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 
@@ -120,19 +126,24 @@ class MainWindow(TemplateBaseClass):
     def fit_and_plot(self):
         fit_func = self.ui.fitFunc_comboBox.currentText()
         
-        if fit_func == "Single Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+        if self.ui.subtract_bck_checkBox.isChecked() == False:
+            self.ui.result_textBrowser.setText("You need to check the subtract background option!")
             
-            single_gauss = Single_Gaussian(self.file, self.bck_file)
-            self.result = single_gauss.gaussian_model()
-            self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
-            self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
-            self.ui.result_textBrowser.setText(self.result.fit_report())
-        
-        elif fit_func == "Double Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
-            self.ui.result_textBrowser.setText("Not Implemented Yet!")
-        
-        elif fit_func == "Multiple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
-            self.ui.result_textBrowser.setText("Not Implemented Yet!")
+        else:
+            if fit_func == "Single Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+                
+                single_gauss = Single_Gaussian(self.file, self.bck_file)
+                self.result = single_gauss.gaussian_model()
+                self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
+                self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+                self.ui.result_textBrowser.setText(self.result.fit_report())
+            
+            elif fit_func == "Double Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+                self.ui.result_textBrowser.setText("Not Implemented Yet!")
+            
+            elif fit_func == "Multiple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
+                self.ui.result_textBrowser.setText("Not Implemented Yet!")
+            
     
     def pub_ready_plot_export(self):
         filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
@@ -161,19 +172,10 @@ class MainWindow(TemplateBaseClass):
         else:
             pass
         
-        
-win = MainWindow()
-#def main():
-#    app = QtGui.QApplication(sys.argv)
-#    main = MainWindow()
-#    main.show()
-#    sys.exit(app.exec_())
-#
-#if __name__ == '__main__':
-#    main()
+def run():
+    win = MainWindow()
+    QtGui.QApplication.instance().exec_()
+    return win
 
-# Start Qt event loop unless running in interactive mode or using pyside.
-if __name__ == '__main__':
-    import sys
-    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-        QtGui.QApplication.instance().exec_()
+#Uncomment below if you want to run this as standalone
+#run()
