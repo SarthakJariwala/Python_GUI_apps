@@ -5,15 +5,21 @@ Created on Wed Mar 27 16:50:26 2019
 @author: Sarthak
 """
 
+# system imports
 import sys
 from pathlib import Path
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets#, QColorDialog
 import numpy as np
-
-from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian
 import matplotlib.pyplot as plt
+
+# local modules
+try:
+    from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian
+except:
+    from Spectrum_analysis.Spectra_fit_funcs import Spectra_Fit, Single_Gaussian    
+
 
 """Recylce params for plotting"""
 plt.rc('xtick', labelsize = 20)
