@@ -104,10 +104,10 @@
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>150</y>
-      <width>201</width>
-      <height>161</height>
+      <width>231</width>
+      <height>91</height>
      </rect>
     </property>
     <property name="font">
@@ -121,17 +121,17 @@
     <widget class="QPushButton" name="plot_pushButton">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>40</y>
+       <x>10</x>
+       <y>30</y>
        <width>91</width>
        <height>41</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>20</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
+       <pointsize>15</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
       </font>
      </property>
      <property name="text">
@@ -141,10 +141,10 @@
     <widget class="QPushButton" name="log_pushButton">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>100</y>
+       <x>120</x>
+       <y>30</y>
        <width>91</width>
-       <height>51</height>
+       <height>41</height>
       </rect>
      </property>
      <property name="font">
@@ -160,8 +160,8 @@
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>320</y>
+      <x>10</x>
+      <y>260</y>
       <width>231</width>
       <height>181</height>
      </rect>
@@ -224,8 +224,8 @@
    <widget class="QPushButton" name="clear_pushButton">
     <property name="geometry">
      <rect>
-      <x>760</x>
-      <y>590</y>
+      <x>910</x>
+      <y>560</y>
       <width>121</width>
       <height>51</height>
      </rect>
@@ -233,7 +233,7 @@
     <property name="font">
      <font>
       <pointsize>15</pointsize>
-      <strikeout>true</strikeout>
+      <strikeout>false</strikeout>
      </font>
     </property>
     <property name="text">
@@ -243,10 +243,10 @@
    <widget class="QTextBrowser" name="Result_textBrowser">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>530</y>
+      <x>10</x>
+      <y>470</y>
       <width>256</width>
-      <height>192</height>
+      <height>261</height>
      </rect>
     </property>
     <property name="font">
@@ -259,7 +259,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>590</y>
+      <y>560</y>
       <width>211</width>
       <height>71</height>
      </rect>
@@ -267,8 +267,8 @@
     <property name="font">
      <font>
       <pointsize>15</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
+      <weight>50</weight>
+      <bold>false</bold>
      </font>
     </property>
     <property name="text">
