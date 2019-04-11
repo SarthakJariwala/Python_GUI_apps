@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1050</width>
+    <width>1201</width>
     <height>785</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>290</x>
       <y>40</y>
-      <width>741</width>
+      <width>891</width>
       <height>501</height>
      </rect>
     </property>
@@ -29,7 +29,7 @@
      <rect>
       <x>10</x>
       <y>30</y>
-      <width>231</width>
+      <width>241</width>
       <height>101</height>
      </rect>
     </property>
@@ -44,15 +44,15 @@
     <widget class="QLabel" name="label_3">
      <property name="geometry">
       <rect>
-       <x>150</x>
+       <x>140</x>
        <y>30</y>
-       <width>71</width>
+       <width>81</width>
        <height>16</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>12</pointsize>
       </font>
      </property>
      <property name="text">
@@ -64,13 +64,13 @@
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>91</width>
+       <width>111</width>
        <height>21</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>12</pointsize>
       </font>
      </property>
      <property name="text">
@@ -80,9 +80,9 @@
     <widget class="QComboBox" name="Channel_comboBox">
      <property name="geometry">
       <rect>
-       <x>150</x>
+       <x>140</x>
        <y>60</y>
-       <width>69</width>
+       <width>81</width>
        <height>22</height>
       </rect>
      </property>
@@ -92,7 +92,7 @@
       <rect>
        <x>10</x>
        <y>60</y>
-       <width>91</width>
+       <width>101</width>
        <height>22</height>
       </rect>
      </property>
@@ -106,8 +106,8 @@
      <rect>
       <x>10</x>
       <y>150</y>
-      <width>231</width>
-      <height>91</height>
+      <width>241</width>
+      <height>131</height>
      </rect>
     </property>
     <property name="font">
@@ -123,7 +123,7 @@
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>91</width>
+       <width>111</width>
        <height>41</height>
       </rect>
      </property>
@@ -141,7 +141,7 @@
     <widget class="QPushButton" name="log_pushButton">
      <property name="geometry">
       <rect>
-       <x>120</x>
+       <x>140</x>
        <y>30</y>
        <width>91</width>
        <height>41</height>
@@ -156,14 +156,33 @@
       <string>Y axis Log</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="clear_pushButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>221</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+       <strikeout>false</strikeout>
+      </font>
+     </property>
+     <property name="text">
+      <string>Clear Plot</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>260</y>
-      <width>231</width>
-      <height>181</height>
+      <y>290</y>
+      <width>241</width>
+      <height>201</height>
      </rect>
     </property>
     <property name="font">
@@ -178,8 +197,8 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>70</y>
-       <width>211</width>
+       <y>60</y>
+       <width>221</width>
        <height>31</height>
       </rect>
      </property>
@@ -188,14 +207,14 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>40</y>
-       <width>101</width>
+       <y>30</y>
+       <width>111</width>
        <height>20</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>12</pointsize>
       </font>
      </property>
      <property name="text">
@@ -205,10 +224,10 @@
     <widget class="QPushButton" name="fit_pushButton">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>120</y>
-       <width>171</width>
-       <height>51</height>
+       <x>10</x>
+       <y>150</y>
+       <width>221</width>
+       <height>41</height>
       </rect>
      </property>
      <property name="font">
@@ -220,33 +239,27 @@
       <string>Get Lifetime!</string>
      </property>
     </widget>
-   </widget>
-   <widget class="QPushButton" name="clear_pushButton">
-    <property name="geometry">
-     <rect>
-      <x>910</x>
-      <y>560</y>
-      <width>121</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>15</pointsize>
-      <strikeout>false</strikeout>
-     </font>
-    </property>
-    <property name="text">
-     <string>Clear Plot</string>
-    </property>
+    <widget class="QPushButton" name="config_fit_pushButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>221</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Configure Fit Settings</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QTextBrowser" name="Result_textBrowser">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>470</y>
+      <y>510</y>
       <width>256</width>
-      <height>261</height>
+      <height>221</height>
      </rect>
     </property>
     <property name="font">
@@ -255,26 +268,65 @@
      </font>
     </property>
    </widget>
-   <widget class="QPushButton" name="export_plot_pushButton">
+   <widget class="QGroupBox" name="groupBox_4">
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>560</y>
-      <width>211</width>
-      <height>71</height>
+      <y>550</y>
+      <width>241</width>
+      <height>151</height>
      </rect>
     </property>
     <property name="font">
      <font>
       <pointsize>15</pointsize>
-      <weight>50</weight>
-      <bold>false</bold>
      </font>
     </property>
-    <property name="text">
-     <string>Export Publication
-Ready Figure!</string>
+    <property name="title">
+     <string>Export Plot Settings</string>
     </property>
+    <widget class="QCheckBox" name="save_w_fit_checkBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>121</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Save with Fit</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="export_plot_pushButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>211</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Export Publication
+Ready Figure!</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -282,7 +334,7 @@ Ready Figure!</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1050</width>
+     <width>1201</width>
      <height>21</height>
     </rect>
    </property>
