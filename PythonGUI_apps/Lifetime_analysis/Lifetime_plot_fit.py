@@ -100,7 +100,7 @@ class MainWindow(TemplateBaseClass):
         x,y = self.acquire_settings()
         self.ui.plot.plot(x, y, clear=False, pen='r')
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
-        self.ui.plot.setLabel('bottom', 'Time', units='ns')
+        self.ui.plot.setLabel('bottom', 'Time (ns)')
         try:
             self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
                     self.file.get_integral_counts(int(self.ui.Channel_comboBox.currentText()))))
@@ -173,7 +173,7 @@ class MainWindow(TemplateBaseClass):
                                                "\nA = " + str(a))
             
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
-        self.ui.plot.setLabel('bottom', 'Time', units='ns')
+        self.ui.plot.setLabel('bottom', 'Time (ns)')
         return self.out
     
     def pub_ready_plot_export(self):
