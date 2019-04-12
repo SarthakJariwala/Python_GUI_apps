@@ -16,9 +16,9 @@ import matplotlib.pyplot as plt
 
 # local modules
 try:
-    from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian
+    from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian
 except:
-    from Spectrum_analysis.Spectra_fit_funcs import Spectra_Fit, Single_Gaussian    
+    from Spectrum_analysis.Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian    
 
 
 """Recylce params for plotting"""
@@ -48,7 +48,7 @@ class MainWindow(TemplateBaseClass):
         self.ui = WindowTemplate()
         self.ui.setupUi(self)
         
-        self.ui.fitFunc_comboBox.addItems(["Single Gaussian","Double Gaussian", "Multiple Gaussians"])
+        self.ui.fitFunc_comboBox.addItems(["Single Gaussian","Single Lorentzian", "Double Gaussian", "Multiple Gaussians"])
         
 #        self.ui.actionSave.triggered.connect(self.save_file)
 #        self.ui.actionExit.triggered.connect(self.close_application)
@@ -119,7 +119,7 @@ class MainWindow(TemplateBaseClass):
             
         self.ui.plot.plot(self.x, self.y, clear=False, pen='r')
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
-        self.ui.plot.setLabel('bottom', 'Wavelength', units='nm')
+        self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
         
     
     def normalize(self):
@@ -140,6 +140,14 @@ class MainWindow(TemplateBaseClass):
                 
                 single_gauss = Single_Gaussian(self.file, self.bck_file)
                 self.result = single_gauss.gaussian_model()
+                self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
+                self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+                self.ui.result_textBrowser.setText(self.result.fit_report())
+            
+            elif fit_func == "Single Lorentzian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+                
+                single_lorentzian = Single_Lorentzian(self.file, self.bck_file)
+                self.result = single_lorentzian.lorentzian_model()
                 self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
                 self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
                 self.ui.result_textBrowser.setText(self.result.fit_report())

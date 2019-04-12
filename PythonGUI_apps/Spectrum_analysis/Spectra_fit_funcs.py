@@ -12,7 +12,7 @@ Created on Thu Jan 31 20:48:03 2019
 @author: Sarthak
 """
 import numpy as np
-from lmfit.models import GaussianModel
+from lmfit.models import GaussianModel, LorentzianModel
 
 class Spectra_Fit(object):
     """
@@ -37,7 +37,7 @@ class Spectra_Fit(object):
         return [x,y]
 
 class Single_Gaussian(Spectra_Fit):
-    """Fit a single gaussian to the spectrum, plot it and save it
+    """Fit a single gaussian to the spectrum
     
     Attributes:
         data: spectrum data (x-axis and y-axis)
@@ -49,6 +49,21 @@ class Single_Gaussian(Spectra_Fit):
         gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
         pars = gmodel.guess(y, x=x) # parameters - center, width, height
         result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
+        return result
+
+class Single_Lorentzian(Spectra_Fit):
+    """Fit a single Lorentzian to the spectrum
+    
+    Attributes:
+        data: spectrum data (x-axis and y-axis)
+        ref: reference spectrum (both x and y-axis) for background correction
+    """
+    
+    def lorentzian_model(self):
+        x,y = self.background_correction()
+        lmodel = LorentzianModel(prefix = 'l1_') # calling lorentzian model
+        pars = lmodel.guess(y, x=x) # parameters - center, width, height
+        result = lmodel.fit(y, pars, x=x, nan_policy='propagate')
         return result
 
 class Double_Gaussian(Spectra_Fit):
