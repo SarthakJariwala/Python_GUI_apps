@@ -130,84 +130,92 @@ class MainWindow(TemplateBaseClass):
         self.ui.Result_textBrowser.clear()
     
     def fit_and_plot(self):
-        
-        x,y = self.acquire_settings()
-        
-        y_norm = y/np.max(y)
-        # find the max intensity in the array and start things from there
-        find_max_int = np.nonzero(y_norm == 1)
-        y = y[np.asscalar(find_max_int[0]):]
-        
-        resolution = float(self.ui.Res_comboBox.currentText())
-#        x = x[np.asscalar(find_max_int[0]):]
-        x = np.arange(0, len(y), 1) * resolution
-        
-        t = x
-        
-        time_fit = t 
-        TRPL_interp = np.interp(time_fit, t, y)
-        
-        fit_func = self.ui.FittingFunc_comboBox.currentText()
-        self.ui.plot.plot(t, y, clear=True, pen='r')
-        
-        if fit_func == "Stretched Exponential":
-            tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
-            self.out = np.empty((len(t), 3))
-            self.out[:,0] = t #time
-            self.out[:,1] = TRPL_interp #Raw PL 
-            self.out[:,2] = PL_fit # PL fit
-            self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
-            self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential"
-                                               "\nAverage Lifetime = " + str(avg_tau)+ " ns"
-                                               "\nCharacteristic Tau = " + str(tc)+" ns"
-                                               "\nBeta = "+str(beta))
-        
-        elif fit_func == "Double Exponential":
-            tau1, a1, tau2, a2, avg_tau, PL_fit = double_exp_fit(TRPL_interp, t)
-            self.out = np.empty((len(t), 3))
-            self.out[:,0] = t #time
-            self.out[:,1] = TRPL_interp #Raw PL 
-            self.out[:,2] = PL_fit # PL fit
-            self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
-            self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
-                                               "\nAverage Lifetime = " + str(avg_tau)+ " ns"
-                                               "\nTau 1 = " + str(tau1)+" ns"
-                                               "\nA 1 = " + str(a1)+
-                                               "\nTau 2 = " + str(tau2)+" ns"
-                                               "\nA 2 = " + str(a2))
-        
-        elif fit_func == "Single Exponential":
-            tau, a, PL_fit = single_exp_fit(TRPL_interp, t)
-            self.out = np.empty((len(t), 3))
-            self.out[:,0] = t #time
-            self.out[:,1] = TRPL_interp #Raw PL 
-            self.out[:,2] = PL_fit # PL fit
-            self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
-            self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
-                                               "\nLifetime = " + str(tau)+ " ns"
-                                               "\nA = " + str(a))
+        try:
+            x,y = self.acquire_settings()
             
-        self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
-        self.ui.plot.setLabel('bottom', 'Time (ns)')
-        return self.out
+            y_norm = y/np.max(y)
+            # find the max intensity in the array and start things from there
+            find_max_int = np.nonzero(y_norm == 1)
+            y = y[np.asscalar(find_max_int[0]):]
+            
+            resolution = float(self.ui.Res_comboBox.currentText())
+    #        x = x[np.asscalar(find_max_int[0]):]
+            x = np.arange(0, len(y), 1) * resolution
+            
+            t = x
+            
+            time_fit = t 
+            TRPL_interp = np.interp(time_fit, t, y)
+            
+            fit_func = self.ui.FittingFunc_comboBox.currentText()
+            self.ui.plot.plot(t, y, clear=True, pen='r')
+            
+            if fit_func == "Stretched Exponential":
+                tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
+                self.out = np.empty((len(t), 3))
+                self.out[:,0] = t #time
+                self.out[:,1] = TRPL_interp #Raw PL 
+                self.out[:,2] = PL_fit # PL fit
+                self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
+                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential"
+                                                   "\nAverage Lifetime = " + str(avg_tau)+ " ns"
+                                                   "\nCharacteristic Tau = " + str(tc)+" ns"
+                                                   "\nBeta = "+str(beta))
+            
+            elif fit_func == "Double Exponential":
+                tau1, a1, tau2, a2, avg_tau, PL_fit = double_exp_fit(TRPL_interp, t)
+                self.out = np.empty((len(t), 3))
+                self.out[:,0] = t #time
+                self.out[:,1] = TRPL_interp #Raw PL 
+                self.out[:,2] = PL_fit # PL fit
+                self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
+                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
+                                                   "\nAverage Lifetime = " + str(avg_tau)+ " ns"
+                                                   "\nTau 1 = " + str(tau1)+" ns"
+                                                   "\nA 1 = " + str(a1)+
+                                                   "\nTau 2 = " + str(tau2)+" ns"
+                                                   "\nA 2 = " + str(a2))
+            
+            elif fit_func == "Single Exponential":
+                tau, a, PL_fit = single_exp_fit(TRPL_interp, t)
+                self.out = np.empty((len(t), 3))
+                self.out[:,0] = t #time
+                self.out[:,1] = TRPL_interp #Raw PL 
+                self.out[:,2] = PL_fit # PL fit
+                self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
+                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
+                                                   "\nLifetime = " + str(tau)+ " ns"
+                                                   "\nA = " + str(a))
+                
+            self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
+            self.ui.plot.setLabel('bottom', 'Time (ns)')
+            return self.out
+        
+        except:
+            pass
     
     def pub_ready_plot_export(self):
-        filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
+        try:
+            filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
+            
+            plt.figure(figsize=(8,6))
+            plt.tick_params(direction='out', length=8, width=3.5)
+            if self.ui.save_w_fit_checkBox.isChecked():
+                plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]))
+                plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),'k')
+            else:
+                plt.plot(self.acquire_settings()[0],self.acquire_settings()[1]/np.max(self.acquire_settings()[1]))
+            plt.yscale('log')
+            plt.xlabel("Time (ns)", fontsize=20, fontweight='bold')
+            plt.ylabel("Intensity (norm.)", fontsize=20, fontweight='bold')
+            plt.tight_layout()
+            
+            plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+            plt.close()
         
-        plt.figure(figsize=(8,6))
-        plt.tick_params(direction='out', length=8, width=3.5)
-        if self.ui.save_w_fit_checkBox.isChecked():
-            plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]))
-            plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),'k')
-        else:
-            plt.plot(self.acquire_settings()[0],self.acquire_settings()[1]/np.max(self.acquire_settings()[1]))
-        plt.yscale('log')
-        plt.xlabel("Time (ns)", fontsize=20, fontweight='bold')
-        plt.ylabel("Intensity (norm.)", fontsize=20, fontweight='bold')
-        plt.tight_layout()
-        
-        plt.savefig(filename[0],bbox_inches='tight', dpi=300)
-        plt.close()
+        except:
+            pass
+            
     
     def close_application(self):
         choice = QtGui.QMessageBox.question(self, 'EXIT!',
