@@ -77,16 +77,6 @@
       <string>Resolution (ns)</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="Channel_comboBox">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>60</y>
-       <width>81</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QComboBox" name="Res_comboBox">
      <property name="geometry">
       <rect>
@@ -98,6 +88,19 @@
      </property>
      <property name="acceptDrops">
       <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="Channel_spinBox">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>60</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>512</number>
      </property>
     </widget>
    </widget>

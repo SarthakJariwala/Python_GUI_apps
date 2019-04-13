@@ -51,7 +51,6 @@ class MainWindow(TemplateBaseClass):
         self.ui = WindowTemplate()
         self.ui.setupUi(self)
         self.ui.Res_comboBox.addItems(["0.004","0.008","0.016","0.032","0.064","0.128","0.256","0.512"])
-        self.ui.Channel_comboBox.addItems(["0","1","2","3","4","5","6","7"])
         self.ui.FittingFunc_comboBox.addItems(["Stretched Exponential","Double Exponential", "Single Exponential"])
         
         self.ui.actionOpen.triggered.connect(self.open_file)
@@ -90,7 +89,7 @@ class MainWindow(TemplateBaseClass):
     
     def acquire_settings(self):
         resolution = float(self.ui.Res_comboBox.currentText())
-        channel = int(self.ui.Channel_comboBox.currentText())
+        channel = int(self.ui.Channel_spinBox.value())
         try:
             try:
                 y = self.file[:,channel]
@@ -113,7 +112,7 @@ class MainWindow(TemplateBaseClass):
             self.ui.plot.plot(x, y, clear=False, pen='r')
             try:
                 self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
-                        self.file.get_integral_counts(int(self.ui.Channel_comboBox.currentText()))))
+                        self.file.get_integral_counts(int(self.ui.Channel_spinBox.value()))))
             except:
                 self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(np.sum(y)))
         except:
@@ -233,4 +232,4 @@ def run():
     return win
 
 #Uncomment below if you want to run this as standalone
-#run()
+run()
