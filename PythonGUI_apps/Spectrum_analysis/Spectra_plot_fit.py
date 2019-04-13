@@ -135,7 +135,7 @@ class MainWindow(TemplateBaseClass):
         if self.ui.subtract_bck_checkBox.isChecked() == False:
             self.ui.result_textBrowser.setText("You need to check the subtract background option!")
         
-        elif self.wlref_file != None and self.ui.WLRef_checkBox.isChecked() == False:
+        elif self.wlref_file is not None and self.ui.WLRef_checkBox.isChecked() == False:
             self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
             
         else:
@@ -195,4 +195,4 @@ def run():
     return win
 
 #Uncomment below if you want to run this as standalone
-#run()
+run()
