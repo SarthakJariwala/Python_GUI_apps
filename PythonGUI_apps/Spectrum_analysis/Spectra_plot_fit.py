@@ -71,29 +71,41 @@ class MainWindow(TemplateBaseClass):
         self.show()
         
     def open_file(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
-            self.file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            try:
+                self.file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+            except:
+                self.file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
         except:
-            self.file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+            pass
     
     def open_bck_file(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
-            self.bck_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            try:
+                self.bck_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+            except:
+                self.bck_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
         except:
-            self.bck_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+            pass
     
     def open_wlref_file(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
-            self.wlref_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            try:
+                self.wlref_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+            except:
+                self.wlref_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
         except:
-            self.wlref_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+            pass
     
     def save_file(self):
-        filename = QtWidgets.QFileDialog.getSaveFileName(self)
-        np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
+        try:
+            filename = QtWidgets.QFileDialog.getSaveFileName(self)
+            np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
+        except:
+            pass
 
     def plot(self):
         
