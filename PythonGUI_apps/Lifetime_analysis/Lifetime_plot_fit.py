@@ -33,6 +33,7 @@ plt.rc('axes', linewidth=3.5)
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
+#pg.setConfigOption('crashWarning', True)
 
 base_path = Path(__file__).parent
 file_path = (base_path / "Lifetime_analysis_gui_layout.ui").resolve()
@@ -69,14 +70,14 @@ class MainWindow(TemplateBaseClass):
         self.show()
         
     def open_file(self):
+#        try:
+        filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
-            filename = QtWidgets.QFileDialog.getOpenFileName(self)
-            try:
-                self.file = np.loadtxt(filename[0], skiprows=0)
-            except ValueError:
-                self.file = np.loadtxt(filename[0], skiprows=10)
-            except:
-                self.file = read_picoharp_phd(filename[0])
+            self.file = np.loadtxt(filename[0], skiprows=10)
+#        except ValueError:
+#            self.file = np.loadtxt(filename[0], skiprows=10)
+        except UnicodeDecodeError:
+            self.file = read_picoharp_phd(filename[0])
         except:
             pass
     
@@ -91,27 +92,35 @@ class MainWindow(TemplateBaseClass):
         resolution = float(self.ui.Res_comboBox.currentText())
         channel = int(self.ui.Channel_comboBox.currentText())
         try:
-            y = self.file[:,channel]
-        except:
-            res, y = self.file.get_curve(channel)
-            # TO DO - check if res read in is the same as selected
-            time_window = int(np.floor(self.file.get_time_window_in_ns(channel)))
-            y = y[0:time_window]
+            try:
+                y = self.file[:,channel]
+            except:
+                res, y = self.file.get_curve(channel)
+                # TO DO - check if res read in is the same as selected
+                time_window = int(np.floor(self.file.get_time_window_in_ns(channel)))
+                y = y[0:time_window]
+            
+            length = np.shape(y)[0]
+            x = np.arange(0, length, 1) * resolution
+            return x,y
         
-        length = np.shape(y)[0]
-        x = np.arange(0, length, 1) * resolution
-        return x,y
+        except Exception as e:
+            self.ui.Result_textBrowser.setText(str(e))
 
     def plot(self):
-        x,y = self.acquire_settings()
-        self.ui.plot.plot(x, y, clear=False, pen='r')
+        try:
+            x,y = self.acquire_settings()
+            self.ui.plot.plot(x, y, clear=False, pen='r')
+            try:
+                self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
+                        self.file.get_integral_counts(int(self.ui.Channel_comboBox.currentText()))))
+            except:
+                self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(np.sum(y)))
+        except:
+            pass
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Time (ns)')
-        try:
-            self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
-                    self.file.get_integral_counts(int(self.ui.Channel_comboBox.currentText()))))
-        except:
-            self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(np.sum(y)))
+        
     
     def make_semilog(self):
         self.ui.plot.setLogMode(False,True)
