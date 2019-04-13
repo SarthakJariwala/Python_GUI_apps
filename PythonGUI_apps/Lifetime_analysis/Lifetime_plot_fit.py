@@ -69,17 +69,23 @@ class MainWindow(TemplateBaseClass):
         self.show()
         
     def open_file(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
-            self.file = np.loadtxt(filename[0], skiprows=0)
-        except ValueError:
-            self.file = np.loadtxt(filename[0], skiprows=10)
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            try:
+                self.file = np.loadtxt(filename[0], skiprows=0)
+            except ValueError:
+                self.file = np.loadtxt(filename[0], skiprows=10)
+            except:
+                self.file = read_picoharp_phd(filename[0])
         except:
-            self.file = read_picoharp_phd(filename[0])
+            pass
     
     def save_file(self):
-        filename = QtWidgets.QFileDialog.getSaveFileName(self)
-        np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
+        try:
+            filename = QtWidgets.QFileDialog.getSaveFileName(self)
+            np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
+        except:
+            pass
     
     def acquire_settings(self):
         resolution = float(self.ui.Res_comboBox.currentText())
