@@ -134,11 +134,14 @@ class MainWindow(TemplateBaseClass):
         
         if self.ui.subtract_bck_checkBox.isChecked() == False:
             self.ui.result_textBrowser.setText("You need to check the subtract background option!")
+        
+        elif self.wlref_file != None and self.ui.WLRef_checkBox.isChecked() == False:
+            self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
             
         else:
             if fit_func == "Single Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
                 
-                single_gauss = Single_Gaussian(self.file, self.bck_file)
+                single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
                 self.result = single_gauss.gaussian_model()
                 self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
                 self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
@@ -146,7 +149,7 @@ class MainWindow(TemplateBaseClass):
             
             elif fit_func == "Single Lorentzian" and self.ui.subtract_bck_checkBox.isChecked() == True:
                 
-                single_lorentzian = Single_Lorentzian(self.file, self.bck_file)
+                single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
                 self.result = single_lorentzian.lorentzian_model()
                 self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
                 self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')

@@ -23,9 +23,10 @@ class Spectra_Fit(object):
         ref: reference spectrum (both x and y-axis) for background correction
     """
     
-    def __init__(self, data, ref):
+    def __init__(self, data, ref, wlref = None):
         self.data = data
         self.ref = ref
+        self.wlref = wlref
         
     def background_correction(self):
         """Return the background corrected spectrum"""
@@ -33,6 +34,10 @@ class Spectra_Fit(object):
         y = self.data[:, 1] # intensity
         yref = self.ref[:, 1]
         y = y - yref # background correction
+        if self.wlref is not None:
+            wlref = self.wlref[:,1]
+            y = y/wlref
+            
         # y = y - np.mean(y[(x>600) & (x<700)]) # removing any remaining bckgrnd
         return [x,y]
 
