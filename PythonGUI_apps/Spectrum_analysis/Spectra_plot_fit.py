@@ -108,28 +108,30 @@ class MainWindow(TemplateBaseClass):
             pass
 
     def plot(self):
-        
-        self.x = self.file[:,0]
-        self.y = self.file[:,1]
-        
-        if self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
-            bck_y = self.bck_file[:,1]
-            self.y = self.y - bck_y
-        
-        elif self.ui.subtract_bck_checkBox.isChecked() == False and self.ui.WLRef_checkBox.isChecked() == True:
-            wlref_y = self.wlref_file[:,1]
-            self.y = (self.y)/wlref_y
-        
-        elif self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == True:
-            bck_y = self.bck_file[:,1]
-            wlref_y = self.wlref_file[:,1]
-            self.y = (self.y-bck_y)/wlref_y
-        
-        
-        if self.ui.norm_checkBox.isChecked():
-            self.normalize()
+        try:
+            self.x = self.file[:,0]
+            self.y = self.file[:,1]
             
-        self.ui.plot.plot(self.x, self.y, clear=False, pen='r')
+            if self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
+                bck_y = self.bck_file[:,1]
+                self.y = self.y - bck_y
+            
+            elif self.ui.subtract_bck_checkBox.isChecked() == False and self.ui.WLRef_checkBox.isChecked() == True:
+                wlref_y = self.wlref_file[:,1]
+                self.y = (self.y)/wlref_y
+            
+            elif self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == True:
+                bck_y = self.bck_file[:,1]
+                wlref_y = self.wlref_file[:,1]
+                self.y = (self.y-bck_y)/wlref_y
+            
+            
+            if self.ui.norm_checkBox.isChecked():
+                self.normalize()
+                
+            self.ui.plot.plot(self.x, self.y, clear=False, pen='r')
+        except:
+            pass
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
         
@@ -162,7 +164,15 @@ class MainWindow(TemplateBaseClass):
             elif fit_func == "Single Lorentzian" and self.ui.subtract_bck_checkBox.isChecked() == True:
                 
                 single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
-                self.result = single_lorentzian.lorentzian_model()
+                """Needs work -- adjust param not working"""
+                if self.ui.adjust_param_checkBox.isChecked():
+                    self.param_window = ParamWindow()
+                    self.param_window.show()
+                    center_min, center_max = self.param_window.done()
+                    self.result = single_lorentzian.lorentzian_model_w_lims(
+                            center_min = center_min, center_max = center_max)
+                else:
+                    self.result = single_lorentzian.lorentzian_model()
                 self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
                 self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
                 self.ui.result_textBrowser.setText(self.result.fit_report())
@@ -200,6 +210,30 @@ class MainWindow(TemplateBaseClass):
             sys.exit()
         else:
             pass
+
+param_file_path = (base_path / "peak_bounds_input.ui").resolve()
+
+uiFile = file_path
+
+param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(uiFile)
+
+class ParamWindow(param_TemplateBaseClass):  
+    
+    def __init__(self):
+        param_TemplateBaseClass.__init__(self)
+        
+        # Create the main window
+        self.ui = param_WindowTemplate()
+        self.ui.setupUi(self)
+        
+        self.ui.pushButton.clicked.connect(self.done)
+        
+        self.show()
+    
+    def done(self):
+        center_min = self.ui.cent_min_doubleSpinBox.value()
+        center_max = self.ui.cent_max_doubleSpinBox.value()
+        return center_min, center_max
         
 def run():
     win = MainWindow()
