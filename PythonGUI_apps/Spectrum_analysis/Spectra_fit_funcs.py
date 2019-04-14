@@ -55,6 +55,15 @@ class Single_Gaussian(Spectra_Fit):
         pars = gmodel.guess(y, x=x) # parameters - center, width, height
         result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
         return result
+    
+    def gaussian_model_w_lims(self, center_min=None, center_max=None):
+        x,y = self.background_correction()
+        gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
+        pars = gmodel.guess(y, x=x) # parameters - center, width, height
+#        pars['g1_center'].set(800, min = 795, max = 820)
+        gmodel.set_param_hint('g1_center', min=center_min, max=center_max)
+        result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
+        return result
 
 class Single_Lorentzian(Spectra_Fit):
     """Fit a single Lorentzian to the spectrum
@@ -68,6 +77,14 @@ class Single_Lorentzian(Spectra_Fit):
         x,y = self.background_correction()
         lmodel = LorentzianModel(prefix = 'l1_') # calling lorentzian model
         pars = lmodel.guess(y, x=x) # parameters - center, width, height
+        result = lmodel.fit(y, pars, x=x, nan_policy='propagate')
+        return result
+    
+    def lorentzian_model_w_lims(self, center_min = None, center_max = None):
+        x,y = self.background_correction()
+        lmodel = LorentzianModel(prefix = 'l1_') # calling lorentzian model
+        pars = lmodel.guess(y, x=x) # parameters - center, width, height
+        lmodel.set_param_hint('l1_center', min = center_min, max = center_max)
         result = lmodel.fit(y, pars, x=x, nan_policy='propagate')
         return result
 
