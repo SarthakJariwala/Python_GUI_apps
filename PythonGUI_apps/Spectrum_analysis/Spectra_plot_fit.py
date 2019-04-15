@@ -42,7 +42,7 @@ WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 class MainWindow(TemplateBaseClass):  
     
     def __init__(self):
-        TemplateBaseClass.__init__(self)
+        super(TemplateBaseClass, self).__init__()
         
         # Create the main window
         self.ui = WindowTemplate()
@@ -58,6 +58,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.importWLRef_pushButton.clicked.connect(self.open_wlref_file)
         self.ui.plot_pushButton.clicked.connect(self.plot)
         self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
+        self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         self.ui.export_fig_pushButton.clicked.connect(self.pub_ready_plot_export)
         
@@ -67,6 +68,10 @@ class MainWindow(TemplateBaseClass):
         self.x = None
         self.y = None
         self.out = None # output file after fitting
+        
+        # Peak parameters if adjust params is selected
+        self.center_min = None
+        self.center_max = None
         
         self.show()
         
@@ -129,7 +134,8 @@ class MainWindow(TemplateBaseClass):
             if self.ui.norm_checkBox.isChecked():
                 self.normalize()
                 
-            self.ui.plot.plot(self.x, self.y, clear=False, pen='r')
+            self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+            self.ui.Result_textBrowser.setText(str(self.clear_check))
         except:
             pass
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
@@ -142,6 +148,21 @@ class MainWindow(TemplateBaseClass):
     def clear_plot(self):
         self.ui.plot.clear()
 #        self.ui.Result_textBrowser.clear()
+        
+    def clear_check(self):
+        if self.ui.clear_checkBox.isChecked() == True:
+            return True
+        elif self.ui.clear_checkBox.isChecked() == False:
+            return False
+    
+    def configure_fit_params(self):
+        self.param_window = ParamWindow()
+        self.param_window.peak_range.connect(self.peak_range)
+    
+    def peak_range(self, peaks):
+        self.center_min = peaks[0]
+        self.center_max = peaks[1]
+        
     
     def fit_and_plot(self):
         fit_func = self.ui.fitFunc_comboBox.currentText()
@@ -156,24 +177,26 @@ class MainWindow(TemplateBaseClass):
             if fit_func == "Single Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
                 
                 single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
-                self.result = single_gauss.gaussian_model()
-                self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
+                
+                if self.ui.adjust_param_checkBox.isChecked():
+                    self.result = single_gauss.gaussian_model_w_lims(
+                            center_min=self.center_min, center_max=self.center_max)
+                else:
+                    self.result = single_gauss.gaussian_model()
+                self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
                 self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
                 self.ui.result_textBrowser.setText(self.result.fit_report())
             
             elif fit_func == "Single Lorentzian" and self.ui.subtract_bck_checkBox.isChecked() == True:
                 
                 single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
-                """Needs work -- adjust param not working"""
+                
                 if self.ui.adjust_param_checkBox.isChecked():
-                    self.param_window = ParamWindow()
-                    self.param_window.show()
-                    center_min, center_max = self.param_window.done()
                     self.result = single_lorentzian.lorentzian_model_w_lims(
-                            center_min = center_min, center_max = center_max)
+                            center_min = self.center_min, center_max = self.center_max)
                 else:
                     self.result = single_lorentzian.lorentzian_model()
-                self.ui.plot.plot(self.x, self.y, clear=True, pen='r')
+                self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
                 self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
                 self.ui.result_textBrowser.setText(self.result.fit_report())
             
@@ -210,30 +233,39 @@ class MainWindow(TemplateBaseClass):
             sys.exit()
         else:
             pass
+        
+        
 
 param_file_path = (base_path / "peak_bounds_input.ui").resolve()
 
-uiFile = file_path
+param_uiFile = param_file_path
 
-param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(uiFile)
+param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(param_uiFile)
 
-class ParamWindow(param_TemplateBaseClass):  
+class ParamWindow(param_TemplateBaseClass):
+    
+    peak_range = QtCore.pyqtSignal(list)
     
     def __init__(self):
+#        super(param_TemplateBaseClass, self).__init__()
         param_TemplateBaseClass.__init__(self)
         
-        # Create the main window
-        self.ui = param_WindowTemplate()
-        self.ui.setupUi(self)
+        # Create the param window
+        self.pui = param_WindowTemplate()
+        self.pui.setupUi(self)
         
-        self.ui.pushButton.clicked.connect(self.done)
+        self.pui.pushButton.clicked.connect(self.done)
         
         self.show()
     
-    def done(self):
-        center_min = self.ui.cent_min_doubleSpinBox.value()
-        center_max = self.ui.cent_max_doubleSpinBox.value()
+    def current_peak_range(self):
+        center_min = self.pui.cent_min_doubleSpinBox.value()
+        center_max = self.pui.cent_max_doubleSpinBox.value()
         return center_min, center_max
+    
+    def done(self):
+        center_min, center_max = self.current_peak_range()
+        self.peak_range.emit([center_min, center_max])
         
 def run():
     win = MainWindow()
@@ -241,4 +273,4 @@ def run():
     return win
 
 #Uncomment below if you want to run this as standalone
-#run()
+run()
