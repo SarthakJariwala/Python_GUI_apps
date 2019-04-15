@@ -135,7 +135,7 @@ class MainWindow(TemplateBaseClass):
                 self.normalize()
                 
             self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
-            self.ui.Result_textBrowser.setText(str(self.clear_check))
+            
         except:
             pass
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
@@ -147,7 +147,7 @@ class MainWindow(TemplateBaseClass):
     
     def clear_plot(self):
         self.ui.plot.clear()
-#        self.ui.Result_textBrowser.clear()
+        self.ui.Result_textBrowser.clear()
         
     def clear_check(self):
         if self.ui.clear_checkBox.isChecked() == True:
@@ -155,6 +155,7 @@ class MainWindow(TemplateBaseClass):
         elif self.ui.clear_checkBox.isChecked() == False:
             return False
     
+    """Open param window and get peak center range values and assign it to variables to use later"""
     def configure_fit_params(self):
         self.param_window = ParamWindow()
         self.param_window.peak_range.connect(self.peak_range)
@@ -240,7 +241,7 @@ class MainWindow(TemplateBaseClass):
             pass
         
         
-
+"""Parameter Window GUI and Functions"""
 param_file_path = (base_path / "peak_bounds_input.ui").resolve()
 
 param_uiFile = param_file_path
@@ -271,7 +272,8 @@ class ParamWindow(param_TemplateBaseClass):
     def done(self):
         center_min, center_max = self.current_peak_range()
         self.peak_range.emit([center_min, center_max])
-        
+    
+"""Run the Main Window"""    
 def run():
     win = MainWindow()
     QtGui.QApplication.instance().exec_()
