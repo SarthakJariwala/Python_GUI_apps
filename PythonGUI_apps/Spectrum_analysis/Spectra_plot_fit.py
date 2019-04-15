@@ -147,7 +147,7 @@ class MainWindow(TemplateBaseClass):
     
     def clear_plot(self):
         self.ui.plot.clear()
-        self.ui.Result_textBrowser.clear()
+        self.ui.result_textBrowser.clear()
         
     def clear_check(self):
         if self.ui.clear_checkBox.isChecked() == True:
@@ -280,4 +280,4 @@ def run():
     return win
 
 #Uncomment below if you want to run this as standalone
-#run()
+run()
