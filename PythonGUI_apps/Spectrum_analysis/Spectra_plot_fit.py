@@ -167,44 +167,49 @@ class MainWindow(TemplateBaseClass):
     def fit_and_plot(self):
         fit_func = self.ui.fitFunc_comboBox.currentText()
         
-        if self.ui.subtract_bck_checkBox.isChecked() == False:
-            self.ui.result_textBrowser.setText("You need to check the subtract background option!")
+        try:
+            
+            if self.ui.subtract_bck_checkBox.isChecked() == False:
+                self.ui.result_textBrowser.setText("You need to check the subtract background option!")
+            
+            elif self.wlref_file is not None and self.ui.WLRef_checkBox.isChecked() == False:
+                self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
+                
+            else:
+                if fit_func == "Single Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+                    
+                    single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
+                    
+                    if self.ui.adjust_param_checkBox.isChecked():
+                        self.result = single_gauss.gaussian_model_w_lims(
+                                center_min=self.center_min, center_max=self.center_max)
+                    else:
+                        self.result = single_gauss.gaussian_model()
+                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+                    self.ui.result_textBrowser.setText(self.result.fit_report())
+                
+                elif fit_func == "Single Lorentzian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+                    
+                    single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
+                    
+                    if self.ui.adjust_param_checkBox.isChecked():
+                        self.result = single_lorentzian.lorentzian_model_w_lims(
+                                center_min = self.center_min, center_max = self.center_max)
+                    else:
+                        self.result = single_lorentzian.lorentzian_model()
+                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+                    self.ui.result_textBrowser.setText(self.result.fit_report())
+                
+                elif fit_func == "Double Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+                    self.ui.result_textBrowser.setText("Not Implemented Yet!")
+                
+                elif fit_func == "Multiple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
+                    self.ui.result_textBrowser.setText("Not Implemented Yet!")
         
-        elif self.wlref_file is not None and self.ui.WLRef_checkBox.isChecked() == False:
-            self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
-            
-        else:
-            if fit_func == "Single Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
-                
-                single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
-                
-                if self.ui.adjust_param_checkBox.isChecked():
-                    self.result = single_gauss.gaussian_model_w_lims(
-                            center_min=self.center_min, center_max=self.center_max)
-                else:
-                    self.result = single_gauss.gaussian_model()
-                self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
-                self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
-                self.ui.result_textBrowser.setText(self.result.fit_report())
-            
-            elif fit_func == "Single Lorentzian" and self.ui.subtract_bck_checkBox.isChecked() == True:
-                
-                single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
-                
-                if self.ui.adjust_param_checkBox.isChecked():
-                    self.result = single_lorentzian.lorentzian_model_w_lims(
-                            center_min = self.center_min, center_max = self.center_max)
-                else:
-                    self.result = single_lorentzian.lorentzian_model()
-                self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
-                self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
-                self.ui.result_textBrowser.setText(self.result.fit_report())
-            
-            elif fit_func == "Double Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
-                self.ui.result_textBrowser.setText("Not Implemented Yet!")
-            
-            elif fit_func == "Multiple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
-                self.ui.result_textBrowser.setText("Not Implemented Yet!")
+        except Exception as e:
+            self.ui.result_textBrowser.setText(str(e))
             
     
     def pub_ready_plot_export(self):
@@ -273,4 +278,4 @@ def run():
     return win
 
 #Uncomment below if you want to run this as standalone
-run()
+#run()
