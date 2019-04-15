@@ -132,6 +132,21 @@ Ref File</string>
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="clear_checkBox">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Clear Plots Everytime</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="clear_pushButton">
          <property name="font">
           <font>
@@ -174,6 +189,13 @@ Ref File</string>
              <font>
               <pointsize>12</pointsize>
              </font>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="config_fit_params_pushButton">
+            <property name="text">
+             <string>Configure Fit Params</string>
             </property>
            </widget>
           </item>
@@ -275,7 +297,7 @@ Ready Figure</string>
      <x>0</x>
      <y>0</y>
      <width>1816</width>
-     <height>38</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
