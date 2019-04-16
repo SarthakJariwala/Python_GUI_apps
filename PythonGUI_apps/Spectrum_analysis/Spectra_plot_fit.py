@@ -272,6 +272,7 @@ class ParamWindow(param_TemplateBaseClass):
     def done(self):
         center_min, center_max = self.current_peak_range()
         self.peak_range.emit([center_min, center_max])
+        self.close()
     
 """Run the Main Window"""    
 def run():
@@ -280,4 +281,4 @@ def run():
     return win
 
 #Uncomment below if you want to run this as standalone
-run()
+#run()
