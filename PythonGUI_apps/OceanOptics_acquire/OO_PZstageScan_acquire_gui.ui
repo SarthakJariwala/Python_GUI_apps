@@ -58,18 +58,6 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="font">
-               <font>
-                <pointsize>12</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Y Start (um)</string>
-              </property>
-             </widget>
-            </item>
             <item row="4" column="1">
              <widget class="QDoubleSpinBox" name="x_size_doubleSpinBox">
               <property name="font">
@@ -95,6 +83,18 @@
               </property>
              </spacer>
             </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Y Start (um)</string>
+              </property>
+             </widget>
+            </item>
             <item row="5" column="0">
              <widget class="QLabel" name="label_4">
               <property name="font">
@@ -116,21 +116,6 @@
               </property>
               <property name="value">
                <double>5.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QDoubleSpinBox" name="x_start_doubleSpinBox">
-              <property name="font">
-               <font>
-                <pointsize>12</pointsize>
-               </font>
-              </property>
-              <property name="maximum">
-               <double>100.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>50.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -174,18 +159,6 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="0" colspan="2">
-             <widget class="QPushButton" name="init_stage_pushButton">
-              <property name="font">
-               <font>
-                <pointsize>12</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Initialize Piezo Stage</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_9">
               <property name="font">
@@ -195,6 +168,30 @@
               </property>
               <property name="text">
                <string>X Start (um)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>X Step (um)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <widget class="QPushButton" name="init_stage_pushButton">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Initialize Piezo Stage</string>
               </property>
              </widget>
             </item>
@@ -213,19 +210,34 @@
               </property>
              </widget>
             </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="label_6">
+            <item row="1" column="1">
+             <widget class="QDoubleSpinBox" name="x_start_doubleSpinBox">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="maximum">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>50.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0" colspan="2">
+             <widget class="QPushButton" name="estimate_scan_time_pushButton">
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
                </font>
               </property>
               <property name="text">
-               <string>X Step (um)</string>
+               <string>Estimate Scan Time</string>
               </property>
              </widget>
             </item>
-            <item row="9" column="0">
+            <item row="10" column="0" colspan="2">
              <widget class="QPushButton" name="start_x_y_sacan_pushButton">
               <property name="font">
                <font>
@@ -234,18 +246,6 @@
               </property>
               <property name="text">
                <string>Start X-Y Scan</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
-             <widget class="QPushButton" name="start_line_scan_pushButton">
-              <property name="font">
-               <font>
-                <pointsize>12</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Start Line Scan</string>
               </property>
              </widget>
             </item>
@@ -320,6 +320,9 @@
               </property>
               <property name="maximum">
                <number>3000</number>
+              </property>
+              <property name="value">
+               <number>100</number>
               </property>
              </widget>
             </item>
@@ -489,7 +492,7 @@ BEFORE EXITING APP</string>
     </item>
     <item row="0" column="1">
      <layout class="QGridLayout" name="gridLayout_6">
-      <item row="2" column="1">
+      <item row="7" column="1">
        <widget class="QGroupBox" name="groupBox_4">
         <property name="font">
          <font>
@@ -586,7 +589,7 @@ BEFORE EXITING APP</string>
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QDoubleSpinBox" name="doubleSpinBox">
+          <widget class="QDoubleSpinBox" name="x_abs_doubleSpinBox">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -607,7 +610,7 @@ BEFORE EXITING APP</string>
           </widget>
          </item>
          <item row="6" column="1">
-          <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
+          <widget class="QDoubleSpinBox" name="y_abs_doubleSpinBox">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -665,7 +668,7 @@ BEFORE EXITING APP</string>
           </widget>
          </item>
          <item row="10" column="1">
-          <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
+          <widget class="QDoubleSpinBox" name="x_rel_doubleSpinBox">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -686,7 +689,7 @@ BEFORE EXITING APP</string>
           </widget>
          </item>
          <item row="12" column="1">
-          <widget class="QDoubleSpinBox" name="doubleSpinBox_9">
+          <widget class="QDoubleSpinBox" name="y_rel_doubleSpinBox">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
@@ -709,7 +712,19 @@ BEFORE EXITING APP</string>
         </layout>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="0" column="0" colspan="2">
+       <widget class="PlotWidget" name="plot"/>
+      </item>
+      <item row="7" column="0">
+       <widget class="QTextBrowser" name="status_textBrowser">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
        <widget class="QLabel" name="label_23">
         <property name="font">
          <font>
@@ -721,15 +736,27 @@ BEFORE EXITING APP</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="PlotWidget" name="plot"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QTextBrowser" name="status_textBrowser">
+      <item row="3" column="1">
+       <widget class="QProgressBar" name="progressBar">
         <property name="font">
          <font>
           <pointsize>12</pointsize>
          </font>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_17">
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Scan Progress:</string>
         </property>
        </widget>
       </item>
