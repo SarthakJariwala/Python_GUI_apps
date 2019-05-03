@@ -42,6 +42,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.rel_mov_pushButton.clicked.connect(self.rel_mov)
         self.ui.estimate_scan_time_pushButton.clicked.connect(self.estimate_scan_time)
         self.ui.path_to_folder_pushButton.clicked.connect(self.save_file_location)
+        self.ui.start_x_y_sacan_pushButton.clicked.connect(self.x_y_scan)
         
 #        self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         
