@@ -64,7 +64,7 @@ class MainWindow(TemplateBaseClass):
         self.pi_device = GCSDevice("E-710")	# Creates a Controller instant
         self.pi_device.ConnectNIgpib(board=0,device=4) # Connect to GPIB board
         self.ui.status_textBrowser.setText('Connected: {}'.format(self.pi_device.qIDN().strip()))
-        print('connected: {}'.format(self.pi_device.qIDN().strip()))
+#        print('connected: {}'.format(self.pi_device.qIDN().strip()))
         
         self.axes = self.pi_device.axes[0:2] # selecting x and y axis of the stage
         
@@ -72,15 +72,15 @@ class MainWindow(TemplateBaseClass):
         self.pi_device.REF(axes=self.axes)
         
         self.pi_device.SVO(axes=self.axes, values=[True,True])	# Turn on servo control for both axes
-        self.ui.status_textBrowser.setText("Current Stage Position:\n"+self.pi_device.qPOS(axes=self.axes))
-        print(self.pi_device.qPOS(axes=self.axes))
+        self.ui.status_textBrowser.setText("Current Stage Position:\n{}".format(self.pi_device.qPOS(axes=self.axes)))
+#        print(self.pi_device.qPOS(axes=self.axes))
         
     def center_piezo(self):
         self.pi_device.MOV(axes=self.axes, values=[50,50])
         self.ui.status_textBrowser.setText("Piezo Stage Centered: [50x,50y]")
     
     def current_piezo_stage_pos(self):
-        self.ui.status_textBrowser.setText("Current Stage Position:\n"+self.pi_device.qPOS(axes=self.axes))
+        self.ui.status_textBrowser.setText("Current Stage Position:\n{}".format(self.pi_device.qPOS(axes=self.axes)))
     
     def abs_mov(self):
         x_abs_pos = self.ui.x_abs_doubleSpinBox.value()
