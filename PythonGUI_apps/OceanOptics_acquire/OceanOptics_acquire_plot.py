@@ -12,6 +12,7 @@ import pickle
 import sys
 import seabreeze.spectrometers as sb
 from pipython import GCSDevice
+import time
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
@@ -100,6 +101,18 @@ class MainWindow(TemplateBaseClass):
         x_step = self.ui.x_step_doubleSpinBox.value()
         y_step = self.ui.y_step_doubleSpinBox.value()
         
+        if y_scan_size == 0:
+            y_scan_size = 1
+        
+        if x_scan_size == 0:
+            x_scan_size = 1
+        
+        if y_step == 0:
+            y_step = 1
+            
+        if x_step == 0:
+            x_step = 1
+        
         y_range = int(np.ceil(y_scan_size/y_step))
         x_range = int(np.ceil(x_scan_size/x_step))
         
@@ -110,9 +123,10 @@ class MainWindow(TemplateBaseClass):
         
         total_time = total_points*(intg_time_ms*1e-3)*(scans_to_avg) # in seconds
         
-        self.ui.status_textBrowser.setText("Estimated scan time: "+str(total_time/60)+" mins")
+        self.ui.status_textBrowser.setText("Estimated scan time: "+str(np.float16(total_time/60))+" mins")
     
     def x_y_scan(self):
+        start_time = time.time()
         x_start = self.ui.x_start_doubleSpinBox.value()
         y_start = self.ui.y_start_doubleSpinBox.value()
         
@@ -151,17 +165,19 @@ class MainWindow(TemplateBaseClass):
         k = 0 
         for i in range(y_range):
             for j in range(x_range):
-                print(self.pi_device.qPOS(axes=self.axes))
+#                print(self.pi_device.qPOS(axes=self.axes))
                 
                 self._read_spectrometer()
                 data_array[k,:] = self.y
                 self.ui.plot.plot(self.spec.wavelengths(), self.y, pen='r', clear=True)
+                pg.QtGui.QApplication.processEvents()
                 
                 self.pi_device.MVR(axes=self.axes[0], values=[x_step])
                 
-                self.ui.progressBar.setValue(((k+1)/(x_range*y_range)))
+                self.ui.progressBar.setValue(100*((k+1)/(x_range*y_range)))
                 k+=1
-                
+            # TODO
+            # if statement needs to be modified to keep the stage at the finish y-pos for line scans in x, and same for y
             if i == y_range-1: # this if statement is there to keep the stage at the finish position (in x) and not bring it back like we were doing during the scan 
                 self.pi_device.MVR(axes=self.axes[1], values=[y_step])
             else:
@@ -177,7 +193,7 @@ class MainWindow(TemplateBaseClass):
         
         pickle.dump(save_dict, open(self.save_folder+"/"+self.ui.lineEdit.text()+"_raw_PL_spectra_data.pkl", "wb"))
         
-        self.ui.status_textBrowser.setText("Data saved!")
+        self.ui.status_textBrowser.setText("Data saved!\nTotal time taken:"+str(np.float16((time.time()-start_time)/60))+" mins")
         
         
     
