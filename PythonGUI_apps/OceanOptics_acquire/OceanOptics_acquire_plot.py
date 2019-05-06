@@ -230,18 +230,18 @@ class MainWindow(TemplateBaseClass):
 
     def live(self):
         save_array = np.zeros(shape=(2048,2))
-        save_array[:,0] = self.spec.wavelengths()
         
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Wavelength', units='nm')
         j = 0
-        while self.ui.connect_checkBox.isChecked(): # this while loop works!
+        while self.spec is not None:#self.ui.connect_checkBox.isChecked(): # this while loop works!
             self._read_spectrometer()
             save_array[:,1] = self.y
             
             self.ui.plot.plot(self.spec.wavelengths(), self.y, pen='r', clear=True)
             
             if self.ui.save_every_spec_checkBox.isChecked():
+                save_array[:,0] = self.spec.wavelengths()
                 np.savetxt(self.save_folder+"/"+self.ui.lineEdit.text()+str(j)+".txt", save_array, fmt = '%.5f', 
                            header = 'Wavelength (nm), Intensity (counts)', delimiter = ' ')
             
