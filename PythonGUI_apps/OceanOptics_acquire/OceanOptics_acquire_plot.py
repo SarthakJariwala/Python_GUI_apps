@@ -205,11 +205,14 @@ class MainWindow(TemplateBaseClass):
                 self.pi_device.MVR(axes=self.axes, values=[-x_scan_size, y_step])
         
         self.ui.status_textBrowser.append("Scan Complete!\nSaving Data...")
-        # TODO add ocean optics acquisition params to the save dict
+
         save_dict = {"Wavelengths": self.spec.wavelengths(), "Intensities": data_array,
                      "Scan Parameters":{"X scan start (um)": x_start, "Y scan start (um)": y_start,
                                         "X scan size (um)": x_scan_size, "Y scan size (um)": y_scan_size,
-                                        "X step size (um)": x_step, "Y step size (um)": y_step}
+                                        "X step size (um)": x_step, "Y step size (um)": y_step},
+                                        "OceanOptics Parameters":{"Integration Time (ms)": self.ui.intg_time_spinBox.value(),
+                                                                  "Scans Averages": self.ui.scan_to_avg_spinBox.value(),
+                                                                  "Correct Dark Counts": self.ui.correct_dark_counts_checkBox.isChecked()}
                      }
         
         pickle.dump(save_dict, open(self.save_folder+"/"+self.ui.lineEdit.text()+"_raw_PL_spectra_data.pkl", "wb"))
