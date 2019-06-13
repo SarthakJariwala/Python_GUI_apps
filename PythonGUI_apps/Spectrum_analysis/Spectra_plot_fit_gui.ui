@@ -168,7 +168,7 @@ Ref File</string>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="load_spectra_scan_pushButton">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -181,7 +181,7 @@ File</string>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_3">
+        <widget class="QPushButton" name="load_bck_file_pushButton">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -194,7 +194,7 @@ File</string>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_4">
+        <widget class="QPushButton" name="load_fitted_scan_pushButton">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -207,7 +207,7 @@ File</string>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_5">
+        <widget class="QPushButton" name="plot_scan_pushButton">
          <property name="font">
           <font>
            <pointsize>12</pointsize>

@@ -13,6 +13,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets#, QColorDialog
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 
 # local modules
 try:
@@ -56,7 +57,12 @@ class MainWindow(TemplateBaseClass):
         self.ui.importSpec_pushButton.clicked.connect(self.open_file)
         self.ui.importBck_pushButton.clicked.connect(self.open_bck_file)
         self.ui.importWLRef_pushButton.clicked.connect(self.open_wlref_file)
+        self.ui.load_spectra_scan_pushButton.clicked.connect(self.open_spectra_scan_file)
+        self.ui.load_bck_file_pushButton.clicked.connect(self.open_bck_file)
+        self.ui.load_fitted_scan_pushButton.clicked.connect(self.open_fit_scan_file)
+        
         self.ui.plot_pushButton.clicked.connect(self.plot)
+        self.ui.plot_scan_pushButton.clicked.connect(self.plot_scan)
         self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
         self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
@@ -89,8 +95,10 @@ class MainWindow(TemplateBaseClass):
         try:
             filename = QtWidgets.QFileDialog.getOpenFileName(self)
             try:
-                self.bck_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+                self.bck_file = np.loadtxt(filename[0], skiprows=1)
             except:
+                self.bck_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+            else:
                 self.bck_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
         except:
             pass
@@ -102,6 +110,20 @@ class MainWindow(TemplateBaseClass):
                 self.wlref_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
             except:
                 self.wlref_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+        except:
+            pass
+    
+    def open_spectra_scan_file(self):
+        try:
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
+        except:
+            pass
+    
+    def open_fit_scan_file(self):
+        try:
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            self.fit_scan_file = pickle.load(open(filename[0], 'rb'))
         except:
             pass
     
@@ -140,6 +162,38 @@ class MainWindow(TemplateBaseClass):
             pass
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
+    
+    def plot_scan(self):
+        try:
+#            data = self.fit_scan_file
+#            numb_pixels = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))#75*75
+#            numb_of_points = numb_pixels*numb_pixels
+            numb_of_points = 75*75
+            
+            fwhm = np.zeros(shape=(numb_of_points,1))
+            pk_pos = np.zeros(shape=(numb_of_points,1))
+#            pk_pos_plus = np.zeros(shape=(numb_of_points,1))
+#            pk_pos_minus = np.zeros(shape=(numb_of_points,1))
+            sigma = np.zeros(shape=(numb_of_points,1))
+            height = np.zeros(shape=(numb_of_points,1))
+            
+            for i in range(numb_of_points):
+                fwhm[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_fwhm']
+                pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_center']
+                sigma[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_sigma']
+                height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
+            
+            newshape = (75,75)
+            
+            fwhm = np.reshape(fwhm, newshape)
+            pk_pos = np.reshape(pk_pos, newshape)
+            sigma = np.reshape(sigma, newshape)
+            height = np.reshape(height, newshape)
+            
+            self.ui.scan_plot.setImage(pk_pos)#, scale=(stepsize,stepsize))
+        except:
+            pass
+            
         
     
     def normalize(self):
