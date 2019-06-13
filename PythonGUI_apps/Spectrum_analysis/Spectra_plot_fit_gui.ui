@@ -214,7 +214,7 @@ File</string>
      </item>
     </layout>
    </widget>
-   <widget class="ImageView" name="plot_fit_scan">
+   <widget class="ImageView" name="fit_scan_viewbox">
     <property name="geometry">
      <rect>
       <x>720</x>
@@ -257,7 +257,7 @@ File</string>
      </font>
     </property>
    </widget>
-   <widget class="QPushButton" name="plot_scan_pushButton">
+   <widget class="QPushButton" name="plot_fit_scan_pushButton">
     <property name="geometry">
      <rect>
       <x>1090</x>
@@ -321,7 +321,7 @@ File</string>
      </rect>
     </property>
    </widget>
-   <widget class="ImageView" name="plot_raw_scan">
+   <widget class="ImageView" name="raw_scan_viewbox">
     <property name="geometry">
      <rect>
       <x>220</x>
