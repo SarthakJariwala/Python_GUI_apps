@@ -62,7 +62,9 @@ class MainWindow(TemplateBaseClass):
         self.ui.load_fitted_scan_pushButton.clicked.connect(self.open_fit_scan_file)
         
         self.ui.plot_pushButton.clicked.connect(self.plot)
-        self.ui.plot_scan_pushButton.clicked.connect(self.plot_scan)
+        self.ui.plot_fit_scan_pushButton.clicked.connect(self.plot_fit_scan)
+        self.ui.plot_raw_scan_pushButton.clicked.connect(self.plot_raw_scan)
+        
         self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
         self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
@@ -163,7 +165,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
     
-    def plot_scan(self):
+    def plot_fit_scan(self):
         try:
 #            data = self.fit_scan_file
 #            numb_pixels = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))#75*75
@@ -190,11 +192,23 @@ class MainWindow(TemplateBaseClass):
             sigma = np.reshape(sigma, newshape)
             height = np.reshape(height, newshape)
             
-            self.ui.scan_plot.setImage(pk_pos)#, scale=(stepsize,stepsize))
+            self.ui.fit_scan_viewbox.setImage(pk_pos)#, scale=(stepsize,stepsize))
         except:
             pass
             
-        
+    def plot_raw_scan(self):
+        try:
+            data = self.spec_scan_file
+            numb_pixels = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
+#            numb_of_points = numb_pixels*numb_pixels
+            intensities = data['Intensities'].T
+            
+            intensities = np.reshape(intensities, newshape=(2048,numb_pixels,numb_pixels))
+            
+            self.ui.raw_scan_viewbox.setImage(intensities)
+        except:
+            pass
+            
     
     def normalize(self):
         self.y = (self.y) / np.amax(self.y)
