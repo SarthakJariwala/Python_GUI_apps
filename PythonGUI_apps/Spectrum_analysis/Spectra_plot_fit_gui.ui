@@ -115,7 +115,7 @@ Ready Figure</string>
       <x>10</x>
       <y>10</y>
       <width>1121</width>
-      <height>831</height>
+      <height>833</height>
      </rect>
     </property>
     <property name="font">
@@ -124,7 +124,7 @@ Ready Figure</string>
      </font>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="documentMode">
      <bool>false</bool>
