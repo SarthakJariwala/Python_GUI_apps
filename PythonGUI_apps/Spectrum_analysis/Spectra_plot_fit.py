@@ -73,7 +73,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.export_fig_pushButton.clicked.connect(self.pub_ready_plot_export)
         
         self.file = None
-        self.bck_file = None#np.loadtxt("E:/FLIM/Giles_Strained_HighBandgap_Films/2019_05_07_confocal_films_frm_giles/10p_DMA/Background.txt")
+        self.bck_file = None
         self.wlref_file = None
         self.x = None
         self.y = None
@@ -142,7 +142,7 @@ class MainWindow(TemplateBaseClass):
         except:
             pass
     
-    def save_file(self):
+    def save_file(self):# not used yet!
         try:
             filename = QtWidgets.QFileDialog.getSaveFileName(self)
             np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
@@ -215,7 +215,8 @@ class MainWindow(TemplateBaseClass):
             data = self.spec_scan_file
             numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
             numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
-#            numb_of_points = numb_pixels*numb_pixels
+            # TODO test line scan plots
+
             intensities = data['Intensities'].T
             
             intensities = np.reshape(intensities, newshape=(2048,numb_pixels_X,numb_pixels_Y))
@@ -297,31 +298,30 @@ class MainWindow(TemplateBaseClass):
     
     def fit_and_plot_scan(self):
         self.ui.result_textBrowser.append("Starting Scan Fitting")
+        
         try:
             """Define starting and stopping wavelength values here"""
-            start_nm = 600
-            stop_nm = 900
-            self.ui.result_textBrowser.append("Load Bckground file")
+            # TODO pause this loop while paramwindow is called and updated and Done is clicked
+            start_nm = int(self.center_min)
+            stop_nm = int(self.center_max)
+            
             ref = self.bck_file
-            print(ref.shape)
-            print(ref)
             index = (ref[:,0]>start_nm) & (ref[:,0]<stop_nm)
-            self.ui.result_textBrowser.append("Loading Wavelenth file")
+            
             x = self.spec_scan_file['Wavelengths']
             x = x[index]
             
-            self.ui.result_textBrowser.append("Assigning data file")
             data_array = self.spec_scan_file['Intensities']
             
             result_dict = {}
-            self.ui.result_textBrowser.append("Starting Fitting")
+            
             for i in range(data_array.shape[0]):
                 
                 y = data_array[i, index] # intensity
                 yref = ref[index, 1]
                 
                 y = y - yref # background correction
-                y = y - np.mean(y[(x>600) & (x<625)]) # removing any remaining bckgrnd
+                y = y - np.mean(y[(x>start_nm) & (x<start_nm + 25)]) # removing any remaining bckgrnd
                 
                 gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
                 pars = gmodel.guess(y, x=x) # parameters - center, width, height
@@ -329,17 +329,24 @@ class MainWindow(TemplateBaseClass):
                 result_dict["result_"+str(i)] = result
             
             self.ui.result_textBrowser.append("Scan Fitting Complete!")
-            # TODO implement save option
+
             filename = QtWidgets.QFileDialog.getSaveFileName(self)
             pickle.dump(result_dict, open(filename[0]+"_fit_result_dict.pkl", "wb"))
             
-            self.fit_scan_file = pickle.load(open(filename[0]+"_fit_result_dict.pkl", 'rb'))
-            self.plot_fit_scan()
+            self.ui.result_textBrowser.append("Data Saved!")
         
         except Exception as e:
             self.ui.result_textBrowser.append(str(e))
-#            pass
+            pass
+        
+        self.ui.result_textBrowser.append("Loading Fit Data and Plotting")
+        try:
+            self.fit_scan_file = pickle.load(open(filename[0]+"_fit_result_dict.pkl", 'rb'))
+            self.plot_fit_scan()
             
+        except Exception as e:
+            self.ui.result_textBrowser.append(str(e))
+            pass
     
     def pub_ready_plot_export(self):
         filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
