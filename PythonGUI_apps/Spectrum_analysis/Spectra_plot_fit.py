@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 
+from lmfit.models import GaussianModel
 # local modules
 try:
     from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian
@@ -58,7 +59,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.importBck_pushButton.clicked.connect(self.open_bck_file)
         self.ui.importWLRef_pushButton.clicked.connect(self.open_wlref_file)
         self.ui.load_spectra_scan_pushButton.clicked.connect(self.open_spectra_scan_file)
-        self.ui.load_bck_file_pushButton.clicked.connect(self.open_bck_file)
+        self.ui.load_bck_file_pushButton.clicked.connect(self.open_spectra_bck_file)
         self.ui.load_fitted_scan_pushButton.clicked.connect(self.open_fit_scan_file)
         
         self.ui.plot_pushButton.clicked.connect(self.plot)
@@ -66,12 +67,13 @@ class MainWindow(TemplateBaseClass):
         self.ui.plot_raw_scan_pushButton.clicked.connect(self.plot_raw_scan)
         
         self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
+        self.ui.fit_scan_pushButton.clicked.connect(self.fit_and_plot_scan)
         self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         self.ui.export_fig_pushButton.clicked.connect(self.pub_ready_plot_export)
         
         self.file = None
-        self.bck_file = None
+        self.bck_file = None#np.loadtxt("E:/FLIM/Giles_Strained_HighBandgap_Films/2019_05_07_confocal_films_frm_giles/10p_DMA/Background.txt")
         self.wlref_file = None
         self.x = None
         self.y = None
@@ -82,7 +84,8 @@ class MainWindow(TemplateBaseClass):
         self.center_max = None
         
         self.show()
-        
+    
+    """Open Single Spectrum Files"""    
     def open_file(self):
         try:
             filename = QtWidgets.QFileDialog.getOpenFileName(self)
@@ -97,12 +100,11 @@ class MainWindow(TemplateBaseClass):
         try:
             filename = QtWidgets.QFileDialog.getOpenFileName(self)
             try:
-                self.bck_file = np.loadtxt(filename[0], skiprows=1)
-            except:
                 self.bck_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
-            else:
-                self.bck_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
-        except:
+            except:
+                self.bck_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')    
+        except Exception as e:
+            self.ui.result_textBrowser.append(str(e))
             pass
     
     def open_wlref_file(self):
@@ -114,7 +116,8 @@ class MainWindow(TemplateBaseClass):
                 self.wlref_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
         except:
             pass
-    
+        
+    """Open Scan Files"""
     def open_spectra_scan_file(self):
         try:
             filename = QtWidgets.QFileDialog.getOpenFileName(self)
@@ -122,6 +125,16 @@ class MainWindow(TemplateBaseClass):
         except:
             pass
     
+    def open_spectra_bck_file(self):
+        try:
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            print(filename[0])
+            self.bck_file = np.loadtxt(filename[0])#, skiprows=1, delimiter=None)
+            self.ui.result_textBrowser.append("Done Loading")
+        except Exception as e:
+            self.ui.result_textBrowser.append(str(e))
+            pass
+        
     def open_fit_scan_file(self):
         try:
             filename = QtWidgets.QFileDialog.getOpenFileName(self)
@@ -170,6 +183,7 @@ class MainWindow(TemplateBaseClass):
 #            data = self.fit_scan_file
 #            numb_pixels = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))#75*75
 #            numb_of_points = numb_pixels*numb_pixels
+            #TODO Read number of points from the scan file or have the user input it
             numb_of_points = 75*75
             
             fwhm = np.zeros(shape=(numb_of_points,1))
@@ -199,11 +213,12 @@ class MainWindow(TemplateBaseClass):
     def plot_raw_scan(self):
         try:
             data = self.spec_scan_file
-            numb_pixels = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
+            numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
+            numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
 #            numb_of_points = numb_pixels*numb_pixels
             intensities = data['Intensities'].T
             
-            intensities = np.reshape(intensities, newshape=(2048,numb_pixels,numb_pixels))
+            intensities = np.reshape(intensities, newshape=(2048,numb_pixels_X,numb_pixels_Y))
             
             self.ui.raw_scan_viewbox.setImage(intensities)
         except:
@@ -279,6 +294,51 @@ class MainWindow(TemplateBaseClass):
         
         except Exception as e:
             self.ui.result_textBrowser.setText(str(e))
+    
+    def fit_and_plot_scan(self):
+        self.ui.result_textBrowser.append("Starting Scan Fitting")
+        try:
+            """Define starting and stopping wavelength values here"""
+            start_nm = 600
+            stop_nm = 900
+            self.ui.result_textBrowser.append("Load Bckground file")
+            ref = self.bck_file
+            print(ref.shape)
+            print(ref)
+            index = (ref[:,0]>start_nm) & (ref[:,0]<stop_nm)
+            self.ui.result_textBrowser.append("Loading Wavelenth file")
+            x = self.spec_scan_file['Wavelengths']
+            x = x[index]
+            
+            self.ui.result_textBrowser.append("Assigning data file")
+            data_array = self.spec_scan_file['Intensities']
+            
+            result_dict = {}
+            self.ui.result_textBrowser.append("Starting Fitting")
+            for i in range(data_array.shape[0]):
+                
+                y = data_array[i, index] # intensity
+                yref = ref[index, 1]
+                
+                y = y - yref # background correction
+                y = y - np.mean(y[(x>600) & (x<625)]) # removing any remaining bckgrnd
+                
+                gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
+                pars = gmodel.guess(y, x=x) # parameters - center, width, height
+                result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
+                result_dict["result_"+str(i)] = result
+            
+            self.ui.result_textBrowser.append("Scan Fitting Complete!")
+            # TODO implement save option
+            filename = QtWidgets.QFileDialog.getSaveFileName(self)
+            pickle.dump(result_dict, open(filename[0]+"_fit_result_dict.pkl", "wb"))
+            
+            self.fit_scan_file = pickle.load(open(filename[0]+"_fit_result_dict.pkl", 'rb'))
+            self.plot_fit_scan()
+        
+        except Exception as e:
+            self.ui.result_textBrowser.append(str(e))
+#            pass
             
     
     def pub_ready_plot_export(self):
