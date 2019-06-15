@@ -319,7 +319,7 @@ class MainWindow(TemplateBaseClass):
             self.ui.result_textBrowser.setText(str(e))
     
     def fit_and_plot_scan(self):
-        self.ui.result_textBrowser.append("Starting Scan Fitting")
+#        self.ui.result_textBrowser.append("Starting Scan Fitting")
         print("Starting Scan Fitting")
         
         try:
@@ -350,20 +350,21 @@ class MainWindow(TemplateBaseClass):
                 result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
                 result_dict["result_"+str(i)] = result
             
-            self.ui.result_textBrowser.append("Scan Fitting Complete!")
+#            self.ui.result_textBrowser.append("Scan Fitting Complete!")
             print("Scan Fitting Complete!")
 
             filename = QtWidgets.QFileDialog.getSaveFileName(self)
             pickle.dump(result_dict, open(filename[0]+"_fit_result_dict.pkl", "wb"))
             
-            self.ui.result_textBrowser.append("Data Saved!")
+#            self.ui.result_textBrowser.append("Data Saved!")
             print("Data Saved!")
         
         except Exception as e:
             self.ui.result_textBrowser.append(str(e))
             pass
         
-        self.ui.result_textBrowser.append("Loading Fit Data and Plotting")
+#        self.ui.result_textBrowser.append("Loading Fit Data and Plotting")
+        print("Loading Fit Data and Plotting")
         try:
             self.fit_scan_file = pickle.load(open(filename[0]+"_fit_result_dict.pkl", 'rb'))
             self.plot_fit_scan()
@@ -440,4 +441,4 @@ def run():
     return win
 
 #Uncomment below if you want to run this as standalone
-run()
+#run()
