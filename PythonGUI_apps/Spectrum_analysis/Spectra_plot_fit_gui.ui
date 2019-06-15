@@ -18,21 +18,21 @@
     <property name="geometry">
      <rect>
       <x>1135</x>
-      <y>20</y>
+      <y>30</y>
       <width>281</width>
-      <height>244</height>
+      <height>311</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <pointsize>15</pointsize>
      </font>
     </property>
     <property name="title">
      <string>Fitting Settings</string>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0" colspan="2">
       <widget class="QComboBox" name="fitFunc_comboBox">
        <property name="font">
         <font>
@@ -41,14 +41,79 @@
        </property>
       </widget>
      </item>
-     <item>
+     <item row="1" column="0" colspan="2">
       <widget class="QPushButton" name="config_fit_params_pushButton">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Configure Fit Params</string>
        </property>
       </widget>
      </item>
-     <item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_8">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Start at (nm):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QSpinBox" name="start_nm_spinBox">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="minimum">
+        <number>300</number>
+       </property>
+       <property name="maximum">
+        <number>1100</number>
+       </property>
+       <property name="value">
+        <number>600</number>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Stop at (nm):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QSpinBox" name="stop_nm_spinBox">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="minimum">
+        <number>300</number>
+       </property>
+       <property name="maximum">
+        <number>1100</number>
+       </property>
+       <property name="value">
+        <number>900</number>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="2">
       <widget class="QCheckBox" name="adjust_param_checkBox">
        <property name="font">
         <font>
@@ -60,7 +125,7 @@
        </property>
       </widget>
      </item>
-     <item>
+     <item row="5" column="0" colspan="2">
       <widget class="QPushButton" name="fit_pushButton">
        <property name="font">
         <font>
@@ -72,14 +137,19 @@
        </property>
       </widget>
      </item>
-     <item>
+     <item row="6" column="0" colspan="2">
       <widget class="QPushButton" name="fit_scan_pushButton">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Fit Entire Scan</string>
        </property>
       </widget>
      </item>
-     <item>
+     <item row="7" column="0" colspan="2">
       <widget class="QPushButton" name="export_fig_pushButton">
        <property name="font">
         <font>
@@ -98,9 +168,9 @@ Ready Figure</string>
     <property name="geometry">
      <rect>
       <x>1140</x>
-      <y>270</y>
+      <y>350</y>
       <width>281</width>
-      <height>561</height>
+      <height>481</height>
      </rect>
     </property>
     <property name="font">
@@ -423,12 +493,12 @@ Ref File</string>
       </property>
       <item>
        <property name="text">
-        <string>fwhm</string>
+        <string>pk_pos</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>pk_pos</string>
+        <string>fwhm</string>
        </property>
       </item>
       <item>
@@ -516,8 +586,8 @@ File</string>
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
-        <x>740</x>
-        <y>400</y>
+        <x>800</x>
+        <y>450</y>
         <width>141</width>
         <height>41</height>
        </rect>
@@ -529,8 +599,8 @@ File</string>
      <widget class="QLabel" name="label_7">
       <property name="geometry">
        <rect>
-        <x>740</x>
-        <y>450</y>
+        <x>800</x>
+        <y>500</y>
         <width>141</width>
         <height>41</height>
        </rect>
@@ -542,21 +612,49 @@ File</string>
      <widget class="QSpinBox" name="num_x_spinBox">
       <property name="geometry">
        <rect>
-        <x>890</x>
-        <y>410</y>
-        <width>45</width>
+        <x>950</x>
+        <y>460</y>
+        <width>81</width>
         <height>31</height>
        </rect>
+      </property>
+      <property name="maximum">
+       <number>2000</number>
+      </property>
+      <property name="value">
+       <number>100</number>
       </property>
      </widget>
      <widget class="QSpinBox" name="num_y_spinBox">
       <property name="geometry">
        <rect>
-        <x>890</x>
-        <y>460</y>
-        <width>45</width>
+        <x>950</x>
+        <y>510</y>
+        <width>81</width>
         <height>31</height>
        </rect>
+      </property>
+      <property name="maximum">
+       <number>2000</number>
+      </property>
+      <property name="value">
+       <number>100</number>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="use_raw_scan_settings">
+      <property name="geometry">
+       <rect>
+        <x>800</x>
+        <y>570</y>
+        <width>231</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Use Raw Scan Settings</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>
@@ -568,7 +666,7 @@ File</string>
      <x>0</x>
      <y>0</y>
      <width>1430</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
