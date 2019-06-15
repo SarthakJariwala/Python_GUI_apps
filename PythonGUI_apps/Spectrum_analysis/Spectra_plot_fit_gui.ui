@@ -124,7 +124,7 @@ Ready Figure</string>
      </font>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <property name="documentMode">
      <bool>false</bool>
@@ -421,6 +421,26 @@ Ref File</string>
         <pointsize>15</pointsize>
        </font>
       </property>
+      <item>
+       <property name="text">
+        <string>fwhm</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>pk_pos</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>sigma</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>height</string>
+       </property>
+      </item>
      </widget>
      <widget class="QGroupBox" name="groupBox_3">
       <property name="geometry">
@@ -493,6 +513,52 @@ File</string>
        </item>
       </layout>
      </widget>
+     <widget class="QLabel" name="label_6">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>400</y>
+        <width>141</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string># X points</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_7">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>450</y>
+        <width>141</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string># Y points</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="num_x_spinBox">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>410</y>
+        <width>45</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="num_y_spinBox">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>460</y>
+        <width>45</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -502,7 +568,7 @@ File</string>
      <x>0</x>
      <y>0</y>
      <width>1430</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
   </widget>
