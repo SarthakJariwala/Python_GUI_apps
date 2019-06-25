@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import pickle
 import time
 from lmfit.models import GaussianModel
+import customplotting.mscope as cpm
 # local modules
 try:
     from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian
@@ -209,17 +210,17 @@ class MainWindow(TemplateBaseClass):
             newshape = (num_x, num_y)
             
             param_selection = str(self.ui.comboBox.currentText())
-            img = np.reshape(eval(param_selection), newshape)
+            self.img = np.reshape(eval(param_selection), newshape)
 
             if self.ui.use_raw_scan_settings.isChecked():
-                self.ui.fit_scan_viewbox.setImage(img, scale=
+                self.ui.fit_scan_viewbox.setImage(self.img, scale=
                                                   (data['Scan Parameters']['X step size (um)'],
                                                    data['Scan Parameters']['Y step size (um)']))
                 scale = pg.ScaleBar(size=2,suffix='um')
                 scale.setParentItem(self.ui.fit_scan_viewbox.view)
                 scale.anchor((1, 1), (1, 1), offset=(-30, -30))
             else:
-                self.ui.fit_scan_viewbox.setImage(img)
+                self.ui.fit_scan_viewbox.setImage(self.img)
                 
         except Exception as e:
             self.ui.result_textBrowser.append(str(e))
@@ -376,16 +377,22 @@ class MainWindow(TemplateBaseClass):
     def pub_ready_plot_export(self):
         filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
         try:
-            plt.figure(figsize=(8,6))
-            plt.tick_params(direction='out', length=8, width=3.5)
-            plt.plot(self.x, self.y)
-            plt.plot(self.x, self.result.best_fit,'k')
-            plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
-            plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
-            plt.tight_layout()
-            
-            plt.savefig(filename[0],bbox_inches='tight', dpi=300)
-            plt.close()
+            try:
+                data = self.spec_scan_file
+                cpm.plot_confocal(self.img, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap="seismic")
+                plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+                plt.close()
+            except:
+                plt.figure(figsize=(8,6))
+                plt.tick_params(direction='out', length=8, width=3.5)
+                plt.plot(self.x, self.y)
+                plt.plot(self.x, self.result.best_fit,'k')
+                plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
+                plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
+                plt.tight_layout()
+                
+                plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+                plt.close()
             
         except AttributeError:
             self.ui.result_textBrowser.setText("Need to fit the data first!")
