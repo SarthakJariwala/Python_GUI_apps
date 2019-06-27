@@ -194,7 +194,7 @@ Ready Figure</string>
      </font>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <property name="documentMode">
      <bool>false</bool>
@@ -658,6 +658,78 @@ File</string>
       </property>
      </widget>
     </widget>
+    <widget class="QWidget" name="pkl_to_text">
+     <attribute name="title">
+      <string>pkl to txt</string>
+     </attribute>
+     <widget class="QGroupBox" name="groupBox_4">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>281</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Convert</string>
+      </property>
+      <widget class="QPushButton" name="import_pkl_pushButton">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>241</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Import .pkl file</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="data_txt_pushButton">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>90</y>
+         <width>241</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Data to .txt</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="scan_params_txt_psuhButton">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>140</y>
+         <width>241</width>
+         <height>34</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Scan params to .txt</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -666,7 +738,7 @@ File</string>
      <x>0</x>
      <y>0</y>
      <width>1430</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
   </widget>

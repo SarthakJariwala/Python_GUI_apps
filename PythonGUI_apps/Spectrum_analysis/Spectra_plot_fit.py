@@ -72,6 +72,11 @@ class MainWindow(TemplateBaseClass):
         self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         self.ui.export_fig_pushButton.clicked.connect(self.pub_ready_plot_export)
+
+        self.ui.import_pkl_pushButton.clicked.connect(self.open_pkl_file)
+        self.ui.data_txt_pushButton.clicked.connect(self.pkl_data_to_txt)
+        self.ui.scan_params_txt_pushButton.clicked.connect(self.pkl_params_to_txt)
+
         
         self.file = None
         self.bck_file = None
@@ -136,7 +141,7 @@ class MainWindow(TemplateBaseClass):
         except Exception as e:
             self.ui.result_textBrowser.append(str(e))
             pass
-        
+       
     def open_fit_scan_file(self):
         try:
             filename = QtWidgets.QFileDialog.getOpenFileName(self)
@@ -144,6 +149,13 @@ class MainWindow(TemplateBaseClass):
             self.ui.result_textBrowser.append("Done Loading - Scan Fit File")
         except Exception as e:
             self.ui.result_textBrowser.append(str(e))
+            pass
+
+    def open_pkl_file(self):
+		try:
+        	self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self, "*.pkl")
+        	self.ui.result_textBrowser.append("Done Loading - .pkl to convert")
+        except:
             pass
     
     def save_file(self):# not used yet!
@@ -399,8 +411,59 @@ class MainWindow(TemplateBaseClass):
             
         except AttributeError:
             self.ui.result_textBrowser.setText("Need to fit the data first!")
-            
-    
+
+    def pkl_data_to_txt(self):
+		folder = os.path.dirname(os.path.realpath(self.pkl_to_convert))
+		filename = os.path.basename(self.pkl_to_convert)
+		
+		pkl_file = pickle.load(open(self.pkl_to_convert, 'rb'))
+
+		txt_file = np.zeros(shape=(2048,pkl_file['Intensities'].shape[0] + 1))
+
+		data_array = pkl_file['Intensities']
+		data_array = np.transpose(data_array)
+		wavelength = pkl_file['Wavelengths']
+
+		txt_file[:,0] = wavelength
+
+		for i in range(pkl_file['Intensities'].shape[0]):
+		    txt_file[:,i+1] = data_array[:,i]
+
+		np.savetxt(folder +"/"+ filename +"_data.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="wavelength(nm), Intensities at different points")
+        self.ui.result_textBrowser.append("Data from .pkl saved as .txt")
+
+    def pkl_params_to_txt(self):
+    	folder = os.path.dirname(os.path.realpath(self.pkl_to_convert))
+		filename = os.path.basename(self.pkl_to_convert)
+		
+		pkl_file = pickle.load(open(self.pkl_to_convert, 'rb'))
+		pkl_scan = pkl_file['Scan Parameters']
+		pkl_oo = pkl_file['OceanOptics Parameters']
+		
+		txt_file = np.zeros(shape=(9, 2))
+		txt_file[0, 0] = 'X scan start (um)'
+		txt_file[0, 1] = pkl_scan['X scan start (um)']
+		txt_file[1, 0] = 'Y scan start (um)'
+		txt_file[1, 1] = pkl_scan['Y scan start (um)']
+		txt_file[2, 0] = 'X scan size (um)'
+		txt_file[2, 1] = pkl_scan['X scan size (um)']
+		txt_file[3, 0] = 'Y scan size (um)'
+		txt_file[3, 1] = pkl_scan['Y scan size (um)']
+		txt_file[4, 0] = 'X step size (um)'
+		txt_file[4, 1] = pkl_scan['X step size (um)']
+		txt_file[5, 0] = 'Y step size (um)'
+		txt_file[5, 1] = pkl_scan['Y step size (um)']
+
+		txt_file[6, 0] = 'Integration Time (ms)'
+		txt_file[6, 1] = pkl_oo['Integration Time (ms)']
+		txt_file[7, 0] = 'Scans Averages'
+		txt_file[7, 1] = pkl_oo['Scans Averages']
+		txt_file[8, 0] = 'Correct Dark Counts'
+		txt_file[8, 1] = pkl_oo['Correct Dark Counts']
+
+		np.savetxt(folder +"/"+ filename +"_scan_parameters.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="Param name, Values")
+		self.ui.result_textBrowser.append("Scan parameters from .pkl saved as .txt")
+
     def close_application(self):
         choice = QtGui.QMessageBox.question(self, 'EXIT!',
                                             "Do you want to exit the app?",
