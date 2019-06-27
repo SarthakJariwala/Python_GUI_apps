@@ -379,7 +379,10 @@ class MainWindow(TemplateBaseClass):
         try:
             try:
                 data = self.spec_scan_file
-                cpm.plot_confocal(self.img, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap="seismic")
+                param_selection = str(self.ui.comboBox.currentText())
+                if param_selection == 'pk_pos': label = 'PL Peak Position (n.m.)'
+            	elif param_selection == 'fwhm': label = 'PL FWHM (n.m.)'
+                cpm.plot_confocal(self.img, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap="seismic", cbar_label=label)
                 plt.savefig(filename[0],bbox_inches='tight', dpi=300)
                 plt.close()
             except:
