@@ -8,7 +8,7 @@ Created on Wed Mar 27 16:50:26 2019
 # system imports
 import sys
 from pathlib import Path
-
+import os.path
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets#, QColorDialog
 import numpy as np
@@ -413,9 +413,10 @@ class MainWindow(TemplateBaseClass):
 			self.ui.result_textBrowser.setText("Need to fit the data first!")
 
 	def pkl_data_to_txt(self):
-		folder = os.path.dirname(os.path.realpath(self.pkl_to_convert))
-		filename = os.path.basename(self.pkl_to_convert)
-		
+		folder = os.path.dirname(self.pkl_to_convert)
+		filename_ext = os.path.basename(self.pkl_to_convert)
+		filename = os.path.splitext(filename_ext)[0] #get filename without extension
+
 		pkl_file = pickle.load(open(self.pkl_to_convert, 'rb'))
 
 		txt_file = np.zeros(shape=(2048,pkl_file['Intensities'].shape[0] + 1))
@@ -433,8 +434,9 @@ class MainWindow(TemplateBaseClass):
 		self.ui.result_textBrowser.append("Data from .pkl saved as .txt")
 
 	def pkl_params_to_txt(self):
-		folder = os.path.dirname(os.path.realpath(self.pkl_to_convert))
-		filename = os.path.basename(self.pkl_to_convert)
+		folder = os.path.dirname(self.pkl_to_convert)
+	    filename_ext = os.path.basename(self.pkl_to_convert)
+		filename = os.path.splitext(filename_ext)[0] #get filename without extension
 		
 		pkl_file = pickle.load(open(self.pkl_to_convert, 'rb'))
 		pkl_scan = pkl_file['Scan Parameters']
