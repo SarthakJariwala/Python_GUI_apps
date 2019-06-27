@@ -710,7 +710,7 @@ File</string>
         <string>Data to .txt</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="scan_params_txt_psuhButton">
+      <widget class="QPushButton" name="scan_params_txt_pushButton">
        <property name="geometry">
         <rect>
          <x>10</x>
