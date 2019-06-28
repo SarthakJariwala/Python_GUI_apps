@@ -413,11 +413,10 @@ class MainWindow(TemplateBaseClass):
 			self.ui.result_textBrowser.setText("Need to fit the data first!")
 
 	def pkl_data_to_txt(self):
-		folder = os.path.dirname(self.pkl_to_convert)
-		filename_ext = os.path.basename(self.pkl_to_convert)
+		folder = os.path.dirname(self.pkl_to_convert[0])
+		filename_ext = os.path.basename(self.pkl_to_convert[0])
 		filename = os.path.splitext(filename_ext)[0] #get filename without extension
-
-		pkl_file = pickle.load(open(self.pkl_to_convert, 'rb'))
+		pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
 
 		txt_file = np.zeros(shape=(2048,pkl_file['Intensities'].shape[0] + 1))
 
@@ -434,11 +433,12 @@ class MainWindow(TemplateBaseClass):
 		self.ui.result_textBrowser.append("Data from .pkl saved as .txt")
 
 	def pkl_params_to_txt(self):
-		folder = os.path.dirname(self.pkl_to_convert)
-	    filename_ext = os.path.basename(self.pkl_to_convert)
+		#TODO - add param names as headers to keep array float-only
+		folder = os.path.dirname(self.pkl_to_convert[0])
+		filename_ext = os.path.basename(self.pkl_to_convert[0])
 		filename = os.path.splitext(filename_ext)[0] #get filename without extension
 		
-		pkl_file = pickle.load(open(self.pkl_to_convert, 'rb'))
+		pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
 		pkl_scan = pkl_file['Scan Parameters']
 		pkl_oo = pkl_file['OceanOptics Parameters']
 		
