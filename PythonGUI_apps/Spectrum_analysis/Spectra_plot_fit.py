@@ -412,6 +412,7 @@ class MainWindow(TemplateBaseClass):
 		except AttributeError:
 			self.ui.result_textBrowser.setText("Need to fit the data first!")
 
+	#Get data from ocean optics scan pkl file, and convert to txt
 	def pkl_data_to_txt(self):
 		folder = os.path.dirname(self.pkl_to_convert[0])
 		filename_ext = os.path.basename(self.pkl_to_convert[0])
@@ -432,38 +433,31 @@ class MainWindow(TemplateBaseClass):
 		np.savetxt(folder +"/"+ filename +"_data.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="wavelength(nm), Intensities at different points")
 		self.ui.result_textBrowser.append("Data from .pkl saved as .txt")
 
+	#Get scan parameters from ocean optics scan pkl file, and convert to txt
 	def pkl_params_to_txt(self):
-		#TODO - add param names as headers to keep array float-only
 		folder = os.path.dirname(self.pkl_to_convert[0])
 		filename_ext = os.path.basename(self.pkl_to_convert[0])
 		filename = os.path.splitext(filename_ext)[0] #get filename without extension
-		
 		pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
+
 		pkl_scan = pkl_file['Scan Parameters']
 		pkl_oo = pkl_file['OceanOptics Parameters']
 		
-		txt_file = np.zeros(shape=(9, 2))
-		txt_file[0, 0] = 'X scan start (um)'
-		txt_file[0, 1] = pkl_scan['X scan start (um)']
-		txt_file[1, 0] = 'Y scan start (um)'
-		txt_file[1, 1] = pkl_scan['Y scan start (um)']
-		txt_file[2, 0] = 'X scan size (um)'
-		txt_file[2, 1] = pkl_scan['X scan size (um)']
-		txt_file[3, 0] = 'Y scan size (um)'
-		txt_file[3, 1] = pkl_scan['Y scan size (um)']
-		txt_file[4, 0] = 'X step size (um)'
-		txt_file[4, 1] = pkl_scan['X step size (um)']
-		txt_file[5, 0] = 'Y step size (um)'
-		txt_file[5, 1] = pkl_scan['Y step size (um)']
+		param_list = []
+		param_list.append(['X scan start (um)', 'Y scan start (um)', 'X scan size (um)', 'Y scan size (um)',
+			'X step size (um)', 'Y step size (um)', 'Integration Time (ms)', 'Scans to Average', 'Correct Dark Counts']) #list of param names
+		param_list.append([ pkl_scan['X scan start (um)'], pkl_scan['Y scan start (um)'], pkl_scan['X scan size (um)'],
+			pkl_scan['Y scan size (um)'], pkl_scan['X step size (um)'], pkl_scan['Y step size (um)'],
+			pkl_oo['Integration Time (ms)'], pkl_oo['Scans Averages'], pkl_oo['Correct Dark Counts'] ]) #list of param values
 
-		txt_file[6, 0] = 'Integration Time (ms)'
-		txt_file[6, 1] = pkl_oo['Integration Time (ms)']
-		txt_file[7, 0] = 'Scans Averages'
-		txt_file[7, 1] = pkl_oo['Scans Averages']
-		txt_file[8, 0] = 'Correct Dark Counts'
-		txt_file[8, 1] = pkl_oo['Correct Dark Counts']
+		param_list = list(zip(*param_list)) #transpose so names and values are side-by-side
+		save_to = folder +"/"+ filename +"_scan_parameters.txt"
+		
+		with open(save_to, 'w') as f:
+			for item in param_list:
+				f.write("%s\t" % str(item[0])) #write name
+				f.write("%s\n" % str(item[1])) #write value
 
-		np.savetxt(folder +"/"+ filename +"_scan_parameters.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="Param name, Values")
 		self.ui.result_textBrowser.append("Scan parameters from .pkl saved as .txt")
 
 	def close_application(self):
