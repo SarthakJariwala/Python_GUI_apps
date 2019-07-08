@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 try:
     from Lifetime_analysis.Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
     from Lifetime_analysis.picoharp_phd import read_picoharp_phd
+    from Lifetime_analysis.Fit_functions_with_irf import fit_exp_stretch_diffev
 except:
     from Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
     from picoharp_phd import read_picoharp_phd
@@ -59,7 +60,7 @@ class MainWindow(TemplateBaseClass):
         
         self.ui.plot_pushButton.clicked.connect(self.plot)
         self.ui.log_pushButton.clicked.connect(self.make_semilog)
-        self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
+        self.ui.fit_pushButton.clicked.connect(self.call_fit_and_plot)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         self.ui.export_plot_pushButton.clicked.connect(self.pub_ready_plot_export)
         
@@ -192,6 +193,86 @@ class MainWindow(TemplateBaseClass):
         
         except:
             pass
+
+    def fit_and_plot_with_irf(self):
+        try:
+            x,y = self.acquire_settings()
+            
+            y_norm = y/np.max(y)
+            # find the max intensity in the array and start things from there
+            find_max_int = np.nonzero(y_norm == 1)
+            y = y[np.asscalar(find_max_int[0]):]
+            
+            resolution = float(self.ui.Res_comboBox.currentText())
+    #        x = x[np.asscalar(find_max_int[0]):]
+            x = np.arange(0, len(y), 1) * resolution
+            
+            t = x
+            
+            time_fit = t 
+            TRPL_interp = np.interp(time_fit, t, y)
+            irf_counts = x/np.max(x) #self.acquire_settings()[0]/np.max(self.acquire_settings()[0])
+            tc_bounds = (0, 10000)
+            a_bounds = (0.9, 1.1)
+            beta_bounds = (0,1)
+            noise_bounds = (0, 1e4)
+            stretch_exp_bounds = [tc_bounds, beta_bounds, a_bounds, noise_bounds]
+            fit_func = self.ui.FittingFunc_comboBox.currentText()
+            self.ui.plot.plot(t, y, clear=True, pen='r')
+            if fit_func == "Stretched Exponential":
+                #tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
+                resolution = float(self.ui.Res_comboBox.currentText())
+                bestfit_params, t_avg, bestfit_model, data_array, time_array, irf = fit_exp_stretch_diffev(t, resolution, TRPL_interp, irf_counts, stretch_exp_bounds)
+                self.out = np.empty((len(t), 3))
+                self.out[:,0] = t #time
+                self.out[:,1] = TRPL_interp #Raw PL 
+                self.out[:,2] = bestfit_model # PL fit
+                self.ui.plot.plot(t, bestfit_model, clear=False, pen='k')
+                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential"
+                    "\ntau_avg = %.5f ns"
+                    "\nbeta = %.5f"
+                    "\ntau_c = %.5f ns"
+                    "\na = %.5f \nnoise = %.5f counts" %(t_avg, bestfit_params[1], bestfit_params[0], bestfit_params[2], bestfit_params[3]))
+            
+            ###TODO - double and single exponential with IRF
+            # elif fit_func == "Double Exponential":
+            #     tau1, a1, tau2, a2, avg_tau, PL_fit = double_exp_fit(TRPL_interp, t)
+            #     self.out = np.empty((len(t), 3))
+            #     self.out[:,0] = t #time
+            #     self.out[:,1] = TRPL_interp #Raw PL 
+            #     self.out[:,2] = PL_fit # PL fit
+            #     self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
+            #     self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
+            #                                        "\nAverage Lifetime = " + str(avg_tau)+ " ns"
+            #                                        "\nTau 1 = " + str(tau1)+" ns"
+            #                                        "\nA 1 = " + str(a1)+
+            #                                        "\nTau 2 = " + str(tau2)+" ns"
+            #                                        "\nA 2 = " + str(a2))
+            
+            # elif fit_func == "Single Exponential":
+            #     tau, a, PL_fit = single_exp_fit(TRPL_interp, t)
+            #     self.out = np.empty((len(t), 3))
+            #     self.out[:,0] = t #time
+            #     self.out[:,1] = TRPL_interp #Raw PL 
+            #     self.out[:,2] = PL_fit # PL fit
+            #     self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
+            #     self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
+            #                                        "\nLifetime = " + str(tau)+ " ns"
+            #                                        "\nA = " + str(a))
+                
+            # self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
+            # self.ui.plot.setLabel('bottom', 'Time (ns)')
+            # return self.out
+        
+        except Exception as err:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            print(exc_type, exc_tb.tb_lineno)
+
+    def call_fit_and_plot(self):
+        if self.ui.plot_with_irf_checkBox.isChecked():
+            self.fit_and_plot_with_irf()
+        else:
+            self.fit_and_plot()
     
     def pub_ready_plot_export(self):
         try:
