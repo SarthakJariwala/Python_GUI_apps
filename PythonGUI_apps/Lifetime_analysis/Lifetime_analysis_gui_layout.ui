@@ -14,9 +14,568 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QFormLayout" name="formLayout">
-    <item row="0" column="1">
-     <widget class="PlotWidget" name="plot"/>
+   <layout class="QGridLayout" name="gridLayout_6">
+    <item row="0" column="2">
+     <widget class="QGroupBox" name="groupBox_3">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="title">
+       <string>Fitting Controls</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QTabWidget" name="FittingFunc_tabWidget">
+         <property name="currentIndex">
+          <number>1</number>
+         </property>
+         <widget class="QWidget" name="stretch_exp">
+          <attribute name="title">
+           <string>stretch_exp</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QGroupBox" name="groupBox_5">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="title">
+              <string>Bounds</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="4" column="3">
+               <widget class="QDoubleSpinBox" name="str_a_max_spinBox">
+                <property name="maximum">
+                 <double>9999999.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.100000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="2">
+               <widget class="QDoubleSpinBox" name="str_a_min_spinBox">
+                <property name="maximum">
+                 <double>9999999.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>0.900000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="2">
+               <widget class="QDoubleSpinBox" name="str_beta_min_spinBox">
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QDoubleSpinBox" name="str_tc_max_spinBox">
+                <property name="maximum">
+                 <double>9999999.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>10000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QDoubleSpinBox" name="str_tc_min_spinBox">
+                <property name="maximum">
+                 <double>9999999.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>tc</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="2">
+               <widget class="QDoubleSpinBox" name="str_noise_min_spinBox">
+                <property name="maximum">
+                 <double>9999999.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_7">
+                <property name="text">
+                 <string>beta</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QLabel" name="label_8">
+                <property name="text">
+                 <string>noise</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="3">
+               <widget class="QDoubleSpinBox" name="str_beta_max_spinBox">
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>a</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="3">
+               <widget class="QDoubleSpinBox" name="str_noise_max_spinBox">
+                <property name="maximum">
+                 <double>9999999.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>10000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>min</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>max</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_6">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="title">
+              <string>Initial Guess</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_5">
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_14">
+                <property name="text">
+                 <string>a</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_13">
+                <property name="text">
+                 <string>noise</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>beta</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_12">
+                <property name="text">
+                 <string>tc</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="str_tc_init_spinBox">
+                <property name="maximum">
+                 <double>9999999.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>5.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="str_a_init_spinBox">
+                <property name="maximum">
+                 <double>9999999.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="str_beta_init_spinBox">
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>0.500000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QDoubleSpinBox" name="str_noise_init_spinBox">
+                <property name="maximum">
+                 <double>9999999.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>0.100000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="double_exp">
+          <attribute name="title">
+           <string>double_exp</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <widget class="QGroupBox" name="groupBox_10">
+             <property name="title">
+              <string>Bounds</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_10">
+              <item row="0" column="1">
+               <widget class="QLabel" name="label_24">
+                <property name="text">
+                 <string>min</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_25">
+                <property name="text">
+                 <string>tau1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="de_a1_min_spinBox"/>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="label_26">
+                <property name="text">
+                 <string>max</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_27">
+                <property name="text">
+                 <string>a1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QDoubleSpinBox" name="de_tau1_max_spinBox"/>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_28">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="de_a2_min_spinBox"/>
+              </item>
+              <item row="4" column="1">
+               <widget class="QDoubleSpinBox" name="de_tau2_min_spinBox"/>
+              </item>
+              <item row="4" column="2">
+               <widget class="QDoubleSpinBox" name="de_tau2_max_spinBox"/>
+              </item>
+              <item row="2" column="2">
+               <widget class="QDoubleSpinBox" name="de_a2_max_spinBox"/>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_30">
+                <property name="text">
+                 <string>tau2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_29">
+                <property name="text">
+                 <string>a2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QDoubleSpinBox" name="de_tau1_min_spinBox"/>
+              </item>
+              <item row="1" column="2">
+               <widget class="QDoubleSpinBox" name="de_a1_max_spinBox"/>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_33">
+                <property name="text">
+                 <string>noise</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QDoubleSpinBox" name="de_noise_min_spinBox"/>
+              </item>
+              <item row="5" column="2">
+               <widget class="QDoubleSpinBox" name="de_noise_max_spinBox"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_9">
+             <property name="title">
+              <string>Initial Guess</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_9">
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_23">
+                <property name="text">
+                 <string>tau1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="de_tau1_init_spinBox"/>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="de_a1_init_spinBox"/>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_22">
+                <property name="text">
+                 <string>a1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="de_a2_init_spinBox"/>
+              </item>
+              <item row="3" column="1">
+               <widget class="QDoubleSpinBox" name="de_tau2_init_spinBox"/>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_31">
+                <property name="text">
+                 <string>a2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_32">
+                <property name="text">
+                 <string>tau2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QDoubleSpinBox" name="de_noise_init_spinBox"/>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_34">
+                <property name="text">
+                 <string>noise</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="single_exp">
+          <attribute name="title">
+           <string>single_exp</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QGroupBox" name="groupBox_7">
+             <property name="title">
+              <string>Bounds</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_7">
+              <item row="0" column="1">
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>min</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>tau</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="se_a_min_spinBox"/>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="label_19">
+                <property name="text">
+                 <string>max</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>a</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QDoubleSpinBox" name="se_tau_max_spinBox"/>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="se_tau_min_spinBox"/>
+              </item>
+              <item row="1" column="2">
+               <widget class="QDoubleSpinBox" name="se_a_max_spinBox"/>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_35">
+                <property name="text">
+                 <string>noise</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QDoubleSpinBox" name="se_noise_min_spinBox"/>
+              </item>
+              <item row="3" column="2">
+               <widget class="QDoubleSpinBox" name="se_noise_max_spinBox"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_8">
+             <property name="title">
+              <string>Initial Guess</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_8">
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="se_a_init_spinBox"/>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_21">
+                <property name="text">
+                 <string>a</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_20">
+                <property name="text">
+                 <string>tau</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="se_tau_init_spinBox"/>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_36">
+                <property name="text">
+                 <string>noise</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="se_noise_init_spinBox"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>Fitting method</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="FittingMethod_comboBox">
+         <item>
+          <property name="text">
+           <string>diff_ev</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>fmin_tnc</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="plot_with_irf_checkBox">
+         <property name="text">
+          <string>Plot with IRF</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="fit_pushButton">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Get Lifetime!</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextBrowser" name="Result_textBrowser">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item row="0" column="0">
      <widget class="QGroupBox" name="groupBox">
@@ -29,115 +588,79 @@
        <string>Settings</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="6" column="0">
-        <widget class="QGroupBox" name="groupBox_3">
+       <item row="0" column="1">
+        <widget class="QComboBox" name="Res_comboBox">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
           </font>
          </property>
-         <property name="title">
-          <string>Fitting Controls</string>
+         <property name="acceptDrops">
+          <bool>true</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Fitting function</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="FittingFunc_comboBox"/>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="plot_with_irf_checkBox">
-            <property name="text">
-             <string>Plot with IRF</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="config_fit_pushButton">
-            <property name="text">
-             <string>Configure Fit Settings</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="fit_pushButton">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Get Lifetime!</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTextBrowser" name="Result_textBrowser">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox_4">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="title">
-             <string>Export Plot Settings</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_3">
-             <item row="2" column="0">
-              <widget class="QPushButton" name="export_plot_pushButton">
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Export Publication
-Ready Figure!</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="save_w_fit_checkBox">
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>Save with Fit</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
         </widget>
        </item>
        <item row="4" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>IRF Channel No</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QSpinBox" name="irf_channel_spinBox">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Data Channel No</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Resolution (ns)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="Data_channel_spinBox">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="maximum">
+          <number>512</number>
+         </property>
+         <property name="value">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="2">
         <widget class="QGroupBox" name="groupBox_2">
          <property name="font">
           <font>
@@ -190,56 +713,55 @@ Ready Figure!</string>
          </layout>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
+       <item row="8" column="0" colspan="2">
+        <widget class="QGroupBox" name="groupBox_4">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
           </font>
          </property>
-         <property name="text">
-          <string>Resolution (ns)</string>
+         <property name="title">
+          <string>Export Plot Settings</string>
          </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QComboBox" name="Res_comboBox">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="acceptDrops">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Channel No</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QSpinBox" name="Channel_spinBox">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="maximum">
-          <number>512</number>
-         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="2" column="0">
+           <widget class="QPushButton" name="export_plot_pushButton">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Export Publication
+Ready Figure!</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="save_w_fit_checkBox">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Save with Fit</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
      </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="PlotWidget" name="plot"/>
     </item>
    </layout>
   </widget>
