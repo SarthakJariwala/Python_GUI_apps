@@ -197,21 +197,25 @@ class MainWindow(TemplateBaseClass):
     def fit_and_plot_with_irf(self):
         try:
             x,y = self.acquire_settings()
-            
             y_norm = y/np.max(y)
+
+            irf_counts = np.copy(self.file[:,0])
+            irf_norm = irf_counts/np.max(irf_counts)
+
             # find the max intensity in the array and start things from there
-            find_max_int = np.nonzero(y_norm == 1)
-            y = y[np.asscalar(find_max_int[0]):]
+            # find_max_int = np.nonzero(y_norm == 1)
+            # y = y[np.asscalar(find_max_int[0]):]
             
             resolution = float(self.ui.Res_comboBox.currentText())
     #        x = x[np.asscalar(find_max_int[0]):]
             x = np.arange(0, len(y), 1) * resolution
             
             t = x
-            
             time_fit = t 
+            y = y_norm
+            irf_counts = irf_norm
+            
             TRPL_interp = np.interp(time_fit, t, y)
-            irf_counts = x/np.max(x) #self.acquire_settings()[0]/np.max(self.acquire_settings()[0])
             tc_bounds = (0, 10000)
             a_bounds = (0.9, 1.1)
             beta_bounds = (0,1)
