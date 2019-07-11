@@ -235,7 +235,7 @@ def fit_exp_stretch_diffev(t, tstep, data, irf,  bounds):
         return model
     bestfit_model = bestfit_decay(bestfit_params)
     t_avg = avg_tau_from_exp_stretch(bestfit_params[0], bestfit_params[1])
-    # print ('--Stretched Exponential Best Fit Parameters--\ntau_avg = %.5f ns\nbeta = %.5f \ntau_c = %.5f ns \na = %.5f \nnoise = %.5f counts' %(t_avg, bestfit_params[1], bestfit_params[0], bestfit_params[2], bestfit_params[3]))
+    print ('--Stretched Exponential Best Fit Parameters--\ntau_avg = %.5f ns\nbeta = %.5f \ntau_c = %.5f ns \na = %.5f \nnoise = %.5f counts' %(t_avg, bestfit_params[1], bestfit_params[0], bestfit_params[2], bestfit_params[3]))
     # plt.figure()
     # plt.ylabel('PL (au)', fontsize = 25)
     # plt.xlabel('Time (ns)', fontsize = 25)

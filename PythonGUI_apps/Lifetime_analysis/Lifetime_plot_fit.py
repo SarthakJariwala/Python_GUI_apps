@@ -204,7 +204,8 @@ class MainWindow(TemplateBaseClass):
 				self.out[:,1] = TRPL_interp #Raw PL 
 				self.out[:,2] = PL_fit # PL fit
 				self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
-				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential " + self.ui.FittingMethod_comboBox.currentText() +
+				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential"
+												   "\nFit Method: " + "diff_ev" + #TODO : change when diff_ev and fmin_tnc implemented for non-irf
 												   "\nAverage Lifetime = " + str(avg_tau)+ " ns"
 												   "\nCharacteristic Tau = " + str(tc)+" ns"
 												   "\nBeta = "+str(beta))
@@ -216,7 +217,8 @@ class MainWindow(TemplateBaseClass):
 				self.out[:,1] = TRPL_interp #Raw PL 
 				self.out[:,2] = PL_fit # PL fit
 				self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
-				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential " + self.ui.FittingMethod_comboBox.currentText() +
+				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
+												   "\nFit Method: " + "diff_ev" +
 												   "\nAverage Lifetime = " + str(avg_tau)+ " ns"
 												   "\nTau 1 = " + str(tau1)+" ns"
 												   "\nA 1 = " + str(a1)+
@@ -230,7 +232,8 @@ class MainWindow(TemplateBaseClass):
 				self.out[:,1] = TRPL_interp #Raw PL 
 				self.out[:,2] = PL_fit # PL fit
 				self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
-				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential " + self.ui.FittingMethod_comboBox.currentText() +
+				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
+												   "\nFit Method: " + "diff_ev" +
 												   "\nLifetime = " + str(tau)+ " ns"
 												   "\nA = " + str(a))
 				
@@ -287,7 +290,8 @@ class MainWindow(TemplateBaseClass):
 				self.out[:,1] = TRPL_interp #Raw PL 
 				self.out[:,2] = bestfit_model # PL fit
 				self.ui.plot.plot(t, bestfit_model, clear=False, pen='k')
-				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential " + self.ui.FittingMethod_comboBox.currentText() +
+				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential"
+					"\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
 					"\ntau_avg = %.5f ns"
 					"\nbeta = %.5f"
 					"\ntau_c = %.5f ns"
@@ -314,7 +318,8 @@ class MainWindow(TemplateBaseClass):
 				self.out[:,2] = bestfit_model # PL fit
 				self.ui.plot.plot(t, bestfit_model, clear=False, pen='k')
 				print(bestfit_params)
-				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential " + self.ui.FittingMethod_comboBox.currentText() +
+				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
+					"\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
 					"\na1 = %.5f"
 					"\ntau1 = %.5f ns"
 					"\na2 = %.5f"
@@ -340,7 +345,8 @@ class MainWindow(TemplateBaseClass):
 				self.out[:,2] = bestfit_model # PL fit
 				self.ui.plot.plot(t, bestfit_model, clear=False, pen='k')
 				print(bestfit_params)
-				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential " + self.ui.FittingMethod_comboBox.currentText() +
+				self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
+					"\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
 					"\na = %.5f"
 					"\ntau = %.5f ns"
 					"\nnoise = %.5f counts" %(bestfit_params[0], bestfit_params[1], bestfit_params[2]))
