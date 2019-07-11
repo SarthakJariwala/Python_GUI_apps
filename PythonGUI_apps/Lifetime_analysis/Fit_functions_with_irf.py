@@ -135,16 +135,16 @@ def fit_herz_ode_global_3traces_fmin_tnc(t1, t2, t3, tstep, d1, d2, d3, irf, ini
         return [model1, model2, model3]
             
     bestfit_model = bestfit_decay(bestfit_params)
-    plt.figure()
-    plt.ylabel('PL Counts')
-    plt.xlabel('Time (ns)')
-    plt.semilogy(time_array1, data_array1,'b', label = 'Data')
-    plt.semilogy(time_array1, bestfit_model[0], 'r', label = 'Fit')
-    plt.semilogy(time_array2, data_array2,'b', label = 'Data')
-    plt.semilogy(time_array2, bestfit_model[1], 'r', label = 'Fit')
-    plt.semilogy(time_array3, data_array3,'b', label = 'Data')
-    plt.semilogy(time_array3, bestfit_model[2], 'r', label = 'Fit')
-    plt.legend(loc = 'best')
+    # plt.figure()
+    # plt.ylabel('PL Counts')
+    # plt.xlabel('Time (ns)')
+    # plt.semilogy(time_array1, data_array1,'b', label = 'Data')
+    # plt.semilogy(time_array1, bestfit_model[0], 'r', label = 'Fit')
+    # plt.semilogy(time_array2, data_array2,'b', label = 'Data')
+    # plt.semilogy(time_array2, bestfit_model[1], 'r', label = 'Fit')
+    # plt.semilogy(time_array3, data_array3,'b', label = 'Data')
+    # plt.semilogy(time_array3, bestfit_model[2], 'r', label = 'Fit')
+    # plt.legend(loc = 'best')
     return bestfit_params, bestfit_model, data_array, time_array, irf 
 
 
@@ -199,13 +199,13 @@ def fit_exp_stretch_fmin_tnc(t, tstep, data, irf, init_params, bounds):
             
     bestfit_model = bestfit_decay(bestfit_params)
     t_avg = avg_tau_from_exp_stretch(bestfit_params[0], bestfit_params[1])
-    print ('--Stretched Exponential Best Fit Parameters--\ntau_avg = %.5f ns\nbeta = %.5f \ntau_c = %.5f ns \na = %.5f \nnoise = %.5f counts' %(t_avg, bestfit_params[1], bestfit_params[0], bestfit_params[2], bestfit_params[3]))
-    plt.figure()
-    plt.ylabel('PL (au)', fontsize = 25)
-    plt.xlabel('Time (ns)', fontsize = 25)
-    plt.semilogy(time_array, data_array,'b', label = 'Data')
-    plt.semilogy(time_array, bestfit_model, 'r', label = 'Fit')
-    plt.legend(loc = 'best')
+    # print ('--Stretched Exponential Best Fit Parameters--\ntau_avg = %.5f ns\nbeta = %.5f \ntau_c = %.5f ns \na = %.5f \nnoise = %.5f counts' %(t_avg, bestfit_params[1], bestfit_params[0], bestfit_params[2], bestfit_params[3]))
+    # plt.figure()
+    # plt.ylabel('PL (au)', fontsize = 25)
+    # plt.xlabel('Time (ns)', fontsize = 25)
+    # plt.semilogy(time_array, data_array,'b', label = 'Data')
+    # plt.semilogy(time_array, bestfit_model, 'r', label = 'Fit')
+    # plt.legend(loc = 'best')
     return bestfit_params, t_avg, bestfit_model, data_array, time_array, irf  
 
 def fit_exp_stretch_diffev(t, tstep, data, irf,  bounds):
@@ -268,26 +268,26 @@ def fit_multi_exp_fmin_tnc(t, tstep, data, irf, init_params, bounds, n):
         return model
     bestfit_model = bestfit_decay(bestfit_params)
     
-    print ('--Multi Exponential Best Fit Parameters--')
-    print ('# Exponentials = %.0f' %(n))
+    # print ('--Multi Exponential Best Fit Parameters--')
+    # print ('# Exponentials = %.0f' %(n))
     
-    for i in range(len(bestfit_params) - 1):
-        remain = i % 2
+    # for i in range(len(bestfit_params) - 1):
+    #     remain = i % 2
           
-        if remain == 0:
-            print ('a%.0f = %.5f \ntau%.0f = %.5f ns' %((i / 2) + 1, bestfit_params[i], (i / 2) + 1, bestfit_params[i + 1]))
+    #     if remain == 0:
+    #         print ('a%.0f = %.5f \ntau%.0f = %.5f ns' %((i / 2) + 1, bestfit_params[i], (i / 2) + 1, bestfit_params[i + 1]))
             
-        else:
-            pass
+    #     else:
+    #         pass
         
-    print ('Noise = %.5f Counts'%(bestfit_model[len(bestfit_model) - 1]))
+    # print ('Noise = %.5f Counts'%(bestfit_model[len(bestfit_model) - 1]))
    
-    plt.figure()
-    plt.ylabel('PL Counts')
-    plt.xlabel('Time (ns)')
-    plt.semilogy(time_array, data_array,'b', label = 'Data')
-    plt.semilogy(time_array, bestfit_model, 'r', label = 'Fit')
-    plt.legend(loc = 'best')
+    # plt.figure()
+    # plt.ylabel('PL Counts')
+    # plt.xlabel('Time (ns)')
+    # plt.semilogy(time_array, data_array,'b', label = 'Data')
+    # plt.semilogy(time_array, bestfit_model, 'r', label = 'Fit')
+    # plt.legend(loc = 'best')
     return bestfit_params, bestfit_model, data_array, time_array, irf  
 
 
@@ -314,24 +314,24 @@ def fit_multi_exp_diffev(t, tstep, data, irf,  bounds, n):
         return model
     bestfit_model = bestfit_decay(bestfit_params)
     
-    print ('--Multi Exponential Best Fit Parameters--')
-    print ('# Exponentials = %.0f' %(n))
+    # print ('--Multi Exponential Best Fit Parameters--')
+    # print ('# Exponentials = %.0f' %(n))
     
-    for i in range(len(bestfit_params) - 1):
-        remain = i % 2
+    # for i in range(len(bestfit_params) - 1):
+    #     remain = i % 2
           
-        if remain == 0:
-            print ('a%.0f = %.5f \ntau%.0f = %.5f ns' %((i / 2) + 1, bestfit_params[i], (i / 2) + 1, bestfit_params[i + 1]))
+    #     if remain == 0:
+    #         print ('a%.0f = %.5f \ntau%.0f = %.5f ns' %((i / 2) + 1, bestfit_params[i], (i / 2) + 1, bestfit_params[i + 1]))
             
-        else:
-            pass
+    #     else:
+    #         pass
         
-    print ('Noise = %.5f Counts'%(bestfit_model[len(bestfit_model) - 1]))
+    # print ('Noise = %.5f Counts'%(bestfit_model[len(bestfit_model) - 1]))
    
-    plt.figure()
-    plt.ylabel('PL Counts')
-    plt.xlabel('Time (ns)')
-    plt.semilogy(time_array, data_array,'b', label = 'Data')
-    plt.semilogy(time_array, bestfit_model, 'r', label = 'Fit')
-    plt.legend(loc = 'best')
+    # plt.figure()
+    # plt.ylabel('PL Counts')
+    # plt.xlabel('Time (ns)')
+    # plt.semilogy(time_array, data_array,'b', label = 'Data')
+    # plt.semilogy(time_array, bestfit_model, 'r', label = 'Fit')
+    # plt.legend(loc = 'best')
     return bestfit_params, bestfit_model, data_array, time_array, irf  
