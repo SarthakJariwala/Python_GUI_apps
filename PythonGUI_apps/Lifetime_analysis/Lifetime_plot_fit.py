@@ -56,21 +56,26 @@ class MainWindow(TemplateBaseClass):
         #self.ui.FittingFunc_comboBox.addItems(["Stretched Exponential","Double Exponential", "Single Exponential"])
         
         self.ui.actionOpen.triggered.connect(self.open_file)
+        self.ui.actionOpen_IRF_File.triggered.connect(self.open_irf_file)
         self.ui.actionSave.triggered.connect(self.save_file)
         self.ui.actionExit.triggered.connect(self.close_application)
         
         self.ui.plot_pushButton.clicked.connect(self.plot)
-        self.ui.log_pushButton.clicked.connect(self.make_semilog)
         self.ui.fit_pushButton.clicked.connect(self.call_fit_and_plot)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         self.ui.export_plot_pushButton.clicked.connect(self.pub_ready_plot_export)
 
+        self.ui.log_checkBox.stateChanged.connect(self.make_semilog)
         self.ui.fit_with_irf_checkBox.stateChanged.connect(self.switch_fit_settings)
         self.ui.FittingFunc_comboBox.currentTextChanged.connect(self.switch_function_tab)
         self.ui.FittingMethod_comboBox.currentTextChanged.connect(self.switch_init_params_groupBox)
         self.ui.calculate_srv_checkBox.stateChanged.connect(self.switch_calculate_srv)
+        self.ui.separate_irf_checkBox.stateChanged.connect(self.switch_open_irf)
 
-        
+        self.plot_color_button = pg.ColorButton(color=(255,0,0))
+        self.ui.plot_color_button_container.layout().addWidget(self.plot_color_button)
+        self.plot_color = self.plot_color_button.color()
+        self.plot_color_button.sigColorChanged.connect(self.plot_color_changed)
         self.file = None
         self.out = None # output file after fitting
         
@@ -87,6 +92,15 @@ class MainWindow(TemplateBaseClass):
             self.file = read_picoharp_phd(filename[0])
         except:
             pass
+
+    def open_irf_file(self):
+        filename = QtWidgets.QFileDialog.getOpenFileName(self)
+        try:
+            self.irf_file = np.loadtxt(filename[0], skiprows=10)
+        except UnicodeDecodeError:
+            self.file = read_picoharp_phd(filename[0])
+        except:
+            pass
     
     def save_file(self):
         try:
@@ -94,6 +108,10 @@ class MainWindow(TemplateBaseClass):
             np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
         except:
             pass
+
+    def switch_open_irf(self):
+        self.ui.actionOpen_IRF_File.setEnabled(self.ui.separate_irf_checkBox.isChecked())
+
 
     def switch_fit_settings(self):
         checked = self.ui.fit_with_irf_checkBox.isChecked()
@@ -134,6 +152,8 @@ class MainWindow(TemplateBaseClass):
         checked = self.ui.calculate_srv_checkBox.isChecked()
         self.ui.calculate_srv_groupBox.setEnabled(checked)
 
+    def plot_color_changed(self):
+        self.plot_color = self.plot_color_button.color()
     
     def acquire_settings(self, mode="data"):# mode --looks whether argument is data or irf
         self.resolution = float(self.ui.Res_comboBox.currentText())
@@ -143,9 +163,10 @@ class MainWindow(TemplateBaseClass):
             channel = int(self.ui.irf_channel_spinBox.value())
         try:
             try:
-                # if irf checkbox True and mode is "irf": y = self.irf_file[:channel]
-                # else :
-                y = self.file[:,channel]
+                if self.ui.separate_irf_checkBox.isChecked() and mode=="irf":
+                    y = self.irf_file[:,channel]
+                else:
+                    y = self.file[:,channel]
             except:
                 res, y = self.file.get_curve(channel)
                 # TO DO - check if res read in is the same as selected
@@ -162,7 +183,8 @@ class MainWindow(TemplateBaseClass):
     def plot(self):
         try:
             x,y = self.acquire_settings()
-            self.ui.plot.plot(x, y, clear=False, pen='r')
+            self.ui.plot.plot(x, y, clear=False, pen=pg.mkPen(self.plot_color))
+
             try:
                 self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
                         self.file.get_integral_counts(int(self.ui.Channel_spinBox.value()))))
@@ -175,7 +197,7 @@ class MainWindow(TemplateBaseClass):
         
     
     def make_semilog(self):
-        self.ui.plot.setLogMode(False,True)
+        self.ui.plot.setLogMode(False,self.ui.log_checkBox.isChecked())
     
     def clear_plot(self):
         self.ui.plot.clear()
@@ -197,7 +219,7 @@ class MainWindow(TemplateBaseClass):
             TRPL_interp = np.interp(time_fit, t, y)
             
             fit_func = self.ui.FittingFunc_comboBox.currentText()
-            self.ui.plot.plot(t, y, clear=True, pen='r')
+            self.ui.plot.plot(t, y, clear=True, pen=pg.mkPen(self.plot_color))
             
             if fit_func == "Stretched Exponential": #stretch exponential tab
                 tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
@@ -251,17 +273,15 @@ class MainWindow(TemplateBaseClass):
         try:
             x,y = self.acquire_settings()
             _, irf_counts = self.acquire_settings(mode="irf")
-            
-            # make sure Irf and data have the same length
+
+            #make sure Irf and data have the same length
             if len(y) != len(irf_counts):
                 y = y[0:min(len(y), len(irf_counts))]
                 irf_counts = irf_counts[0:min(len(y), len(irf_counts))]
                 x = x[0:min(len(y), len(irf_counts))]
-                
+
             y_norm = y/np.max(y)
             irf_norm = irf_counts/np.max(irf_counts)
-#            print(len(y_norm))
-#            print(len(irf_counts))
             
             t = x
             time_fit = t 
@@ -270,9 +290,8 @@ class MainWindow(TemplateBaseClass):
             
             TRPL_interp = np.interp(time_fit, t, y)
 
-            
             fit_func = self.ui.FittingFunc_comboBox.currentText()
-            self.ui.plot.plot(t, y, clear=True, pen='r')
+            self.ui.plot.plot(t, y, clear=True, pen=pg.mkPen(self.plot_color))
             if fit_func == "Stretched Exponential": #stretched exponential tab
                 tc_bounds = (self.ui.str_tc_min_spinBox.value(), self.ui.str_tc_max_spinBox.value()) #(0, 10000)
                 a_bounds = (self.ui.str_a_min_spinBox.value(), self.ui.str_a_max_spinBox.value())#(0.9, 1.1)
@@ -319,7 +338,6 @@ class MainWindow(TemplateBaseClass):
                 self.out[:,1] = TRPL_interp #Raw PL 
                 self.out[:,2] = bestfit_model # PL fit
                 self.ui.plot.plot(t, bestfit_model, clear=False, pen='k')
-                print(bestfit_params)
                 self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
                     "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
                     "\na1 = %.5f"
@@ -327,8 +345,6 @@ class MainWindow(TemplateBaseClass):
                     "\na2 = %.5f"
                     "\ntau2 = %.5f ns"
                     "\nnoise = %.5f counts" %(bestfit_params[0], bestfit_params[1], bestfit_params[2], bestfit_params[3], bestfit_params[4]))
-
-            
 
             elif fit_func == "Single Exponential": #single exponential tab
                 a_bounds = (self.ui.se_a_min_spinBox.value(), self.ui.se_a_max_spinBox.value())
@@ -346,7 +362,6 @@ class MainWindow(TemplateBaseClass):
                 self.out[:,1] = TRPL_interp #Raw PL 
                 self.out[:,2] = bestfit_model # PL fit
                 self.ui.plot.plot(t, bestfit_model, clear=False, pen='k')
-                print(bestfit_params)
                 self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
                     "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
                     "\na = %.5f"
@@ -386,7 +401,6 @@ class MainWindow(TemplateBaseClass):
         except:
             pass
             
-    
     def close_application(self):
         choice = QtGui.QMessageBox.question(self, 'EXIT!',
                                             "Do you want to exit the app?",
@@ -395,7 +409,6 @@ class MainWindow(TemplateBaseClass):
             sys.exit()
         else:
             pass
-        
 
 def run():
     win = MainWindow()

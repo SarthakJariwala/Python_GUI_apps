@@ -36,7 +36,7 @@ pg.mkQApp()
 pg.setConfigOption('background', 'w')
 
 base_path = Path(__file__).parent
-file_path = (base_path / "Spectra_plot_fit_gui_alt.ui").resolve()
+file_path = (base_path / "Spectra_plot_fit_gui.ui").resolve()
 
 uiFile = file_path
 
