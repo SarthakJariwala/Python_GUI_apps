@@ -143,6 +143,8 @@ class MainWindow(TemplateBaseClass):
             channel = int(self.ui.irf_channel_spinBox.value())
         try:
             try:
+                # if irf checkbox True and mode is "irf": y = self.irf_file[:channel]
+                # else :
                 y = self.file[:,channel]
             except:
                 res, y = self.file.get_curve(channel)
