@@ -36,7 +36,7 @@ pg.mkQApp()
 pg.setConfigOption('background', 'w')
 
 base_path = Path(__file__).parent
-file_path = (base_path / "Spectra_plot_fit_gui.ui").resolve()
+file_path = (base_path / "Spectra_plot_fit_gui_alt.ui").resolve()
 
 uiFile = file_path
 
@@ -66,6 +66,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui.plot_pushButton.clicked.connect(self.plot)
 		self.ui.plot_fit_scan_pushButton.clicked.connect(self.plot_fit_scan)
 		self.ui.plot_raw_scan_pushButton.clicked.connect(self.plot_raw_scan)
+		self.ui.plot_intensity_sums_pushButton.clicked.connect(self.plot_intensity_sums)
 		
 		self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
 		self.ui.fit_scan_pushButton.clicked.connect(self.fit_and_plot_scan)
@@ -259,8 +260,33 @@ class MainWindow(TemplateBaseClass):
 			
 		except:
 			pass
+
+	def plot_intensity_sums(self):
+		try:
+			data = self.spec_scan_file
+			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
+			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
+			# TODO test line scan plots
+
+			intensities = data['Intensities']
+
+			#intensities = np.reshape(intensities, newshape=(2048, numb_pixels_X*numb_pixels_Y))
 			
-	
+			sums = np.sum(intensities, axis=-1)
+			sums = np.reshape(sums, newshape=(numb_pixels_X, numb_pixels_Y))
+			print(sums)
+			print(sums.shape)
+			self.ui.intensity_sums_viewBox.setImage(sums, scale=
+												  (data['Scan Parameters']['X step size (um)'],
+												   data['Scan Parameters']['Y step size (um)']))
+			
+			scale = pg.ScaleBar(size=2,suffix='um')
+			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
+			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+
+		except:
+			pass
+
 	def normalize(self):
 		self.y = (self.y) / np.amax(self.y)
 	
@@ -385,7 +411,7 @@ class MainWindow(TemplateBaseClass):
 		except Exception as e:
 			self.ui.result_textBrowser.append(str(e))
 			pass
-	
+
 	def pub_ready_plot_export(self):
 		filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
 		try:

@@ -184,8 +184,8 @@ Ready Figure</string>
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>1121</width>
-      <height>833</height>
+      <width>1153</width>
+      <height>605</height>
      </rect>
     </property>
     <property name="font">
@@ -194,7 +194,7 @@ Ready Figure</string>
      </font>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <property name="documentMode">
      <bool>false</bool>
@@ -530,15 +530,16 @@ Ref File</string>
        <string>Load Settings</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_3">
+       <item row="2" column="0">
+        <widget class="QPushButton" name="load_bck_file_pushButton">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
           </font>
          </property>
          <property name="text">
-          <string>For Scan Data</string>
+          <string>Background 
+File</string>
          </property>
         </widget>
        </item>
@@ -555,16 +556,15 @@ File</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="load_bck_file_pushButton">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_3">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
           </font>
          </property>
          <property name="text">
-          <string>Background 
-File</string>
+          <string>For Scan Data</string>
          </property>
         </widget>
        </item>
@@ -655,6 +655,52 @@ File</string>
       </property>
       <property name="checked">
        <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_10">
+      <property name="geometry">
+       <rect>
+        <x>760</x>
+        <y>20</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>15</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Intensity Sums</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="plot_intensity_sums_pushButton">
+      <property name="geometry">
+       <rect>
+        <x>970</x>
+        <y>20</y>
+        <width>101</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Plot</string>
+      </property>
+     </widget>
+     <widget class="ImageView" name="intensity_sums_viewBox">
+      <property name="geometry">
+       <rect>
+        <x>580</x>
+        <y>60</y>
+        <width>521</width>
+        <height>331</height>
+       </rect>
       </property>
      </widget>
     </widget>
