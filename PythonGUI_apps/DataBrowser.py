@@ -13,7 +13,7 @@ from pyqtgraph.Qt import QtGui
 
 from Lifetime_analysis import Lifetime_plot_fit
 from Spectrum_analysis import Spectra_plot_fit
-
+from FLIM_analysis import FLIM_plot
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
 
@@ -32,7 +32,7 @@ class MainWindow(TemplateBaseClass):
         # Create the main window
         self.ui = WindowTemplate()
         self.ui.setupUi(self)
-        self.ui.select_comboBox.addItems(["Lifetime Analysis", "Spectrum Analysis", "UV-Vis Analysis"])
+        self.ui.select_comboBox.addItems(["Lifetime Analysis", "Spectrum Analysis", "FLIM Analysis", "UV-Vis Analysis"])
         self.ui.load_pushButton.clicked.connect(self.load_app)
         
         self.show()
@@ -49,7 +49,9 @@ class MainWindow(TemplateBaseClass):
         elif analysis_software == "Spectrum Analysis":
             self.spectrum_window = Spectra_plot_fit.MainWindow()
             self.spectrum_window.show()
-            
+        elif analysis_software == "FLIM Analysis":
+            self.flim_window = FLIM_plot.MainWindow()
+            self.flim_window.show()
         else:
             print("not yet linked -- coming soon")
 

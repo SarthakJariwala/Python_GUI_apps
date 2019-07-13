@@ -154,7 +154,7 @@ class MainWindow(TemplateBaseClass):
 
 	def open_pkl_file(self):
 		try:
-			self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self, "*.pkl")
+			self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self)
 			self.ui.result_textBrowser.append("Done Loading - .pkl to convert")
 		except:
 			pass
@@ -250,10 +250,14 @@ class MainWindow(TemplateBaseClass):
 			
 			intensities = np.reshape(intensities, newshape=(2048,numb_pixels_X,numb_pixels_Y))
 			
+			wavelengths = data['Wavelengths']
 			self.ui.raw_scan_viewbox.setImage(intensities, scale=
 												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']))
+												   data['Scan Parameters']['Y step size (um)']), xvals=wavelengths)
 			
+
+			#roi_plot = self.ui.raw_scan_viewBox.getRoiPlot()
+			#roi_plot.plot(data['Wavelengths'], intensities)
 			scale = pg.ScaleBar(size=2,suffix='um')
 			scale.setParentItem(self.ui.raw_scan_viewbox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
@@ -274,8 +278,7 @@ class MainWindow(TemplateBaseClass):
 			
 			sums = np.sum(intensities, axis=-1)
 			sums = np.reshape(sums, newshape=(numb_pixels_X, numb_pixels_Y))
-			print(sums)
-			print(sums.shape)
+
 			self.ui.intensity_sums_viewBox.setImage(sums, scale=
 												  (data['Scan Parameters']['X step size (um)'],
 												   data['Scan Parameters']['Y step size (um)']))
