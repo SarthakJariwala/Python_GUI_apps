@@ -317,6 +317,7 @@ class MainWindow(TemplateBaseClass):
                     "\nbeta = %.5f"
                     "\ntau_c = %.5f ns"
                     "\na = %.5f \nnoise = %.5f counts" %(t_avg, bestfit_params[1], bestfit_params[0], bestfit_params[2], bestfit_params[3]))
+                self.effective_lifetime = t_avg
             
             elif fit_func == "Double Exponential": #double exponential tab
                 a1_bounds = (self.ui.de_a1_min_spinBox.value(), self.ui.de_a1_max_spinBox.value())
@@ -376,8 +377,27 @@ class MainWindow(TemplateBaseClass):
     def call_fit_and_plot(self):
         if self.ui.fit_with_irf_checkBox.isChecked():
             self.fit_and_plot_with_irf()
+            if self.ui.calculate_srv_checkBox.isChecked():
+                self.calculate_surface_lifetime()
+                self.calculate_srv()
         else:
             self.fit_and_plot()
+    
+    def calculate_surface_lifetime(self):
+        self.bulk_lifetime = self.ui.bulk_lifetime_spinBox.value() # in ns
+        self.surface_lifetime = (self.effective_lifetime * self.bulk_lifetime)/(self.bulk_lifetime - self.effective_lifetime)
+        self.ui.surface_lifetime_label.setText(str(self.surface_lifetime))
+        
+    def calculate_srv (self):
+        self.thickness = self.ui.thickness_spinBox.value()*1e-7 # convert to cm
+        self.diffusion_coeffecient = self.ui.diffusion_coefficient_spinBox.value() # in cm2/s
+        
+        if self.ui.srv1_srv2_checkBox.isChecked():
+            self.srv = self.thickness / (2*((1e-9*self.surface_lifetime) - ((1/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) ))
+        else:
+            self.srv = self.thickness / ((1e-9*self.surface_lifetime) - ((4/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) )
+        
+        self.ui.srv_label.setText(str(self.srv))
     
     def pub_ready_plot_export(self):
         try:
