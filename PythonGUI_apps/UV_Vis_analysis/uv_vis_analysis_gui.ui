@@ -68,36 +68,54 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="tauc_start_spinBox">
+          <widget class="QDoubleSpinBox" name="hv_min_spinBox">
            <property name="minimumSize">
             <size>
              <width>180</width>
              <height>0</height>
             </size>
            </property>
+           <property name="minimum">
+            <double>-9999999.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>9999999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="0" column="3">
-          <widget class="QDoubleSpinBox" name="tauc_end_spinBox">
+          <widget class="QDoubleSpinBox" name="hv_max_spinBox">
            <property name="minimumSize">
             <size>
              <width>180</width>
              <height>0</height>
             </size>
+           </property>
+           <property name="minimum">
+            <double>-9999999.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>9999999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.010000000000000</double>
            </property>
           </widget>
          </item>
          <item row="0" column="2">
           <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>End (ev)</string>
+            <string>hv max (ev)</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label_3">
            <property name="text">
-            <string>Start (ev)</string>
+            <string>hv min (ev)</string>
            </property>
           </widget>
          </item>
