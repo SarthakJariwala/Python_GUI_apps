@@ -64,12 +64,12 @@ class MainWindow(TemplateBaseClass):
         self.ui.fit_pushButton.clicked.connect(self.call_fit_and_plot)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         self.ui.export_plot_pushButton.clicked.connect(self.pub_ready_plot_export)
+        self.ui.calculate_srv_pushButton.clicked.connect(self.calculate_srv)
 
         self.ui.log_checkBox.stateChanged.connect(self.make_semilog)
         self.ui.fit_with_irf_checkBox.stateChanged.connect(self.switch_fit_settings)
         self.ui.FittingFunc_comboBox.currentTextChanged.connect(self.switch_function_tab)
         self.ui.FittingMethod_comboBox.currentTextChanged.connect(self.switch_init_params_groupBox)
-        self.ui.calculate_srv_checkBox.stateChanged.connect(self.switch_calculate_srv)
         self.ui.separate_irf_checkBox.stateChanged.connect(self.switch_open_irf)
 
         self.plot_color_button = pg.ColorButton(color=(255,0,0))
@@ -147,10 +147,6 @@ class MainWindow(TemplateBaseClass):
             for func in "str de se".split(" "):
                 initGb = eval("self.ui."+func+"_init_groupBox")
                 initGb.setEnabled(True)
-
-    def switch_calculate_srv(self):
-        checked = self.ui.calculate_srv_checkBox.isChecked()
-        self.ui.calculate_srv_groupBox.setEnabled(checked)
 
     def plot_color_changed(self):
         self.plot_color = self.plot_color_button.color()
@@ -377,8 +373,8 @@ class MainWindow(TemplateBaseClass):
     def call_fit_and_plot(self):
         if self.ui.fit_with_irf_checkBox.isChecked():
             self.fit_and_plot_with_irf()
-            if self.ui.calculate_srv_checkBox.isChecked():
-                self.calculate_surface_lifetime()
+            if self.ui.calculate_srv_groupBox.isChecked() and self.FittingFunc_comboBox.currentText() == "Stretched Exponential":
+                #self.calculate_surface_lifetime()
                 self.calculate_srv()
         else:
             self.fit_and_plot()
@@ -389,15 +385,19 @@ class MainWindow(TemplateBaseClass):
         self.ui.surface_lifetime_label.setText(str(self.surface_lifetime))
         
     def calculate_srv (self):
-        self.thickness = self.ui.thickness_spinBox.value()*1e-7 # convert to cm
-        self.diffusion_coeffecient = self.ui.diffusion_coefficient_spinBox.value() # in cm2/s
-        
-        if self.ui.srv1_srv2_checkBox.isChecked():
-            self.srv = self.thickness / (2*((1e-9*self.surface_lifetime) - ((1/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) ))
+        if not hasattr(self, "effective_lifetime"):
+            self.ui.Result_textBrowser.setText("No Tau_c value exists. Plot stretched exponential fit with IRF before calculating SRV.")
         else:
-            self.srv = self.thickness / ((1e-9*self.surface_lifetime) - ((4/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) )
-        
-        self.ui.srv_label.setText(str(self.srv))
+            self.calculate_surface_lifetime()
+            self.thickness = self.ui.thickness_spinBox.value()*1e-7 # convert to cm
+            self.diffusion_coeffecient = self.ui.diffusion_coefficient_spinBox.value() # in cm2/s
+            
+            if self.ui.srv1_srv2_checkBox.isChecked():
+                self.srv = self.thickness / (2*((1e-9*self.surface_lifetime) - ((1/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) ))
+            else:
+                self.srv = self.thickness / ((1e-9*self.surface_lifetime) - ((4/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) )
+            
+            self.ui.srv_label.setText(str(self.srv))
     
     def pub_ready_plot_export(self):
         try:
