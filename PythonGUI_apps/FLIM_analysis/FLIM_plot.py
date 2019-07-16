@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 27 16:50:26 2019
-
-@author: Sarthak
-"""
-
-# system imports
 import sys
 from pathlib import Path
 import os.path
@@ -45,16 +37,12 @@ class MainWindow(TemplateBaseClass):
 		self.ui.plot_raw_hist_data_pushButton.clicked.connect(self.plot_raw_scan)
 		self.ui.save_intensities_image_pushButton.clicked.connect(self.save_intensities_image)
 		self.ui.save_intensities_array_pushButton.clicked.connect(self.save_intensities_array)
-		# self.file = None
-		# self.bck_file = None
-		# self.wlref_file = None
-		# self.x = None
-		# self.y = None
-		# self.out = None # output file after fitting
-		
-		# Peak parameters if adjust params is selected		
+		self.ui.compare_checkBox.stateChanged.connect(self.switch_compare)
+		#self.ui.gridLayout.addWidget(QtWidgets.QPushButton("&Download", self), 10, 4)
+
 		self.show()
-	
+
+
 	"""Open Scan Files"""
 	def open_pkl_file(self):
 		try:
@@ -64,6 +52,7 @@ class MainWindow(TemplateBaseClass):
 		except Exception as err:
 			print(format(err))
 
+		
 	def plot_intensity_sums(self):
 		try:
 			data = self.pkl_file
@@ -92,18 +81,16 @@ class MainWindow(TemplateBaseClass):
 			# TODO test line scan plots
 			hist_data = data['Histogram data']
 			
-			hist_data = np.reshape(hist_data, newshape=(hist_data.shape[0],numb_pixels_X,numb_pixels_Y))
+			self.hist_image = np.reshape(hist_data, newshape=(hist_data.shape[0],numb_pixels_X,numb_pixels_Y))
 			
 			time_data = data['Time data']
-			times = time_data[:, 0, 0]*1e-3
-			self.ui.raw_hist_data_viewBox.setImage(hist_data, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']), xvals=times)
-			# time_data = data['Time data']
-			# print(time_data.shape)
-			# print(time_data)
-			# roiPlot = self.ui.raw_hist_data_viewBox.getRoiPlot()
-			# roiPlot.tVals = time_data#(np.min(time_data), np.max(time_data))
+			self.times = time_data[:, 0, 0]*1e-3
+			self.ui.raw_hist_data_viewBox.setImage(self.hist_image, scale=
+											    (data['Scan Parameters']['X step size (um)'],
+											    data['Scan Parameters']['Y step size (um)']), xvals=self.times)
+			if self.ui.compare_checkBox.isChecked():
+				self.ui.imv2.setImage(self.hist_image, scale= (data['Scan Parameters']['X step size (um)'],
+											    data['Scan Parameters']['Y step size (um)']), xvals=self.times)
 			
 			scale = pg.ScaleBar(size=2,suffix='um')
 			scale.setParentItem(self.ui.raw_hist_data_viewBox.view)
@@ -111,6 +98,17 @@ class MainWindow(TemplateBaseClass):
 			
 		except Exception as err:
 			print(format(err))
+
+	def switch_compare(self):
+		if self.ui.compare_checkBox.isChecked():
+			self.imv2 = pg.ImageView()
+			if hasattr(self, "hist_image"):
+				self.imv2.setImage(self.hist_image, scale= (self.pkl_file['Scan Parameters']['X step size (um)'],
+					self.pkl_file['Scan Parameters']['Y step size (um)']), xvals=self.times)
+			self.ui.gridLayout.addWidget(self.imv2, 10, 4)
+		else:
+			self.ui.gridLayout.removeWidget(self.imv2)
+			self.imv2.hide()
 
 	def save_intensities_image(self):
 		try:

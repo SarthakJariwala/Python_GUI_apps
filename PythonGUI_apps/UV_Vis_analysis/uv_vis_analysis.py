@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 27 16:50:26 2019
-
-@author: Sarthak
-"""
-
 # system imports
 from pathlib import Path
 import os.path
@@ -80,13 +73,13 @@ class MainWindow(TemplateBaseClass):
 		self.absorbance_plot.plot(self.Wavelength, self.Absorbance, pen='r', clear=True)
 
 	def plot_tauc(self):
-		hv = 1240/Wavelength
+		hv = 1240/self.Wavelength
 		hv_min = self.ui.tauc_start_spinBox.value()
 		hv_max = self.ui.tauc_end_spinBox.value()
 		index = (hv > hv_min) & (hv < hv_max)
 		Alpha_hv = (self.Absorbance * hv)**2.0
 		model = np.polyfit(hv[index], Alpha_hv[index], 1) 
-		
+		Alpha_hv_fit = hv * model[0] + model[1] #This is the linear fit
 		self.tauc_plot.plot(hv, Alpha_hv, color = 'r')
 		self.tauc_plot.plot(hv, Alpha_hv_fit, color = 'k')
 
