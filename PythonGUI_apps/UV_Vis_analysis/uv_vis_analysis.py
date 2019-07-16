@@ -2,7 +2,8 @@
 from pathlib import Path
 import os.path
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtCore, QtGui, QtWidgets#, QColorDialog
+from pyqtgraph import exporters
+from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
@@ -34,11 +35,16 @@ class MainWindow(TemplateBaseClass):
 		self.absorbance_plot_layout = pg.GraphicsLayoutWidget()
 		self.ui.absorbance_plot_container.layout().addWidget(self.absorbance_plot_layout)
 		self.absorbance_plot = self.absorbance_plot_layout.addPlot(title="Wavelengths vs. Absorbance")
-		self.absorbance_plot.setLabel('left', 'Wavelength', unit='nm')
-		self.absorbance_plot.setLabel('bottom', 'Absorbance', unit='a.u.')
+		self.absorbance_plot.setLabel('bottom', 'Wavelength', unit='nm')
+		self.absorbance_plot.setLabel('left', 'Absorbance', unit='a.u.')
 
+		self.correction_region = pg.LinearRegionItem()
+		self.correction_region.setZValue(10)
+		
 		self.ui.actionLoad_data.triggered.connect(self.open_data_file)
 		self.ui.plot_absorbance_pushButton.clicked.connect(self.plot_absorbance)
+		self.ui.correct_for_scattering_checkBox.stateChanged.connect(self.switch_correction_region)
+		self.correction_region.sigRegionChanged.connect(self.update_correction_region)
 
 		#setup tauc plot
 		self.tauc_plot_layout = pg.GraphicsLayoutWidget()
@@ -46,22 +52,10 @@ class MainWindow(TemplateBaseClass):
 		self.tauc_plot = self.tauc_plot_layout.addPlot(title="Tauc plot fit")
 		self.tauc_plot.setLabel('left', '($\\alpha$h$\\nu$)$^2$') #fix formatting
 		self.tauc_plot.setLabel('bottom', 'h$\\nu', unit='ev')
-		self.tauc_region = pg.LinearRegionItem()
-		self.tauc_region.setZValue(10)
-		self.tauc_plot.addItem(self.tauc_region, ignoreBounds=True)
-		self.hv_min, self.hv_max = self.tauc_region.getRegion()
-		self.ui.hv_min_spinBox.setValue(self.hv_min)
-		self.ui.hv_max_spinBox.setValue(self.hv_max)
 
 		self.ui.plot_tauc_pushButton.clicked.connect(self.plot_tauc)
 		self.ui.export_tauc_pushButton.clicked.connect(self.export_tauc)
-		self.ui.correct_for_scattering_checkBox.stateChanged.connect(self.switch_correct_for_scattering)
 
-		#tauc region widgets
-		self.ui.hv_min_spinBox.valueChanged.connect(self.update_hv_bounds_region)
-		self.ui.hv_max_spinBox.valueChanged.connect(self.update_hv_bounds_region)
-		self.tauc_region.sigRegionChanged.connect(self.update_hv_bounds_spinBox)
-		
 		self.show()
 
 	"""Open Scan Files"""
@@ -71,46 +65,61 @@ class MainWindow(TemplateBaseClass):
 			self.data = np.loadtxt(self.filename[0], delimiter = ',', skiprows = 1)
 			self.Wavelength = self.data[:,0] # in nm
 			self.Absorbance = self.data[:,1] 
+			self.correction_region.setRegion((np.min(self.Wavelength), np.max(self.Wavelength)))
 		except Exception as err:
 			print(format(err))
 
-	def switch_correct_for_scattering(self):
-		uncorrected = self.data[:,1]
-		if self.ui.correct_for_scattering_checkBox.isChecked():
-			self.Absorbance = uncorrected - np.mean(uncorrected[(self.Wavelength>800) & (self.Wavelength<1000)])
-		else:
-			self.Absorbance = uncorrected
+	def update_correction_region(self):
+		self.correction_region_min, self.correction_region_max = self.correction_region.getRegion()
 
-	def update_hv_bounds_spinBox(self):
-		self.hv_min, self.hv_max = self.tauc_region.getRegion()
-		self.ui.hv_min_spinBox.setValue(self.hv_min)
-		self.ui.hv_max_spinBox.setValue(self.hv_max)
-		
-	def update_hv_bounds_region(self):
-		self.tauc_region.setRegion((self.ui.hv_min_spinBox.value(), self.ui.hv_max_spinBox.value()))
-		
+	def switch_correction_region(self):
+		if self.ui.correct_for_scattering_checkBox.isChecked():
+			self.absorbance_plot.addItem(self.correction_region, ignoreBounds=True)
+			self.correction_region.show()
+		else:
+			self.correction_region.hide()
 
 	def plot_absorbance(self):
-		self.absorbance_plot.plot(self.Wavelength, self.Absorbance, pen='r', clear=True)
+		try:
+			Absorbance = self.Absorbance
+			if self.ui.correct_for_scattering_checkBox.isChecked() and hasattr(self, "correction_region_min"):
+				Absorbance = Absorbance - np.mean(Absorbance[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)])
+			self.absorbance_plot.plot(self.Wavelength, Absorbance, pen='r', clear=True)
+			if self.ui.correct_for_scattering_checkBox.isChecked():
+				self.absorbance_plot.addItem(self.correction_region, ignoreBounds=True)
+				self.correction_region.show()
+		except Exception as err:
+			print(format(err))
 
 	def plot_tauc(self):
-		hv = 1240/self.Wavelength
-		# hv_min = self.ui.tauc_start_spinBox.value()
-		# hv_max = self.ui.tauc_end_spinBox.value()
-		index = (hv > self.hv_min) & (hv < self.hv_max)
-		Alpha_hv = (self.Absorbance * hv)**2.0
-		model = np.polyfit(hv[index], Alpha_hv[index], 1) 
-		Alpha_hv_fit = hv * model[0] + model[1] #This is the linear fit
-		self.tauc_plot.plot(hv, Alpha_hv, color = 'r')
-		self.tauc_plot.plot(hv, Alpha_hv_fit, color = 'k')
+		try:
+			hv_min = self.ui.hv_min_spinBox.value()
+			hv_max = self.ui.hv_max_spinBox.value()
+			hv = 1240/self.Wavelength
+			Alpha_hv = (self.Absorbance * hv)**2.0
+			index = (hv > hv_min) & (hv < hv_max)
+			model = np.polyfit(hv[index], Alpha_hv[index], 1) 
+			Alpha_hv_fit = hv * model[0] + model[1] #This is the linear fit
+			self.tauc_plot.plot(hv, Alpha_hv, pen='r')
+			self.tauc_plot.plot(hv, Alpha_hv_fit, pen='k')
+		except:
+			pass
 
 	def export_tauc(self):
-		filename_ext = os.path.basename(self.filename[0])
-		filename = os.path.splitext(filename_ext)[0] #get filename without extension
-		save_to = os.getcwd() + "\\" + filename + "_TaucPlot.tiff"
-		cpm.plt.savefig(save_to, bbox_inches='tight', dpi = 300)
+		try:
+			filename_ext = os.path.basename(self.filename[0])
+			filename = os.path.splitext(filename_ext)[0] #get filename without extension
+			save_to = os.getcwd() + "\\" + filename + "_TaucPlot.tiff"
 
-"""Run the Main Window"""    
+			exporter = pg.exporters.ImageExporter(self.tauc_plot)
+			exporter.params.param('width').setValue(800, blockSignal=exporter.widthChanged)
+			exporter.params.param('height').setValue(600, blockSignal=exporter.heightChanged)
+			# save to file
+			exporter.export(save_to)
+		except Exception as err:
+			print(format(err))
+
+"""Run the Main Window"""
 def run():
 	win = MainWindow()
 	QtGui.QApplication.instance().exec_()

@@ -38,21 +38,17 @@ class MainWindow(TemplateBaseClass):
 		self.ui.save_intensities_image_pushButton.clicked.connect(self.save_intensities_image)
 		self.ui.save_intensities_array_pushButton.clicked.connect(self.save_intensities_array)
 		self.ui.compare_checkBox.stateChanged.connect(self.switch_compare)
-		#self.ui.gridLayout.addWidget(QtWidgets.QPushButton("&Download", self), 10, 4)
 
 		self.show()
-
 
 	"""Open Scan Files"""
 	def open_pkl_file(self):
 		try:
 			self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
 			self.pkl_file = pickle.load(open(self.filename[0], 'rb'))
-			print("load success")
 		except Exception as err:
 			print(format(err))
 
-		
 	def plot_intensity_sums(self):
 		try:
 			data = self.pkl_file
@@ -100,6 +96,9 @@ class MainWindow(TemplateBaseClass):
 			print(format(err))
 
 	def switch_compare(self):
+		"""
+		Handles compare checkbox. If checked, show second ROI that user can use for comparison to first ROI.
+		"""
 		if self.ui.compare_checkBox.isChecked():
 			self.imv2 = pg.ImageView()
 			if hasattr(self, "hist_image"):
@@ -125,7 +124,7 @@ class MainWindow(TemplateBaseClass):
 			filename_ext = os.path.basename(self.filename[0])
 			filename = os.path.splitext(filename_ext)[0] #get filename without extension
 			save_to = os.getcwd() + "\\" + filename + "_intensity_sums.txt"
-			np.savetxt(save_to, self.intensity_sums, fmt='%f')
+			np.savetxt(save_to, self.intensity_sums.T, fmt='%f') #save transpoed intensity sums, as original array handles x in cols and y in rows
 		except:
 			pass
 

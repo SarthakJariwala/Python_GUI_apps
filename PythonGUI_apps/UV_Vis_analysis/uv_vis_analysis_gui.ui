@@ -67,6 +67,20 @@
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>hv max (ev)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>hv min (ev)</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="1">
           <widget class="QDoubleSpinBox" name="hv_min_spinBox">
            <property name="minimumSize">
@@ -105,21 +119,7 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>hv max (ev)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>hv min (ev)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2" colspan="2" alignment="Qt::AlignRight">
+         <item row="0" column="4" alignment="Qt::AlignRight">
           <widget class="QPushButton" name="plot_tauc_pushButton">
            <property name="text">
             <string>Plot</string>
