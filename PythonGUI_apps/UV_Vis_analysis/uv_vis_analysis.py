@@ -5,11 +5,8 @@ import pyqtgraph as pg
 from pyqtgraph import exporters
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 import numpy as np
-import matplotlib.pyplot as plt
-import pickle
 import time
-from lmfit.models import GaussianModel
-import customplotting.mscope as cpm
+
 # local modules
 
 pg.mkQApp()
@@ -44,6 +41,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui.actionLoad_data.triggered.connect(self.open_data_file)
 		self.ui.plot_absorbance_pushButton.clicked.connect(self.plot_absorbance)
 		self.ui.correct_for_scattering_checkBox.stateChanged.connect(self.switch_correction_region)
+		self.ui.export_uv_vis_pushButton.clicked.connect(self.export_uv_vis)
 		self.correction_region.sigRegionChanged.connect(self.update_correction_region)
 
 		#setup tauc plot
@@ -51,7 +49,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui.tauc_plot_container.layout().addWidget(self.tauc_plot_layout)
 		self.tauc_plot = self.tauc_plot_layout.addPlot(title="Tauc plot fit")
 		self.tauc_plot.setLabel('bottom', 'hv', unit='ev')
-		y_label = '(ahv)' + chr(0x00B2)
+		y_label = '(ahv)' + chr(0x00B2) #char is superscripted 2
 		self.tauc_plot.setLabel('left', y_label)
 
 		self.ui.plot_tauc_pushButton.clicked.connect(self.plot_tauc)
@@ -113,6 +111,20 @@ class MainWindow(TemplateBaseClass):
 			save_to = os.getcwd() + "\\" + filename + "_TaucPlot.tiff"
 
 			exporter = pg.exporters.ImageExporter(self.tauc_plot)
+			exporter.params.param('width').setValue(800, blockSignal=exporter.widthChanged)
+			exporter.params.param('height').setValue(600, blockSignal=exporter.heightChanged)
+			# save to file
+			exporter.export(save_to)
+		except Exception as err:
+			print(format(err))
+
+	def export_uv_vis(self):
+		try:
+			filename_ext = os.path.basename(self.filename[0])
+			filename = os.path.splitext(filename_ext)[0] #get filename without extension
+			save_to = os.getcwd() + "\\" + filename + "_UV_Vis_Plot.tiff"
+
+			exporter = pg.exporters.ImageExporter(self.absorbance_plot)
 			exporter.params.param('width').setValue(800, blockSignal=exporter.widthChanged)
 			exporter.params.param('height').setValue(600, blockSignal=exporter.heightChanged)
 			# save to file

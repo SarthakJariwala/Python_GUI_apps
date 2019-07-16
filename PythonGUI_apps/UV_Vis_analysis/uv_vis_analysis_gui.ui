@@ -50,6 +50,13 @@
          <layout class="QGridLayout" name="gridLayout"/>
         </widget>
        </item>
+       <item alignment="Qt::AlignLeft">
+        <widget class="QPushButton" name="export_uv_vis_pushButton">
+         <property name="text">
+          <string>Export UV-Vis plot</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>

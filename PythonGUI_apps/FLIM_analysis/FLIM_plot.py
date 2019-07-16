@@ -63,7 +63,7 @@ class MainWindow(TemplateBaseClass):
 			self.ui.intensity_sums_viewBox.setImage(self.intensity_sums, scale=
 												  (data['Scan Parameters']['X step size (um)'],
 												   data['Scan Parameters']['Y step size (um)']))
-			scale = pg.ScaleBar(size=2,suffix='um')
+			scale = pg.ScaleBar(size=1,suffix='um')
 			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
 		except Exception as err:
@@ -88,7 +88,7 @@ class MainWindow(TemplateBaseClass):
 				self.ui.imv2.setImage(self.hist_image, scale= (data['Scan Parameters']['X step size (um)'],
 											    data['Scan Parameters']['Y step size (um)']), xvals=self.times)
 			
-			scale = pg.ScaleBar(size=2,suffix='um')
+			scale = pg.ScaleBar(size=1,suffix='um')
 			scale.setParentItem(self.ui.raw_hist_data_viewBox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
 			
