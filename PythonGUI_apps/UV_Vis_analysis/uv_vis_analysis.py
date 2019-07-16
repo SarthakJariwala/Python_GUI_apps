@@ -6,7 +6,6 @@ Created on Wed Mar 27 16:50:26 2019
 """
 
 # system imports
-import sys
 from pathlib import Path
 import os.path
 import pyqtgraph as pg
@@ -18,8 +17,6 @@ import time
 from lmfit.models import GaussianModel
 import customplotting.mscope as cpm
 # local modules
- 
-
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
@@ -41,98 +38,66 @@ class MainWindow(TemplateBaseClass):
 		self.ui.setupUi(self)
 		
 		self.ui.actionLoad_data.triggered.connect(self.open_data_file)
+		self.ui.plot_absorbance_pushButton.clicked.connect(self.plot_absorbance)
+		self.ui.plot_tauc_pushButton.clicked.connect(self.plot_tauc)
+		self.ui.export_tauc_pushButton.clicked.connect(self.export_tauc)
+
+		self.ui.correct_for_scattering_checkBox.stateChanged.connect(self.switch_correct_for_scattering)
+
+
+		self.absorbance_plot_layout = pg.GraphicsLayoutWidget()
+		self.ui.absorbance_plot_container.layout().addWidget(self.absorbance_plot_layout)
+		self.absorbance_plot = self.absorbance_plot_layout.addPlot(title="Wavelengths vs. Absorbance")
+		self.absorbance_plot.setLabel('left', 'Wavelength', unit='nm')
+		self.absorbance_plot.setLabel('bottom', 'Absorbance', unit='a.u.')
+
+		self.tauc_plot_layout = pg.GraphicsLayoutWidget()
+		self.ui.tauc_plot_container.layout().addWidget(self.tauc_plot_layout)
+		self.tauc_plot = self.tauc_plot_layout.addPlot(title="Tauc plot fit")
+		self.tauc_plot.setLabel('left', '($\\alpha$h$\\nu$)$^2$') #fix formatting
+		self.tauc_plot.setLabel('bottom', 'h$\\nu', unit='ev')
 
 		self.show()
-	
+
 	"""Open Scan Files"""
 	def open_data_file(self):
 		try:
 			self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			self.data_file = np.loadtxt(self.filename[0])
+			self.data = np.loadtxt(self.filename[0], delimiter = ',', skiprows = 1)
+			self.Wavelength = self.data[:,0] # in nm
+			self.Absorbance = self.data[:,1] 
 		except Exception as err:
 			print(format(err))
 
-	def plot_intensity_sums(self):
-		try:
-			data = self.pkl_file
-			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
-			# TODO test line scan plots
-
-			hist_data = data["Histogram data"]
-			hist_data = np.reshape(hist_data, newshape=(hist_data.shape[0], numb_pixels_X*numb_pixels_Y))
-			self.intensity_sums = np.sum(hist_data, axis=0)
-			self.intensity_sums = np.reshape(self.intensity_sums, newshape=(numb_pixels_X, numb_pixels_Y))
-			self.ui.intensity_sums_viewBox.setImage(self.intensity_sums, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']))
-			scale = pg.ScaleBar(size=2,suffix='um')
-			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
-			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-		except Exception as err:
-			print(format(err))
-
-	def plot_raw_scan(self):
-		try:
-			data = self.pkl_file
-			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
-			# TODO test line scan plots
-			hist_data = data['Histogram data']
-			
-			hist_data = np.reshape(hist_data, newshape=(hist_data.shape[0],numb_pixels_X,numb_pixels_Y))
-			
-			time_data = data['Time data']
-			times = time_data[:, 0, 0]*1e-3
-			self.ui.raw_hist_data_viewBox.setImage(hist_data, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']), xvals=times)
-			# time_data = data['Time data']
-			# print(time_data.shape)
-			# print(time_data)
-			# roiPlot = self.ui.raw_hist_data_viewBox.getRoiPlot()
-			# roiPlot.tVals = time_data#(np.min(time_data), np.max(time_data))
-			
-			scale = pg.ScaleBar(size=2,suffix='um')
-			scale.setParentItem(self.ui.raw_hist_data_viewBox.view)
-			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-			
-		except Exception as err:
-			print(format(err))
-
-	def save_intensities_image(self):
-		try:
-			filename_ext = os.path.basename(self.filename[0])
-			filename = os.path.splitext(filename_ext)[0] #get filename without extension
-			save_to = os.getcwd() + "\\" + filename + "_intensity_sums.png"
-			cpm.plot_confocal(self.intensity_sums, stepsize=np.abs(self.pkl_file['Scan Parameters']['X step size (um)']))
-			cpm.plt.savefig(save_to, bbox_inches='tight', dpi=300)
-		except:
-			pass
-
-	def save_intensities_array(self):
-		try:
-			filename_ext = os.path.basename(self.filename[0])
-			filename = os.path.splitext(filename_ext)[0] #get filename without extension
-			save_to = os.getcwd() + "\\" + filename + "_intensity_sums.txt"
-			np.savetxt(save_to, self.intensity_sums, fmt='%f')
-		except:
-			pass
-
-	def close_application(self):
-		choice = QtGui.QMessageBox.question(self, 'EXIT!',
-											"Do you want to exit the app?",
-											QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-		if choice == QtGui.QMessageBox.Yes:
-			sys.exit()
+	def switch_correct_for_scattering(self):
+		uncorrected = self.data[:,1]
+		if self.ui.correct_for_scattering_checkBox.isChecked():
+			self.Absorbance = uncorrected - np.mean(uncorrected[(self.Wavelength>800) & (self.Wavelength<1000)])
 		else:
-			pass
+			self.Absorbance = uncorrected
+
+	def plot_absorbance(self):
+		self.absorbance_plot.plot(self.Wavelength, self.Absorbance, pen='r', clear=True)
+
+	def plot_tauc(self):
+		hv = 1240/Wavelength
+		hv_min = self.ui.tauc_start_spinBox.value()
+		hv_max = self.ui.tauc_end_spinBox.value()
+		index = (hv > hv_min) & (hv < hv_max)
+		Alpha_hv = (self.Absorbance * hv)**2.0
+		model = np.polyfit(hv[index], Alpha_hv[index], 1) 
+		
+		self.tauc_plot.plot(hv, Alpha_hv, color = 'r')
+		self.tauc_plot.plot(hv, Alpha_hv_fit, color = 'k')
+
+	def export_tauc(self):
+		filename_ext = os.path.basename(self.filename[0])
+		filename = os.path.splitext(filename_ext)[0] #get filename without extension
+		save_to = os.getcwd() + "\\" + filename + "_TaucPlot.tiff"
+		cpm.plt.savefig(save_to, bbox_inches='tight', dpi = 300)
 
 """Run the Main Window"""    
 def run():
 	win = MainWindow()
 	QtGui.QApplication.instance().exec_()
 	return win
-
-#Uncomment below if you want to run this as standalone
-#run()
