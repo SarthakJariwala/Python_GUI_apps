@@ -50,8 +50,9 @@ class MainWindow(TemplateBaseClass):
 		self.tauc_plot_layout = pg.GraphicsLayoutWidget()
 		self.ui.tauc_plot_container.layout().addWidget(self.tauc_plot_layout)
 		self.tauc_plot = self.tauc_plot_layout.addPlot(title="Tauc plot fit")
-		self.tauc_plot.setLabel('left', '($\\alpha$h$\\nu$)$^2$') #fix formatting
-		self.tauc_plot.setLabel('bottom', 'h$\\nu', unit='ev')
+		self.tauc_plot.setLabel('bottom', 'hv', unit='ev')
+		y_label = '(ahv)' + chr(0x00B2)
+		self.tauc_plot.setLabel('left', y_label)
 
 		self.ui.plot_tauc_pushButton.clicked.connect(self.plot_tauc)
 		self.ui.export_tauc_pushButton.clicked.connect(self.export_tauc)

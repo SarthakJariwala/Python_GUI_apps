@@ -14,7 +14,7 @@ from pyqtgraph.Qt import QtGui
 from Lifetime_analysis import Lifetime_plot_fit
 from Spectrum_analysis import Spectra_plot_fit
 from FLIM_analysis import FLIM_plot
-from UV_Vis_analysis import UV_Vis_analysis
+from UV_Vis_analysis import uv_vis_analysis
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
 
@@ -54,7 +54,7 @@ class MainWindow(TemplateBaseClass):
             self.flim_window = FLIM_plot.MainWindow()
             self.flim_window.show()
         elif analysis_software == "UV-Vis Analysis":
-            self.uv_vis_window = UV_Vis_analysis.MainWindow()
+            self.uv_vis_window = uv_vis_analysis.MainWindow()
             self.uv_vis_window.show()
 
 def run():
