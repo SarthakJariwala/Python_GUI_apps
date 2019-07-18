@@ -15,6 +15,7 @@ import customplotting.mscope as cpm
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
+pg.setConfigOption('imageAxisOrder', 'row-major')
 
 base_path = Path(__file__).parent
 file_path = (base_path / "flim_plot_gui.ui").resolve()
