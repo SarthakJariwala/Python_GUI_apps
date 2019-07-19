@@ -236,7 +236,7 @@ class MainWindow(TemplateBaseClass):
             else:
                 self.ui.fit_scan_viewbox.setImage(self.img)
             
-#            self.ui.fit_scan_viewbox.invertY(False) # Only Manual re-invert is working -- can't get it to stop inverting
+            self.ui.fit_scan_viewbox.view.invertY(False)
                 
         except Exception as e:
             self.ui.result_textBrowser.append(str(e))
@@ -255,7 +255,7 @@ class MainWindow(TemplateBaseClass):
             
             wavelengths = data['Wavelengths']
             
-#            self.ui.raw_scan_viewbox.invertY(False) # Only Manual re-invert is working -- can't get it to stop inverting
+            self.ui.raw_scan_viewbox.view.invertY(False)
             self.ui.raw_scan_viewbox.setImage(intensities, scale=
                                                   (data['Scan Parameters']['X step size (um)'],
                                                    data['Scan Parameters']['Y step size (um)']), xvals=wavelengths)
@@ -287,7 +287,7 @@ class MainWindow(TemplateBaseClass):
             self.ui.intensity_sums_viewBox.setImage(sums, scale=
                                                   (data['Scan Parameters']['X step size (um)'],
                                                    data['Scan Parameters']['Y step size (um)']))
-#            self.ui.intensity_sums_viewBox.invertY(False)# Only Manual re-invert is working -- can't get it to stop inverting
+            self.ui.intensity_sums_viewBox.view.invertY(False)
             
             scale = pg.ScaleBar(size=2,suffix='um')
             scale.setParentItem(self.ui.intensity_sums_viewBox.view)
