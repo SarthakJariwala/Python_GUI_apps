@@ -19,9 +19,9 @@ from lmfit.models import GaussianModel
 import customplotting.mscope as cpm
 # local modules
 try:
-	from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian
+	from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
 except:
-	from Spectrum_analysis.Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian
+	from Spectrum_analysis.Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
 
 
 """Recylce params for plotting"""
@@ -71,7 +71,7 @@ class MainWindow(TemplateBaseClass):
 		
 		self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
 		self.ui.fit_scan_pushButton.clicked.connect(self.fit_and_plot_scan)
-		self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
+		# self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
 		self.ui.clear_pushButton.clicked.connect(self.clear_plot)
 		self.ui.export_fig_pushButton.clicked.connect(self.pub_ready_plot_export)
 
@@ -79,6 +79,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui.data_txt_pushButton.clicked.connect(self.pkl_data_to_txt)
 		self.ui.scan_params_txt_pushButton.clicked.connect(self.pkl_params_to_txt)
 
+		self.ui.tabWidget.currentChanged.connect(self.switch_overall_tab)
 		self.ui.fitFunc_comboBox.currentTextChanged.connect(self.switch_bounds_and_guess_tab)
 		self.ui.adjust_param_checkBox.stateChanged.connect(self.switch_adjust_param)
 
@@ -172,6 +173,17 @@ class MainWindow(TemplateBaseClass):
 			np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
 		except:
 			pass
+
+	def switch_overall_tab(self):
+		if self.ui.tabWidget.currentIndex() == 0:
+			self.ui.fitting_settings_groupBox.setEnabled(True)
+			self.ui.scan_fit_settings_groupBox.setEnabled(False)
+		elif self.ui.tabWidget.currentIndex() == 1:
+			self.ui.fitting_settings_groupBox.setEnabled(False)
+			self.ui.scan_fit_settings_groupBox.setEnabled(True)
+		elif self.ui.tabWidget.currentIndex() == 2:
+			self.ui.fitting_settings_groupBox.setEnabled(False)
+			self.ui.scan_fit_settings_groupBox.setEnabled(False)
 
 	def switch_bounds_and_guess_tab(self):
 		fit_func = self.ui.fitFunc_comboBox.currentText()
@@ -345,9 +357,9 @@ class MainWindow(TemplateBaseClass):
 			return False
 	
 	"""Open param window and get peak center range values and assign it to variables to use later"""
-	def configure_fit_params(self):
-		self.param_window = ParamWindow()
-		self.param_window.peak_range.connect(self.peak_range)
+	# def configure_fit_params(self):
+	# 	self.param_window = ParamWindow()
+	# 	self.param_window.peak_range.connect(self.peak_range)
 	
 	def peak_range(self, peaks):
 		self.center_min = peaks[0]
@@ -373,8 +385,8 @@ class MainWindow(TemplateBaseClass):
 						center1_max = self.ui.single_peakcenter1_max_spinBox.value()
 						center1_guess = self.ui.single_peakcenter1_guess_spinBox.value()
 						sigma1_guess = self.ui.single_sigma1_guess_spinBox.value()
-						self.result = single_gauss.gaussian_model_w_lims(center_initial_guess=center1_guess, sigma_initial_guess=sigma1_guess,
-							center_min=center1_min, center_max=center1_max)
+						self.result = single_gauss.gaussian_model_w_lims(center1_guess, sigma1_guess,
+							[center1_min, center1_max])
 					else:
 						self.result = single_gauss.gaussian_model()
 					self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
@@ -389,8 +401,8 @@ class MainWindow(TemplateBaseClass):
 						center1_max = self.ui.single_peakcenter1_max_spinBox.value()
 						center1_guess = self.ui.single_peakcenter1_guess_spinBox.value()
 						sigma1_guess = self.ui.single_sigma1_guess_spinBox.value()
-						self.result = single_lorentzian.lorentzian_model_w_lims(center_initial_guess=center1_guess, sigma_initial_guess=sigma1_guess,
-								center_min = center1_min, center_max = center1_max)
+						self.result = single_lorentzian.lorentzian_model_w_lims(center1_guess, sigma1_guess,
+								[center1_min, center1_max])
 					else:
 						self.result = single_lorentzian.lorentzian_model()
 					self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
@@ -398,7 +410,6 @@ class MainWindow(TemplateBaseClass):
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 				
 				elif fit_func == "Double Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
-					self.ui.result_textBrowser.setText("Not Implemented Yet!")
 					double_gauss = Double_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
 					if self.ui.adjust_param_checkBox.isChecked():
 						center1_min = self.ui.double_peakcenter1_min_spinBox.value()
@@ -410,8 +421,10 @@ class MainWindow(TemplateBaseClass):
 						center2_guess = self.ui.double_peakcenter2_guess_spinBox.value()
 						sigma2_guess = self.ui.double_sigma2_guess_spinBox.value()
 
-						self.result = double_gauss.gaussian_model_w_lims(center_initial_guesses=[center1_guess, center2_guess], 
-							sigma_initial_guesses=[sigma1_guess, sigma2_guess], min_max_range=[ [center1_min, center1_max], [center2_min, center2_max]])
+						peak_pos = [center1_guess, center2_guess]
+						sigma = [sigma1_guess, sigma2_guess]
+						min_max_range = [ [center1_min, center1_max], [center2_min, center2_max] ]
+						self.result = double_gauss.gaussian_model_w_lims(peak_pos, sigma, min_max_range)
 
 					else:
 						self.result = double_gauss.gaussian_model()
@@ -426,7 +439,39 @@ class MainWindow(TemplateBaseClass):
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 				
 				elif fit_func == "Multiple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
-					self.ui.result_textBrowser.setText("Not Implemented Yet!")
+					#currently only works for triple gaussian (n=3)
+					multiple_gauss = Multi_Gaussian(self.file, self.bck_file, 3, wlref=self.wlref_file)
+					if self.ui.adjust_param_checkBox.isChecked():
+						center1_min = self.ui.multi_peakcenter1_min_spinBox.value()
+						center1_max = self.ui.multi_peakcenter1_max_spinBox.value()
+						center2_min = self.ui.multi_peakcenter2_min_spinBox.value()
+						center2_max = self.ui.multi_peakcenter2_max_spinBox.value()
+						center3_min = self.ui.multi_peakcenter3_min_spinBox.value()
+						center3_max = self.ui.multi_peakcenter3_max_spinBox.value()
+						center1_guess = self.ui.multi_peakcenter1_guess_spinBox.value()
+						sigma1_guess = self.ui.multi_sigma1_guess_spinBox.value()
+						center2_guess = self.ui.multi_peakcenter2_guess_spinBox.value()
+						sigma2_guess = self.ui.multi_sigma2_guess_spinBox.value()
+						center3_guess = self.ui.multi_peakcenter3_guess_spinBox.value()
+						sigma3_guess = self.ui.multi_sigma3_guess_spinBox.value()
+						num_gaussians = 3
+						peak_pos = [center1_guess, center2_guess, center3_guess]
+						sigma = [sigma1_guess, sigma2_guess, sigma3_guess]
+						min_max_range = [ [center1_min, center1_max], [center2_min, center2_max], [center3_min, center3_max] ]
+						
+						self.result = multiple_gauss.gaussian_model_w_lims(peak_pos, sigma, min_max_range)
+					else:
+						self.result = multiple_gauss.gaussian_model()
+
+					self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+					self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+					if self.ui.plot_components_checkBox.isChecked():
+						comps = self.result.eval_components(x=self.x)
+						self.ui.plot.plot(self.x, comps['g1_'], pen='b', clear=False)
+						self.ui.plot.plot(self.x, comps['g2_'], pen='g', clear=False)
+						self.ui.plot.plot(self.x, comps['g3_'], pen='c', clear=False)
+					self.ui.result_textBrowser.setText(self.result.fit_report())
+
 		
 		except Exception as e:
 			self.ui.result_textBrowser.setText(str(e))
@@ -571,37 +616,37 @@ class MainWindow(TemplateBaseClass):
 		
 		
 """Parameter Window GUI and Functions"""
-param_file_path = (base_path / "peak_bounds_input.ui").resolve()
+# param_file_path = (base_path / "peak_bounds_input.ui").resolve()
 
-param_uiFile = param_file_path
+# param_uiFile = param_file_path
 
-param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(param_uiFile)
+# param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(param_uiFile)
 
-class ParamWindow(param_TemplateBaseClass):
+# class ParamWindow(param_TemplateBaseClass):
 	
-	peak_range = QtCore.pyqtSignal(list)
+# 	peak_range = QtCore.pyqtSignal(list)
 	
-	def __init__(self):
-#        super(param_TemplateBaseClass, self).__init__()
-		param_TemplateBaseClass.__init__(self)
+# 	def __init__(self):
+# #        super(param_TemplateBaseClass, self).__init__()
+# 		param_TemplateBaseClass.__init__(self)
 		
-		# Create the param window
-		self.pui = param_WindowTemplate()
-		self.pui.setupUi(self)
+# 		# Create the param window
+# 		self.pui = param_WindowTemplate()
+# 		self.pui.setupUi(self)
 		
-		self.pui.pushButton.clicked.connect(self.done)
+# 		self.pui.pushButton.clicked.connect(self.done)
 		
-		self.show()
+# 		self.show()
 	
-	def current_peak_range(self):
-		center_min = self.pui.cent_min_doubleSpinBox.value()
-		center_max = self.pui.cent_max_doubleSpinBox.value()
-		return center_min, center_max
+# 	def current_peak_range(self):
+# 		center_min = self.pui.cent_min_doubleSpinBox.value()
+# 		center_max = self.pui.cent_max_doubleSpinBox.value()
+# 		return center_min, center_max
 	
-	def done(self):
-		center_min, center_max = self.current_peak_range()
-		self.peak_range.emit([center_min, center_max])
-		self.close()
+# 	def done(self):
+# 		center_min, center_max = self.current_peak_range()
+# 		self.peak_range.emit([center_min, center_max])
+# 		self.close()
 	
 """Run the Main Window"""    
 def run():

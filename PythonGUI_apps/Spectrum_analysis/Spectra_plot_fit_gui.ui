@@ -24,14 +24,14 @@
     <item row="0" column="1">
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
-       <widget class="QGroupBox" name="groupBox_2">
+       <widget class="QGroupBox" name="fitting_settings_groupBox">
         <property name="font">
          <font>
-          <pointsize>15</pointsize>
+          <pointsize>12</pointsize>
          </font>
         </property>
         <property name="title">
-         <string>Fitting Settings</string>
+         <string>Fit Settings</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="1" column="0">
@@ -64,6 +64,24 @@
            </property>
            <property name="value">
             <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0" colspan="2">
+          <widget class="QCheckBox" name="plot_components_checkBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Plot components (&gt;1 Gaussian)</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -220,19 +238,54 @@
               <widget class="QWidget" name="multiple_bounds_page">
                <layout class="QGridLayout" name="gridLayout_10">
                 <item row="2" column="1">
-                 <widget class="QDoubleSpinBox" name="mult_peakcenter2_min_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_peakcenter2_min_spinBox">
+                  <property name="maximum">
+                   <double>9999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>760.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="1" column="2">
-                 <widget class="QDoubleSpinBox" name="mult_peakcenter1_max_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_peakcenter1_max_spinBox">
+                  <property name="maximum">
+                   <double>9999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>820.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="2" column="2">
-                 <widget class="QDoubleSpinBox" name="mult_peakcenter2_max_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_peakcenter2_max_spinBox">
+                  <property name="maximum">
+                   <double>9999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>775.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="3" column="2">
-                 <widget class="QDoubleSpinBox" name="mult_peakcenter3_max_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_peakcenter3_max_spinBox">
+                  <property name="maximum">
+                   <double>9999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>755.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="3" column="1">
-                 <widget class="QDoubleSpinBox" name="mult_peakcenter3_min_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_peakcenter3_min_spinBox">
+                  <property name="maximum">
+                   <double>9999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>740.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="1" column="0">
                  <widget class="QLabel" name="label_28">
@@ -263,7 +316,14 @@
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QDoubleSpinBox" name="mult_peakcenter1_min_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_peakcenter1_min_spinBox">
+                  <property name="maximum">
+                   <double>9999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>795.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="0" column="1">
                  <widget class="QLabel" name="label_26">
@@ -286,24 +346,6 @@
            </layout>
           </widget>
          </item>
-         <item row="2" column="1">
-          <widget class="QSpinBox" name="start_nm_spinBox">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="minimum">
-            <number>300</number>
-           </property>
-           <property name="maximum">
-            <number>1100</number>
-           </property>
-           <property name="value">
-            <number>600</number>
-           </property>
-          </widget>
-         </item>
          <item row="9" column="0" colspan="2">
           <widget class="QPushButton" name="fit_scan_pushButton">
            <property name="font">
@@ -313,39 +355,6 @@
            </property>
            <property name="text">
             <string>Fit Entire Scan</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Stop at (nm):</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QSpinBox" name="stop_nm_spinBox">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="inputMethodHints">
-            <set>Qt::ImhDigitsOnly</set>
-           </property>
-           <property name="minimum">
-            <number>300</number>
-           </property>
-           <property name="maximum">
-            <number>1100</number>
-           </property>
-           <property name="value">
-            <number>900</number>
            </property>
           </widget>
          </item>
@@ -388,18 +397,6 @@
              <string>Multiple Gaussians</string>
             </property>
            </item>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Start at (nm):</string>
-           </property>
           </widget>
          </item>
          <item row="8" column="0" colspan="2">
@@ -579,22 +576,55 @@
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QDoubleSpinBox" name="mult_peakcenter1_guess_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_peakcenter1_guess_spinBox">
+                  <property name="maximum">
+                   <double>9999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>800.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QDoubleSpinBox" name="mult_sigma1_guess_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_sigma1_guess_spinBox">
+                  <property name="value">
+                   <double>15.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="2" column="1">
-                 <widget class="QDoubleSpinBox" name="mult_peakcenter2_guess_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_peakcenter2_guess_spinBox">
+                  <property name="maximum">
+                   <double>9999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>767.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="3" column="1">
-                 <widget class="QDoubleSpinBox" name="mult_sigma2_guess_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_sigma2_guess_spinBox">
+                  <property name="value">
+                   <double>15.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="4" column="1">
-                 <widget class="QDoubleSpinBox" name="mult_peakcenter3_guess_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_peakcenter3_guess_spinBox">
+                  <property name="maximum">
+                   <double>9999.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>750.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item row="5" column="1">
-                 <widget class="QDoubleSpinBox" name="mult_sigma3_guess_spinBox"/>
+                 <widget class="QDoubleSpinBox" name="multi_sigma3_guess_spinBox">
+                  <property name="value">
+                   <double>15.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </widget>
@@ -603,21 +633,83 @@
            </layout>
           </widget>
          </item>
-         <item row="5" column="0" colspan="2">
-          <widget class="QCheckBox" name="plot_components_checkBox">
-           <property name="enabled">
-            <bool>false</bool>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="scan_fit_settings_groupBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="title">
+         <string>Scan Fit Settings</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_12">
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="start_nm_spinBox">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
            </property>
+           <property name="minimum">
+            <number>300</number>
+           </property>
+           <property name="maximum">
+            <number>1100</number>
+           </property>
+           <property name="value">
+            <number>600</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_8">
            <property name="font">
             <font>
              <pointsize>10</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>Plot components (&gt;1 Gaussian)</string>
+            <string>Start at (nm):</string>
            </property>
-           <property name="checked">
-            <bool>true</bool>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_9">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Stop at (nm):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="stop_nm_spinBox">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="inputMethodHints">
+            <set>Qt::ImhDigitsOnly</set>
+           </property>
+           <property name="minimum">
+            <number>300</number>
+           </property>
+           <property name="maximum">
+            <number>1100</number>
+           </property>
+           <property name="value">
+            <number>900</number>
            </property>
           </widget>
          </item>
@@ -815,18 +907,6 @@ Ready Figure</string>
               <font>
                <pointsize>10</pointsize>
               </font>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="config_fit_params_pushButton">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Configure Fit Params</string>
              </property>
             </widget>
            </item>
