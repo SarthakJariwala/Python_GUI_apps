@@ -15,6 +15,7 @@ from Lifetime_analysis import Lifetime_plot_fit
 from Spectrum_analysis import Spectra_plot_fit
 from FLIM_analysis import FLIM_plot
 from UV_Vis_analysis import uv_vis_analysis
+from PLQE_analysis import plqe_analysis
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
 
@@ -33,7 +34,7 @@ class MainWindow(TemplateBaseClass):
         # Create the main window
         self.ui = WindowTemplate()
         self.ui.setupUi(self)
-        self.ui.select_comboBox.addItems(["Lifetime Analysis", "Spectrum Analysis", "FLIM Analysis", "UV-Vis Analysis"])
+        self.ui.select_comboBox.addItems(["Lifetime Analysis", "Spectrum Analysis", "FLIM Analysis", "UV-Vis Analysis", "PLQE Analysis"])
         self.ui.load_pushButton.clicked.connect(self.load_app)
         
         self.show()
@@ -46,7 +47,6 @@ class MainWindow(TemplateBaseClass):
         if analysis_software == "Lifetime Analysis":
             self.lifetime_window = Lifetime_plot_fit.MainWindow()
             self.lifetime_window.show()
-        
         elif analysis_software == "Spectrum Analysis":
             self.spectrum_window = Spectra_plot_fit.MainWindow()
             self.spectrum_window.show()
@@ -56,6 +56,9 @@ class MainWindow(TemplateBaseClass):
         elif analysis_software == "UV-Vis Analysis":
             self.uv_vis_window = uv_vis_analysis.MainWindow()
             self.uv_vis_window.show()
+        elif analysis_software == "PLQE Analysis":
+            self.plqe_window = plqe_analysis.MainWindow()
+            self.plqe_window.show()
 
 def run():
     win = MainWindow()
