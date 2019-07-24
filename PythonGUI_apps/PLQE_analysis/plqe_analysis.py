@@ -182,4 +182,4 @@ def run():
     QtGui.QApplication.instance().exec_()
     return win
 
-run()
+#run()
