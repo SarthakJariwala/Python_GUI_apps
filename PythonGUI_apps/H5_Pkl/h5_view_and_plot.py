@@ -65,6 +65,7 @@ class H5ViewPlot(BaseApp):
 
         self.h5treeview = H5TreeSearchView(self)
         self.ui.dataview_page.layout().addWidget(self.h5treeview.ui)
+        self.h5treeview.ui.hide()
         self.ui.show()
 
     def on_change_data_filename(self):
@@ -73,6 +74,8 @@ class H5ViewPlot(BaseApp):
             fname = self.settings.data_filename.val 
             if os.path.isfile(fname):
                 self.h5treeview.on_change_data_filename(fname)
+                self.ui.dataview_placeholder.hide()
+                self.h5treeview.ui.show()
         except:
             pass
 
@@ -125,7 +128,4 @@ class H5ViewPlot(BaseApp):
 # if __name__ == '__main__':
 #     import sys
 #     app = H5ViewPlot(sys.argv)
-#     sys.exit(app.exec_())
-
-
-    
+#     sys.exit(app.exec_())    

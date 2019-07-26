@@ -16,6 +16,7 @@ class H5TreeSearchView(DataBrowserView):
         self.ui = QtWidgets.QWidget()
         self.ui.setLayout(QtWidgets.QVBoxLayout())
         self.search_lineEdit = QtWidgets.QLineEdit()
+        self.search_lineEdit.setPlaceholderText("Search")
         self.tree_textEdit = QtWidgets.QTextEdit("")
         
         self.ui.layout().addWidget(self.search_lineEdit)
