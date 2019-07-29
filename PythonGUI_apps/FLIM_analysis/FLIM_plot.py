@@ -154,7 +154,7 @@ class MainWindow(TemplateBaseClass):
 				self.roi2_plot.show()
 			else:
 				self.roi2.hide()
-				self.roi2.hide()
+				self.roi2_plot.hide()
 		else:
 			if hasattr(self, "roi2"):
 				self.roi2.hide()
