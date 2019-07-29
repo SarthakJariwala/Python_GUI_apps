@@ -84,41 +84,20 @@ class MainWindow(TemplateBaseClass):
 		if self.ui.line_profile_checkBox.isChecked() and hasattr(self, "intensity_sums"):
 			roiPlot = self.ui.intensity_sums_viewBox.getRoiPlot()
 			roiPlot.clear()
-			intensity_sums = self.intensity_sums
 			roi = self.ui.intensity_sums_viewBox.roi
 
-			##select relevant data in x direction by looking at roi
-			roi_width = roi.size()[0]
-			x_roi_min = self.custom_round(roi.pos()[0], self.x_step_size)
-			x_roi_max = self.custom_round(roi.pos()[0] + roi_width, self.x_step_size)
-			x_values = np.arange(start=x_roi_min, stop=x_roi_max+self.x_step_size, step=self.x_step_size) #get x values within x range, in x_step_size increments
-			x_index_min = 0 
-			if x_roi_min != 0: #to avoid divide by 0 error
-				x_index_min = round(x_roi_min/self.x_step_size) -1
-			x_index_max = round(x_roi_max/self.x_step_size)+1
-			column_slice = intensity_sums[:, x_index_min:x_index_max] #get array of data in x range
-		
-			##select relevant data in y direction by looking at roi
-			roi_height = roi.size()[1]
-			y_roi_min = self.custom_round(roi.pos()[1], self.y_step_size)
-			y_roi_max = self.custom_round(roi.pos()[1] + roi_height, self.y_step_size)
-			y_range = [y_roi_min, y_roi_max] #get y range of roi
-			y_index_min = 0
-			if y_range[0] != 0: #to avoid divide by 0 error
-				y_index_min = round(y_roi_min/self.y_step_size) -1 
-			y_index_max = round(y_range[1]/self.y_step_size)+1
-			row_slice = column_slice[y_index_min:y_index_max] #get array of data in y range
+			image = self.ui.intensity_sums_viewBox.getProcessedImage()
 
-			#sum intensities along columns
-			sums_to_plot = np.sum(row_slice, axis=0)
+			# Extract image data from ROI
+			axes = (self.ui.intensity_sums_viewBox.axes['x'], self.ui.intensity_sums_viewBox.axes['y'])
+			data, coords = roi.getArrayRegion(image.view(np.ndarray), self.ui.intensity_sums_viewBox.imageItem, axes, returnMappedCoords=True)
 
- 			#even with rounding, x_values and sums_to_plot sometimes have slightly uneven lengths
- 			#handle this issue here
-			if x_values.shape[0] != sums_to_plot.shape[0]:
-				newshape = min(x_values.shape[0], sums_to_plot.shape[0])
-				x_values = x_values[0:newshape]
-				sums_to_plot = sums_to_plot[0:newshape]
-			
+			#calculate sums along columns in region
+			sums_to_plot = np.sum(data, axis=0)
+
+			#get scan x-coordinates in region
+			x_values = coords[1][0]
+
 			try:
 				roiPlot.plot(x_values, sums_to_plot)
 			except:
@@ -129,6 +108,10 @@ class MainWindow(TemplateBaseClass):
 			data = self.pkl_file
 			self.numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
 			self.numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
+			self.x_step_size = float(data['Scan Parameters']['X step size (um)'])
+			self.x_scan_size = float(data['Scan Parameters']['X scan size (um)'])
+			self.y_step_size = float(data['Scan Parameters']['Y step size (um)'])
+			self.y_scan_size = float(data['Scan Parameters']['Y scan size (um)'])
 			# TODO test line scan plots
 			hist_data = data['Histogram data']
 			
@@ -139,9 +122,12 @@ class MainWindow(TemplateBaseClass):
 			self.ui.raw_hist_data_viewBox.setImage(self.hist_image, scale=
 												(data['Scan Parameters']['X step size (um)'],
 												data['Scan Parameters']['Y step size (um)']), xvals=self.times)
-			if self.ui.compare_checkBox.isChecked():
-				self.ui.imv2.setImage(self.hist_image, scale= (data['Scan Parameters']['X step size (um)'],
-												data['Scan Parameters']['Y step size (um)']), xvals=self.times)
+			self.ui.raw_hist_data_viewBox.roi.setSize([self.x_scan_size, self.y_scan_size])
+			# if self.ui.compare_checkBox.isChecked():
+			# 	self.ui.imv2.setImage(self.hist_image, scale= (data['Scan Parameters']['X step size (um)'],
+			# 									data['Scan Parameters']['Y step size (um)']), xvals=self.times)
+			self.switch_compare()
+			self.ui.raw_hist_data_viewBox.ui.roiBtn.clicked.connect(self.switch_compare)
 			scale = pg.ScaleBar(size=1,suffix='um')
 			scale.setParentItem(self.ui.raw_hist_data_viewBox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
@@ -153,16 +139,43 @@ class MainWindow(TemplateBaseClass):
 		"""
 		Handles compare checkbox. If checked, show second ROI that user can use for comparison to first ROI.
 		"""
-		if self.ui.compare_checkBox.isChecked():
-			self.imv2 = pg.ImageView()
-			if hasattr(self, "hist_image"):
-				self.imv2.setImage(self.hist_image, scale= (self.pkl_file['Scan Parameters']['X step size (um)'],
-					self.pkl_file['Scan Parameters']['Y step size (um)']), xvals=self.times)
-				self.imv2.view.invertY(False) # stop y-axis invert
-			self.ui.gridLayout.addWidget(self.imv2, 10, 4)
+		if self.ui.compare_checkBox.isChecked() and hasattr(self, "hist_image"):
+			if not hasattr(self, "roi2"):
+				self.roi2 = pg.ROI(pos=[0,0], size=[int(self.x_scan_size/2), int(self.y_scan_size/2)], movable=True, pen='r')
+				self.roi2.addScaleHandle([1, 1], [0, 0])
+				self.roi2.addScaleHandle([0, 0], [1, 1])
+				self.roi2.sigRegionChangeFinished.connect(self.update_roi2_plot)
+				self.ui.raw_hist_data_viewBox.addItem(self.roi2)
+				self.update_roi2_plot()
+				self.roi2.hide()
+				self.roi2_plot.hide()
+			if self.ui.raw_hist_data_viewBox.ui.roiBtn.isChecked():
+				self.roi2.show()
+				self.roi2_plot.show()
+			else:
+				self.roi2.hide()
+				self.roi2.hide()
 		else:
-			self.ui.gridLayout.removeWidget(self.imv2)
-			self.imv2.hide()
+			if hasattr(self, "roi2"):
+				self.roi2.hide()
+				self.roi2_plot.hide()
+
+	def update_roi2_plot(self):
+		#Adapted from pyqtgraph imageview sourcecode
+		
+		image = self.ui.raw_hist_data_viewBox.getProcessedImage()
+
+		# Extract image data from ROI
+		axes = (self.ui.raw_hist_data_viewBox.axes['x'], self.ui.raw_hist_data_viewBox.axes['y'])
+		data, coords = self.roi2.getArrayRegion(image.view(np.ndarray), self.ui.raw_hist_data_viewBox.imageItem, axes, returnMappedCoords=True)
+		if data is None:
+			return
+		# Average data within entire ROI for each frame
+		data = data.mean(axis=max(axes)).mean(axis=min(axes))
+		xvals = self.ui.raw_hist_data_viewBox.tVals
+		if hasattr(self, "roi2_plot"):
+			self.roi2_plot.clear()
+		self.roi2_plot = self.ui.raw_hist_data_viewBox.getRoiPlot().plot(xvals, data, pen='r')
 
 	def save_intensities_image(self):
 		try:
