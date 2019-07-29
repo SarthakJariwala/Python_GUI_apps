@@ -47,7 +47,7 @@ class H5PklView(BaseApp):
 
         self.settings.data_filename.add_listener(self.on_change_data_filename)
 
-        # UI Connections
+        # UI Connections/
         self.settings.data_filename.connect_to_browse_widgets(self.ui.data_filename_lineEdit, 
                                                               self.ui.data_filename_browse_pushButton)
 
