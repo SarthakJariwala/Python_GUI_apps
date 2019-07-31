@@ -76,12 +76,8 @@ class MainWindow(TemplateBaseClass):
 		except Exception as err:
 			print(format(err))
 
-	def custom_round(self, a, round_step):
-		#Round a to the nearest interval of round_step
-		return round(float(a)/round_step) * round_step
-
 	def line_profile_update_plot(self):
-		if self.ui.line_profile_checkBox.isChecked() and hasattr(self, "intensity_sums"):
+		if hasattr(self, "intensity_sums"):
 			roiPlot = self.ui.intensity_sums_viewBox.getRoiPlot()
 			roiPlot.clear()
 			roi = self.ui.intensity_sums_viewBox.roi
@@ -143,8 +139,8 @@ class MainWindow(TemplateBaseClass):
 			if not hasattr(self, "roi2"):
 				self.roi2 = pg.ROI(pos=[0,0], size=[int(self.x_scan_size/2), int(self.y_scan_size/2)], movable=True, pen='r')
 				self.roi2.addScaleHandle([1, 1], [0, 0])
-				self.roi2.addScaleHandle([0, 0], [1, 1])
-				self.roi2.sigRegionChangeFinished.connect(self.update_roi2_plot)
+				self.roi2.addRotateHandle([0, 0], [1, 1])
+				self.roi2.sigRegionChanged.connect(self.update_roi2_plot)
 				self.ui.raw_hist_data_viewBox.addItem(self.roi2)
 				self.update_roi2_plot()
 				self.roi2.hide()

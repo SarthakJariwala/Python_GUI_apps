@@ -32,13 +32,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="line_profile_checkBox">
-         <property name="text">
-          <string>Line profile</string>
-         </property>
-        </widget>
-       </item>
        <item alignment="Qt::AlignLeft">
         <widget class="QPushButton" name="save_intensities_array_pushButton">
          <property name="text">
