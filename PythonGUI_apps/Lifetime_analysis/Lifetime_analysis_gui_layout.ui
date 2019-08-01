@@ -916,31 +916,21 @@
          <bool>false</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout_11">
-         <item row="0" column="0">
+         <item row="1" column="0">
           <widget class="QLabel" name="label_37">
            <property name="text">
             <string>Bulk Lifetime (ns)</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item row="2" column="0">
           <widget class="QLabel" name="label_38">
            <property name="text">
             <string>Thickness (nm)</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="bulk_lifetime_spinBox">
-           <property name="maximum">
-            <double>100000.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>8000.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
+         <item row="2" column="1">
           <widget class="QDoubleSpinBox" name="thickness_spinBox">
            <property name="maximum">
             <double>100000.000000000000000</double>
@@ -950,21 +940,7 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_42">
-           <property name="text">
-            <string>SRV (cm/s)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_39">
-           <property name="text">
-            <string>Diffusion Coefficient (cm2/s)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
+         <item row="3" column="1">
           <widget class="QDoubleSpinBox" name="diffusion_coefficient_spinBox">
            <property name="maximum">
             <double>1000000.000000000000000</double>
@@ -974,38 +950,76 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_40">
-           <property name="text">
-            <string>Surface Lifetime (ns)</string>
-           </property>
-          </widget>
-         </item>
          <item row="5" column="1">
-          <widget class="QLabel" name="srv_label">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
           <widget class="QLabel" name="surface_lifetime_label">
            <property name="text">
             <string>0</string>
            </property>
           </widget>
          </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_42">
+           <property name="text">
+            <string>SRV (cm/s)</string>
+           </property>
+          </widget>
+         </item>
          <item row="3" column="0">
+          <widget class="QLabel" name="label_39">
+           <property name="text">
+            <string>Diffusion Coefficient (cm2/s)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
           <widget class="QCheckBox" name="srv1_srv2_checkBox">
            <property name="text">
             <string>SRV1 = SRV2</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
+         <item row="7" column="0">
           <widget class="QPushButton" name="calculate_srv_pushButton">
            <property name="text">
             <string>Calculate</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="bulk_lifetime_spinBox">
+           <property name="maximum">
+            <double>100000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>8000.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_40">
+           <property name="text">
+            <string>Surface Lifetime (ns)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QLabel" name="srv_label">
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_45">
+           <property name="text">
+            <string>Average Lifetime (ns)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="average_lifetime_spinBox">
+           <property name="maximum">
+            <double>9999999.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1243,7 +1257,7 @@ Ready Figure!</string>
      <x>0</x>
      <y>0</y>
      <width>1985</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1286,7 +1300,7 @@ Ready Figure!</string>
   <customwidget>
    <class>PlotWidget</class>
    <extends>QGraphicsView</extends>
-   <header>pyqtgraph</header>
+   <header location="global">pyqtgraph</header>
   </customwidget>
  </customwidgets>
  <resources/>

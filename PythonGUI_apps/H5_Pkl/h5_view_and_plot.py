@@ -85,14 +85,20 @@ class H5ViewPlot(BaseApp):
 
         data = self.dataset[()]
         if self.dataset_shape == 1:
-            x_values = np.arange(self.dataset.shape[0]) * self.ui.plotWidget_x_scaling_factor_spinBox.value() #scale x axis
+            x_start = self.ui.plotWidget_x_start_spinBox.value()
+            x_end = self.ui.plotWidget_x_end_spinBox.value()
+            num_points = self.dataset.shape[0]
+            x_values = np.linspace(x_start, x_end, num_points) 
             self.plot.plot(x_values, data)
         elif self.dataset_shape == 2 and self.ui.plot_radioButton.isChecked():
             self.plot.plot(data[0], data[1]) # TODO check and test this
         elif self.dataset_shape == 2 and self.ui.image_radioButton.isChecked():
             self.data_img.setImage(data)
         elif self.dataset_shape == 3:
-            x_values = np.arange(self.dataset.shape[0]) * self.ui.imageView_x_scaling_spinBox.value() #scale x axis
+            x_start = self.ui.imageView_x_start_spinBox.value()
+            x_end = self.ui.imageView_x_end_spinBox.value()
+            num_points = self.dataset.shape[0]
+            x_values = np.linspace(x_start, x_end, num_points) #scale x axis
             self.ui.data_imageView.setImage(data, xvals=x_values)
 
     def on_data_selection(self):

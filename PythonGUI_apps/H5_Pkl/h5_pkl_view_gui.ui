@@ -58,7 +58,7 @@
             <item>
              <widget class="QLabel" name="dataview_placeholder">
               <property name="text">
-               <string>Once a valid file is loaded, data will show up here.</string>
+               <string>Once a file is loaded, data will show up here.</string>
               </property>
              </widget>
             </item>

@@ -93,7 +93,7 @@
                <item row="1" column="0" colspan="2">
                 <widget class="QStackedWidget" name="data_stackedWidget">
                  <property name="currentIndex">
-                  <number>0</number>
+                  <number>2</number>
                  </property>
                  <widget class="QWidget" name="dataplot_page">
                   <layout class="QGridLayout" name="gridLayout_6">
@@ -101,24 +101,41 @@
                     <widget class="PlotWidget" name="data_plotWidget"/>
                    </item>
                    <item row="1" column="0">
-                    <layout class="QFormLayout" name="formLayout_3">
+                    <layout class="QGridLayout" name="gridLayout">
+                     <item row="0" column="2">
+                      <widget class="QLabel" name="label_4">
+                       <property name="text">
+                        <string>X end</string>
+                       </property>
+                      </widget>
+                     </item>
                      <item row="0" column="0">
                       <widget class="QLabel" name="label_3">
                        <property name="text">
-                        <string>X-axis scaling factor</string>
+                        <string>X start</string>
                        </property>
                       </widget>
                      </item>
                      <item row="0" column="1">
-                      <widget class="QDoubleSpinBox" name="plotWidget_x_scaling_factor_spinBox">
+                      <widget class="QDoubleSpinBox" name="plotWidget_x_start_spinBox">
                        <property name="maximumSize">
                         <size>
                          <width>203</width>
                          <height>16777215</height>
                         </size>
                        </property>
+                       <property name="maximum">
+                        <double>9999999.000000000000000</double>
+                       </property>
                        <property name="value">
-                        <double>1.000000000000000</double>
+                        <double>0.000000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="3">
+                      <widget class="QDoubleSpinBox" name="plotWidget_x_end_spinBox">
+                       <property name="maximum">
+                        <double>9999999.000000000000000</double>
                        </property>
                       </widget>
                      </item>
@@ -134,25 +151,42 @@
                    <item row="0" column="0" colspan="2">
                     <widget class="ImageView" name="data_imageView"/>
                    </item>
-                   <item row="1" column="0">
-                    <layout class="QFormLayout" name="formLayout">
+                   <item row="1" column="0" colspan="2">
+                    <layout class="QGridLayout" name="gridLayout_9">
+                     <item row="0" column="2">
+                      <widget class="QLabel" name="label_5">
+                       <property name="text">
+                        <string>X end</string>
+                       </property>
+                      </widget>
+                     </item>
                      <item row="0" column="0">
                       <widget class="QLabel" name="label">
                        <property name="text">
-                        <string>X-axis scaling factor</string>
+                        <string>X start</string>
                        </property>
                       </widget>
                      </item>
                      <item row="0" column="1">
-                      <widget class="QDoubleSpinBox" name="imageView_x_scaling_spinBox">
+                      <widget class="QDoubleSpinBox" name="imageView_x_start_spinBox">
                        <property name="maximumSize">
                         <size>
                          <width>203</width>
                          <height>16777215</height>
                         </size>
                        </property>
+                       <property name="maximum">
+                        <double>9999999.000000000000000</double>
+                       </property>
                        <property name="value">
-                        <double>1.000000000000000</double>
+                        <double>0.000000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="3">
+                      <widget class="QDoubleSpinBox" name="imageView_x_end_spinBox">
+                       <property name="maximum">
+                        <double>9999999.000000000000000</double>
                        </property>
                       </widget>
                      </item>
