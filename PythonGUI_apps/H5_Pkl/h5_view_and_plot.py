@@ -1,7 +1,6 @@
 from __future__ import division, print_function, absolute_import
 from ScopeFoundry import BaseApp
-from ScopeFoundry.helper_funcs import load_qt_ui_file, sibling_path,\
-    load_qt_ui_from_pkg
+from ScopeFoundry.helper_funcs import load_qt_ui_file, sibling_path
 from collections import OrderedDict
 import os
 from qtpy import QtCore, QtWidgets, QtGui
