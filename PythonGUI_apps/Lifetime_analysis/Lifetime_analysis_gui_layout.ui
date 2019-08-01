@@ -1118,7 +1118,21 @@ Ready Figure!</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1" colspan="2">
+          <item row="2" column="3">
+           <widget class="QCheckBox" name="log_checkBox">
+            <property name="text">
+             <string>Y Axis Log</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Plot color</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
            <widget class="QPushButton" name="clear_pushButton">
             <property name="font">
              <font>
@@ -1131,22 +1145,22 @@ Ready Figure!</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>Plot color</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
+          <item row="1" column="3">
            <widget class="QWidget" name="plot_color_button_container" native="true">
             <layout class="QGridLayout" name="gridLayout_13"/>
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QCheckBox" name="log_checkBox">
+           <widget class="QCheckBox" name="normalize_checkBox">
             <property name="text">
-             <string>Y Axis Log</string>
+             <string>Normalize</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2" colspan="2">
+           <widget class="QCheckBox" name="clear_plot_checkBox">
+            <property name="text">
+             <string>Clear plot everytime</string>
             </property>
            </widget>
           </item>

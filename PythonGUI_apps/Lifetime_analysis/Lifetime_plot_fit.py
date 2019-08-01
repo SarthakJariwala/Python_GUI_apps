@@ -179,7 +179,10 @@ class MainWindow(TemplateBaseClass):
     def plot(self):
         try:
             x,y = self.acquire_settings()
-            self.ui.plot.plot(x, y, clear=False, pen=pg.mkPen(self.plot_color))
+            if self.ui.normalize_checkBox.isChecked():
+                y = y / np.amax(y)
+                
+            self.ui.plot.plot(x, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
 
             try:
                 self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
@@ -215,7 +218,7 @@ class MainWindow(TemplateBaseClass):
             TRPL_interp = np.interp(time_fit, t, y)
             
             fit_func = self.ui.FittingFunc_comboBox.currentText()
-            self.ui.plot.plot(t, y, clear=True, pen=pg.mkPen(self.plot_color))
+            self.ui.plot.plot(t, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
             
             if fit_func == "Stretched Exponential": #stretch exponential tab
                 tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
@@ -223,7 +226,7 @@ class MainWindow(TemplateBaseClass):
                 self.out[:,0] = t #time
                 self.out[:,1] = TRPL_interp #Raw PL 
                 self.out[:,2] = PL_fit # PL fit
-                self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
+                self.ui.plot.plot(t, PL_fit, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
                 self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential"
                                                    "\nFit Method: " + "diff_ev" + #TODO : change when diff_ev and fmin_tnc implemented for non-irf
                                                    "\nAverage Lifetime = " + str(avg_tau)+ " ns"
@@ -236,7 +239,7 @@ class MainWindow(TemplateBaseClass):
                 self.out[:,0] = t #time
                 self.out[:,1] = TRPL_interp #Raw PL 
                 self.out[:,2] = PL_fit # PL fit
-                self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
+                self.ui.plot.plot(t, PL_fit, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
                 self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
                                                    "\nFit Method: " + "diff_ev" +
                                                    "\nAverage Lifetime = " + str(avg_tau)+ " ns"
@@ -251,7 +254,7 @@ class MainWindow(TemplateBaseClass):
                 self.out[:,0] = t #time
                 self.out[:,1] = TRPL_interp #Raw PL 
                 self.out[:,2] = PL_fit # PL fit
-                self.ui.plot.plot(t, PL_fit, clear=False, pen='k')
+                self.ui.plot.plot(t, PL_fit, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
                 self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
                                                    "\nFit Method: " + "diff_ev" +
                                                    "\nLifetime = " + str(tau)+ " ns"
@@ -287,7 +290,7 @@ class MainWindow(TemplateBaseClass):
             TRPL_interp = np.interp(time_fit, t, y)
 
             fit_func = self.ui.FittingFunc_comboBox.currentText()
-            self.ui.plot.plot(t, y, clear=True, pen=pg.mkPen(self.plot_color))
+            self.ui.plot.plot(t, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
             if fit_func == "Stretched Exponential": #stretched exponential tab
                 tc_bounds = (self.ui.str_tc_min_spinBox.value(), self.ui.str_tc_max_spinBox.value()) #(0, 10000)
                 a_bounds = (self.ui.str_a_min_spinBox.value(), self.ui.str_a_max_spinBox.value())#(0.9, 1.1)
@@ -306,7 +309,7 @@ class MainWindow(TemplateBaseClass):
                 self.out[:,0] = t #time
                 self.out[:,1] = TRPL_interp #Raw PL 
                 self.out[:,2] = bestfit_model # PL fit
-                self.ui.plot.plot(t, bestfit_model, clear=False, pen='k')
+                self.ui.plot.plot(t, bestfit_model, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
                 self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential"
                     "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
                     "\ntau_avg = %.5f ns"
@@ -335,7 +338,7 @@ class MainWindow(TemplateBaseClass):
                 self.out[:,0] = t #time
                 self.out[:,1] = TRPL_interp #Raw PL 
                 self.out[:,2] = bestfit_model # PL fit
-                self.ui.plot.plot(t, bestfit_model, clear=False, pen='k')
+                self.ui.plot.plot(t, bestfit_model, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
                 self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
                     "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
                     "\na1 = %.5f"
@@ -359,7 +362,7 @@ class MainWindow(TemplateBaseClass):
                 self.out[:,0] = t #time
                 self.out[:,1] = TRPL_interp #Raw PL 
                 self.out[:,2] = bestfit_model # PL fit
-                self.ui.plot.plot(t, bestfit_model, clear=False, pen='k')
+                self.ui.plot.plot(t, bestfit_model, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
                 self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
                     "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
                     "\na = %.5f"
