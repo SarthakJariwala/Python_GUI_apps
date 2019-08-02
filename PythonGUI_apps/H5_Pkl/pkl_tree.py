@@ -80,7 +80,7 @@ class PklTreeSearchView(DataBrowserView):
                 self.traverse_dict(dictionary[key], previous_dict, level)
             else:
                 value = dictionary[key]
-                if type(value) == np.ndarray:
+                if type(value) == np.ndarray or type(value)==np.memmap:
                     value = str(value.shape) + " " + str(value.dtype)
                 # if type(value) == list and len(value) > 5: ##account for data stored in lists
                 #     value = str(np.asarray(value).shape) + " " + str(type(value[0]))
