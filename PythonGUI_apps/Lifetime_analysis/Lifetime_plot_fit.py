@@ -163,7 +163,10 @@ class MainWindow(TemplateBaseClass):
 		try:
 			try:
 				if self.ui.separate_irf_checkBox.isChecked() and mode=="irf":
-					y = self.irf_file[:,channel]
+					try:
+						y = self.irf_file[:,channel]
+					except:
+						y = self.irf_file.get_curve(channel)
 				else:
 					y = self.file[:,channel]
 			except:
