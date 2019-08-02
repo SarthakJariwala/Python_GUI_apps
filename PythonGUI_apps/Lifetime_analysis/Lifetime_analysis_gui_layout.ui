@@ -1018,6 +1018,9 @@
          </item>
          <item row="0" column="1">
           <widget class="QDoubleSpinBox" name="average_lifetime_spinBox">
+           <property name="decimals">
+            <number>4</number>
+           </property>
            <property name="maximum">
             <double>9999999.000000000000000</double>
            </property>
@@ -1057,7 +1060,7 @@
           </font>
          </property>
          <property name="title">
-          <string>Export Plot Settings</string>
+          <string>Export Settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="0">
@@ -1085,8 +1088,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Export Publication
-Ready Figure!</string>
+             <string>Export figure</string>
             </property>
            </widget>
           </item>

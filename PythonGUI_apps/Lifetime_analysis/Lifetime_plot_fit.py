@@ -101,7 +101,7 @@ class MainWindow(TemplateBaseClass):
 		try:
 			self.irf_file = np.loadtxt(filename[0], skiprows=10)
 		except UnicodeDecodeError:
-			self.file = read_picoharp_phd(filename[0])
+			self.irf_file = read_picoharp_phd(filename[0])
 		except:
 			pass
 	
