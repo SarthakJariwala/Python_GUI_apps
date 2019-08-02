@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1580</width>
-    <height>884</height>
+    <width>1650</width>
+    <height>1046</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -726,7 +726,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -1216,35 +1216,23 @@ File</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="pkl_to_text">
+      <widget class="QWidget" name="pkl_conversion">
        <attribute name="title">
-        <string>pkl to txt</string>
+        <string>.pkl conversion</string>
        </attribute>
        <widget class="QGroupBox" name="groupBox_4">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>20</y>
+          <y>70</y>
           <width>351</width>
           <height>251</height>
          </rect>
         </property>
         <property name="title">
-         <string>Convert</string>
+         <string>txt</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QPushButton" name="import_pkl_pushButton">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Import .pkl file</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <widget class="QPushButton" name="data_txt_pushButton">
            <property name="font">
@@ -1271,6 +1259,55 @@ File</string>
          </item>
         </layout>
        </widget>
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="geometry">
+         <rect>
+          <x>390</x>
+          <y>70</y>
+          <width>321</width>
+          <height>251</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>h5</string>
+        </property>
+        <widget class="QPushButton" name="pkl_to_h5_pushButton">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>80</y>
+           <width>221</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>.pkl to .h5</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QPushButton" name="import_pkl_pushButton">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>20</y>
+          <width>323</width>
+          <height>40</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Import .pkl file</string>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>
@@ -1281,7 +1318,7 @@ File</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1580</width>
+     <width>1650</width>
      <height>31</height>
     </rect>
    </property>

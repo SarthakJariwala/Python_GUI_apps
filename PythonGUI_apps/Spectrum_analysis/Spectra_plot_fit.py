@@ -7,6 +7,7 @@ Created on Wed Mar 27 16:50:26 2019
 
 # system imports
 import sys
+import h5py
 from pathlib import Path
 import os.path
 import pyqtgraph as pg
@@ -78,6 +79,8 @@ class MainWindow(TemplateBaseClass):
 		self.ui.import_pkl_pushButton.clicked.connect(self.open_pkl_file)
 		self.ui.data_txt_pushButton.clicked.connect(self.pkl_data_to_txt)
 		self.ui.scan_params_txt_pushButton.clicked.connect(self.pkl_params_to_txt)
+
+		self.ui.pkl_to_h5_pushButton.clicked.connect(self.pkl_to_h5)
 
 		self.ui.tabWidget.currentChanged.connect(self.switch_overall_tab)
 		self.ui.fitFunc_comboBox.currentTextChanged.connect(self.switch_bounds_and_guess_tab)
@@ -604,6 +607,30 @@ class MainWindow(TemplateBaseClass):
 				f.write("%s\n" % str(item[1])) #write value
 
 		self.ui.result_textBrowser.append("Scan parameters from .pkl saved as .txt")
+
+	def pkl_to_h5(self):
+		folder = os.path.dirname(self.pkl_to_convert[0])
+		filename_ext = os.path.basename(self.pkl_to_convert[0])
+		filename = os.path.splitext(filename_ext)[0] #get filename without extension
+		pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
+
+		h5_filename = folder + "/" + filename + ".h5"
+		h5_file = h5py.File(h5_filename, "w")
+		self.traverse_dict(pkl_file, h5_file)
+
+	def traverse_dict(self, dictionary, h5_output):
+		for key in dictionary:
+			if type(dictionary[key]) == dict:
+				#print_string += key + "-->"
+				group = h5_output.create_group(key)#print(print_string)
+				previous_dict = dictionary[key]
+				self.traverse_dict(dictionary[key], group)
+			else:
+				if key == "Wavelengths" or key == "Intensities":
+					h5_output.create_dataset(key, data=dictionary[key])
+				else:
+					h5_output.attrs[key] = dictionary[key]	
+
 
 	def close_application(self):
 		choice = QtGui.QMessageBox.question(self, 'EXIT!',

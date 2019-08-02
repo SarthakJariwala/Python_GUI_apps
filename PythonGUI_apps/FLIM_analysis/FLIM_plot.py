@@ -1,4 +1,5 @@
 import sys
+import h5py
 from pathlib import Path
 import os.path
 import pyqtgraph as pg
@@ -40,6 +41,9 @@ class MainWindow(TemplateBaseClass):
 		self.ui.save_intensities_array_pushButton.clicked.connect(self.save_intensities_array)
 		self.ui.compare_checkBox.stateChanged.connect(self.switch_compare)
 		self.ui.intensity_sums_viewBox.roi.sigRegionChanged.connect(self.line_profile_update_plot)
+
+		self.ui.import_pkl_pushButton.clicked.connect(self.import_pkl_to_convert)
+		self.ui.pkl_to_h5_pushButton.clicked.connect(self.pkl_to_h5)
 		self.show()
 
 	"""Open Scan Files"""
@@ -49,6 +53,13 @@ class MainWindow(TemplateBaseClass):
 			self.pkl_file = pickle.load(open(self.filename[0], 'rb'))
 		except Exception as err:
 			print(format(err))
+
+	def import_pkl_to_convert(self):
+		try:
+			self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self)
+			self.ui.result_textBrowser.append("Done Loading - .pkl to convert")
+		except:
+			pass
 
 	def plot_intensity_sums(self):
 		try:
@@ -191,6 +202,32 @@ class MainWindow(TemplateBaseClass):
 			np.savetxt(save_to, self.intensity_sums.T, fmt='%f') #save transpoed intensity sums, as original array handles x in cols and y in rows
 		except:
 			pass
+
+	def pkl_to_h5(self):
+		try:
+			folder = os.path.dirname(self.pkl_to_convert[0])
+			filename_ext = os.path.basename(self.pkl_to_convert[0])
+			filename = os.path.splitext(filename_ext)[0] #get filename without extension
+			pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
+
+			h5_filename = folder + "/" + filename + ".h5"
+			h5_file = h5py.File(h5_filename, "w")
+			self.traverse_dict(pkl_file, h5_file)
+		except Exception as err:
+			print(format(err))
+
+	def traverse_dict(self, dictionary, h5_output):
+		for key in dictionary:
+			if type(dictionary[key]) == dict:
+				#print_string += key + "-->"
+				group = h5_output.create_group(key)#print(print_string)
+				previous_dict = dictionary[key]
+				self.traverse_dict(dictionary[key], group)
+			else:
+				if key == "Histogram data" or key == "Time data":
+					h5_output.create_dataset(key, data=dictionary[key])
+				else:
+					h5_output.attrs[key] = dictionary[key]
 
 	def close_application(self):
 		choice = QtGui.QMessageBox.question(self, 'EXIT!',
