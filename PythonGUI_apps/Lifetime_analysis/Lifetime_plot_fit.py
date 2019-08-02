@@ -391,14 +391,11 @@ class MainWindow(TemplateBaseClass):
     def call_fit_and_plot(self):
         if self.ui.fit_with_irf_checkBox.isChecked():
             self.fit_and_plot_with_irf()
-            if self.ui.calculate_srv_groupBox.isChecked() and self.ui.FittingFunc_comboBox.currentText() == "Stretched Exponential":
-                self.calculate_srv()
-                self.data_list.append(self.get_srv_string())
         else:
             self.fit_and_plot()
-            if self.ui.calculate_srv_groupBox.isChecked() and self.ui.FittingFunc_comboBox.currentText() == "Stretched Exponential":
-                self.calculate_srv()
-                self.data_list.append(self.get_srv_string())
+        if self.ui.calculate_srv_groupBox.isChecked():
+            self.calculate_srv()
+            self.data_list.append(self.get_srv_string())
     
     def calculate_surface_lifetime(self):
         effective_lifetime = self.ui.average_lifetime_spinBox.value()
