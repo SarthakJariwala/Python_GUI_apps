@@ -270,8 +270,6 @@ class MainWindow(TemplateBaseClass):
                 self.ui.average_lifetime_spinBox.setValue(tau)
             
             self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-            if self.ui.calculate_srv_groupBox.isChecked():
-                self.data_list.append(self.get_srv_string())
             
             self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
             self.ui.plot.setLabel('bottom', 'Time (ns)')
@@ -385,8 +383,6 @@ class MainWindow(TemplateBaseClass):
                 self.ui.average_lifetime_spinBox.setValue(bestfit_params[1]) #set spinbox to tau value
 
             self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-            if self.ui.calculate_srv_groupBox.isChecked():
-                self.data_list.append(self.get_srv_string())
         
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -396,10 +392,13 @@ class MainWindow(TemplateBaseClass):
         if self.ui.fit_with_irf_checkBox.isChecked():
             self.fit_and_plot_with_irf()
             if self.ui.calculate_srv_groupBox.isChecked() and self.ui.FittingFunc_comboBox.currentText() == "Stretched Exponential":
-                #self.calculate_surface_lifetime()
                 self.calculate_srv()
+                self.data_list.append(self.get_srv_string())
         else:
             self.fit_and_plot()
+            if self.ui.calculate_srv_groupBox.isChecked() and self.ui.FittingFunc_comboBox.currentText() == "Stretched Exponential":
+                self.calculate_srv()
+                self.data_list.append(self.get_srv_string())
     
     def calculate_surface_lifetime(self):
         effective_lifetime = self.ui.average_lifetime_spinBox.value()
