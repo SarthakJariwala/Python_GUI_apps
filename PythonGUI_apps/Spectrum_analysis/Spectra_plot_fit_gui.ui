@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1650</width>
-    <height>1046</height>
+    <width>1728</width>
+    <height>1052</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -346,18 +346,6 @@
            </layout>
           </widget>
          </item>
-         <item row="9" column="0" colspan="2">
-          <widget class="QPushButton" name="fit_scan_pushButton">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Fit Entire Scan</string>
-           </property>
-          </widget>
-         </item>
          <item row="4" column="0" colspan="2">
           <widget class="QCheckBox" name="adjust_param_checkBox">
            <property name="font">
@@ -397,18 +385,6 @@
              <string>Multiple Gaussians</string>
             </property>
            </item>
-          </widget>
-         </item>
-         <item row="8" column="0" colspan="2">
-          <widget class="QPushButton" name="fit_pushButton">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Fit Single Spectrum</string>
-           </property>
           </widget>
          </item>
          <item row="7" column="0" colspan="2">
@@ -637,6 +613,30 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="fit_pushButton">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Fit Single Spectrum</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="fit_scan_pushButton">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Fit Entire Scan</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QGroupBox" name="scan_fit_settings_groupBox">
         <property name="enabled">
          <bool>false</bool>
@@ -650,6 +650,18 @@
          <string>Scan Fit Settings</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_12">
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_9">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Stop at (nm):</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="1">
           <widget class="QSpinBox" name="start_nm_spinBox">
            <property name="font">
@@ -677,18 +689,6 @@
            </property>
            <property name="text">
             <string>Start at (nm):</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Stop at (nm):</string>
            </property>
           </widget>
          </item>
@@ -726,7 +726,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -1136,7 +1136,14 @@ Ready Figure</string>
           </item>
          </layout>
         </item>
-        <item row="0" column="0">
+        <item row="1" column="1" colspan="2">
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" rowspan="3">
          <widget class="QGroupBox" name="groupBox_3">
           <property name="maximumSize">
            <size>
@@ -1204,14 +1211,10 @@ File</string>
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QTextBrowser" name="result_textBrowser2"/>
+           </item>
           </layout>
-         </widget>
-        </item>
-        <item row="1" column="1" colspan="2">
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
          </widget>
         </item>
        </layout>
@@ -1318,7 +1321,7 @@ File</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1650</width>
+     <width>1728</width>
      <height>31</height>
     </rect>
    </property>

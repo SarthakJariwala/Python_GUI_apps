@@ -1075,7 +1075,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QPushButton" name="export_plot_pushButton">
             <property name="font">
              <font>
@@ -1087,6 +1087,13 @@
             <property name="text">
              <string>Export Publication
 Ready Figure!</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QPushButton" name="export_data_pushButton">
+            <property name="text">
+             <string>Export data</string>
             </property>
            </widget>
           </item>
@@ -1314,7 +1321,7 @@ Ready Figure!</string>
   <customwidget>
    <class>PlotWidget</class>
    <extends>QGraphicsView</extends>
-   <header location="global">pyqtgraph</header>
+   <header>pyqtgraph</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -140,33 +140,32 @@ class MainWindow(TemplateBaseClass):
 		try:
 			filename = QtWidgets.QFileDialog.getOpenFileName(self)
 			self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
-			self.ui.result_textBrowser.append("Done Loading - Spectra Scan File")
+			self.ui.result_textBrowser2.append("Done Loading - Spectra Scan File")
 		except Exception as e:
-			self.ui.result_textBrowser.append(str(e))
+			self.ui.result_textBrowser2.append(str(e))
 			pass
 	
 	def open_spectra_bck_file(self):
 		try:
 			filename = QtWidgets.QFileDialog.getOpenFileName(self)
 			self.bck_file = np.loadtxt(filename[0])#, skiprows=1, delimiter=None)
-			self.ui.result_textBrowser.append("Done Loading - Background File")
+			self.ui.result_textBrowser2.append("Done Loading - Background File")
 		except Exception as e:
-			self.ui.result_textBrowser.append(str(e))
+			self.ui.result_textBrowser2.append(str(e))
 			pass
 	   
 	def open_fit_scan_file(self):
 		try:
 			filename = QtWidgets.QFileDialog.getOpenFileName(self)
 			self.fit_scan_file = pickle.load(open(filename[0], 'rb'))
-			self.ui.result_textBrowser.append("Done Loading - Scan Fit File")
+			self.ui.result_textBrowser2.append("Done Loading - Scan Fit File")
 		except Exception as e:
-			self.ui.result_textBrowser.append(str(e))
+			self.ui.result_textBrowser2.append(str(e))
 			pass
 
 	def open_pkl_file(self):
 		try:
 			self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self)
-			self.ui.result_textBrowser.append("Done Loading - .pkl to convert")
 		except:
 			pass
 	
@@ -180,12 +179,18 @@ class MainWindow(TemplateBaseClass):
 	def switch_overall_tab(self):
 		if self.ui.tabWidget.currentIndex() == 0:
 			self.ui.fitting_settings_groupBox.setEnabled(True)
+			self.ui.fit_pushButton.setEnabled(True)
+			self.ui.fit_scan_pushButton.setEnabled(True)
 			self.ui.scan_fit_settings_groupBox.setEnabled(False)
 		elif self.ui.tabWidget.currentIndex() == 1:
 			self.ui.fitting_settings_groupBox.setEnabled(False)
+			self.ui.fit_pushButton.setEnabled(False)
+			self.ui.fit_scan_pushButton.setEnabled(True)
 			self.ui.scan_fit_settings_groupBox.setEnabled(True)
 		elif self.ui.tabWidget.currentIndex() == 2:
 			self.ui.fitting_settings_groupBox.setEnabled(False)
+			self.ui.fit_pushButton.setEnabled(False)
+			self.ui.fit_scan_pushButton.setEnabled(False)
 			self.ui.scan_fit_settings_groupBox.setEnabled(False)
 
 	def switch_bounds_and_guess_tab(self):
@@ -289,7 +294,7 @@ class MainWindow(TemplateBaseClass):
 			self.ui.fit_scan_viewbox.view.invertY(False)
 				
 		except Exception as e:
-			self.ui.result_textBrowser.append(str(e))
+			self.ui.result_textBrowser2.append(str(e))
 			pass
 			
 	def plot_raw_scan(self):
@@ -317,8 +322,8 @@ class MainWindow(TemplateBaseClass):
 			scale.setParentItem(self.ui.raw_scan_viewbox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
 			
-		except:
-			pass
+		except Exception as e:
+			self.ui.result_textBrowser2.append(str(e))
 
 	def plot_intensity_sums(self):
 		try:
@@ -343,8 +348,8 @@ class MainWindow(TemplateBaseClass):
 			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
 
-		except:
-			pass
+		except Exception as e:
+			self.ui.result_textBrowser2.append(str(e))
 
 	def normalize(self):
 		self.y = (self.y) / np.amax(self.y)
@@ -521,7 +526,7 @@ class MainWindow(TemplateBaseClass):
 			print("Data Saved!")
 		
 		except Exception as e:
-			self.ui.result_textBrowser.append(str(e))
+			self.ui.result_textBrowser2.append(str(e))
 			pass
 		
 #        self.ui.result_textBrowser.append("Loading Fit Data and Plotting")
@@ -531,7 +536,7 @@ class MainWindow(TemplateBaseClass):
 			self.plot_fit_scan()
 			
 		except Exception as e:
-			self.ui.result_textBrowser.append(str(e))
+			self.ui.result_textBrowser2.append(str(e))
 			pass
 
 	def pub_ready_plot_export(self):
@@ -579,7 +584,6 @@ class MainWindow(TemplateBaseClass):
 			txt_file[:,i+1] = data_array[:,i]
 
 		np.savetxt(folder +"/"+ filename +"_data.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="wavelength(nm), Intensities at different points")
-		self.ui.result_textBrowser.append("Data from .pkl saved as .txt")
 
 	#Get scan parameters from ocean optics scan pkl file, and convert to txt
 	def pkl_params_to_txt(self):
@@ -606,9 +610,8 @@ class MainWindow(TemplateBaseClass):
 				f.write("%s\t" % str(item[0])) #write name
 				f.write("%s\n" % str(item[1])) #write value
 
-		self.ui.result_textBrowser.append("Scan parameters from .pkl saved as .txt")
-
 	def pkl_to_h5(self):
+		#Convert scan .pkl file to h5
 		folder = os.path.dirname(self.pkl_to_convert[0])
 		filename_ext = os.path.basename(self.pkl_to_convert[0])
 		filename = os.path.splitext(filename_ext)[0] #get filename without extension
@@ -616,15 +619,15 @@ class MainWindow(TemplateBaseClass):
 
 		h5_filename = folder + "/" + filename + ".h5"
 		h5_file = h5py.File(h5_filename, "w")
-		self.traverse_dict(pkl_file, h5_file)
+		self.traverse_dict_into_h5(pkl_file, h5_file)
 
-	def traverse_dict(self, dictionary, h5_output):
+	def traverse_dict_into_h5(self, dictionary, h5_output):
+		#Create an h5 file using .pkl with scan data and params
 		for key in dictionary:
 			if type(dictionary[key]) == dict:
-				#print_string += key + "-->"
-				group = h5_output.create_group(key)#print(print_string)
+				group = h5_output.create_group(key)
 				previous_dict = dictionary[key]
-				self.traverse_dict(dictionary[key], group)
+				self.traverse_dict_into_h5(dictionary[key], group)
 			else:
 				if key == "Wavelengths" or key == "Intensities":
 					h5_output.create_dataset(key, data=dictionary[key])

@@ -204,6 +204,7 @@ class MainWindow(TemplateBaseClass):
 			pass
 
 	def pkl_to_h5(self):
+		#Convert scan .pkl file into h5
 		try:
 			folder = os.path.dirname(self.pkl_to_convert[0])
 			filename_ext = os.path.basename(self.pkl_to_convert[0])
@@ -212,17 +213,17 @@ class MainWindow(TemplateBaseClass):
 
 			h5_filename = folder + "/" + filename + ".h5"
 			h5_file = h5py.File(h5_filename, "w")
-			self.traverse_dict(pkl_file, h5_file)
+			self.traverse_dict_into_h5(pkl_file, h5_file)
 		except Exception as err:
 			print(format(err))
 
-	def traverse_dict(self, dictionary, h5_output):
+	def traverse_dict_into_h5(self, dictionary, h5_output):
+		#Create an h5 file using .pkl with scan data and params
 		for key in dictionary:
 			if type(dictionary[key]) == dict:
-				#print_string += key + "-->"
-				group = h5_output.create_group(key)#print(print_string)
+				group = h5_output.create_group(key)
 				previous_dict = dictionary[key]
-				self.traverse_dict(dictionary[key], group)
+				self.traverse_dict_into_h5(dictionary[key], group)
 			else:
 				if key == "Histogram data" or key == "Time data":
 					h5_output.create_dataset(key, data=dictionary[key])
