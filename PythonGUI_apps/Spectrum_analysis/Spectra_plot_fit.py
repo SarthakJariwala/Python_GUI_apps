@@ -205,9 +205,9 @@ class MainWindow(TemplateBaseClass):
 			self.ui.guess_stackedWidget.setCurrentIndex(1)
 			self.ui.plot_components_checkBox.setEnabled(True)
 			self.ui.n_spinBox.setValue(2)
-		elif fit_func == "Multiple Gaussians":
-			self.ui.n_label.setEnabled(True)
-			self.ui.n_spinBox.setEnabled(True)
+		elif fit_func == "Triple Gaussian":
+			self.ui.n_label.setEnabled(False)
+			self.ui.n_spinBox.setEnabled(False)
 			self.ui.bounds_stackedWidget.setCurrentIndex(2)
 			self.ui.guess_stackedWidget.setCurrentIndex(2)
 			self.ui.plot_components_checkBox.setEnabled(True)
@@ -343,7 +343,7 @@ class MainWindow(TemplateBaseClass):
 
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 				
-				elif fit_func == "Multiple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
+				elif fit_func == "Triple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
 					#currently only works for triple gaussian (n=3)
 					multiple_gauss = Multi_Gaussian(self.file, self.bck_file, 3, wlref=self.wlref_file)
 					if self.ui.adjust_param_checkBox.isChecked():
