@@ -13,7 +13,6 @@ GUI Python apps
 - lmfit
 - customplotting
 
-## Installation
 ```
 conda install numpy pyqt qtpy h5py pyqtgraph
 pip install git+git://github.com/ScopeFoundry/ScopeFoundry.git
