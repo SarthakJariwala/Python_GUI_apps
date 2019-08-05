@@ -12,8 +12,6 @@ from lmfit.models import GaussianModel
 import customplotting.mscope as cpm
 # local modules
  
-
-
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('imageAxisOrder', 'row-major')
@@ -34,6 +32,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui = WindowTemplate()
 		self.ui.setupUi(self)
 		
+		#set up ui signals
 		self.ui.load_scan_pushButton.clicked.connect(self.open_pkl_file)
 		self.ui.plot_intensity_sums_pushButton.clicked.connect(self.plot_intensity_sums)
 		self.ui.plot_raw_hist_data_pushButton.clicked.connect(self.plot_raw_scan)
@@ -41,13 +40,13 @@ class MainWindow(TemplateBaseClass):
 		self.ui.save_intensities_array_pushButton.clicked.connect(self.save_intensities_array)
 		self.ui.compare_checkBox.stateChanged.connect(self.switch_compare)
 		self.ui.intensity_sums_viewBox.roi.sigRegionChanged.connect(self.line_profile_update_plot)
-
 		self.ui.import_pkl_pushButton.clicked.connect(self.import_pkl_to_convert)
 		self.ui.pkl_to_h5_pushButton.clicked.connect(self.pkl_to_h5)
+
 		self.show()
 
-	"""Open Scan Files"""
 	def open_pkl_file(self):
+		""" Open FLIM scan file """
 		try:
 			self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
 			self.pkl_file = pickle.load(open(self.filename[0], 'rb'))
@@ -55,6 +54,7 @@ class MainWindow(TemplateBaseClass):
 			print(format(err))
 
 	def import_pkl_to_convert(self):
+		""" Open pkl file to convert to h5 """
 		try:
 			self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self)
 			self.ui.result_textBrowser.append("Done Loading - .pkl to convert")
@@ -70,11 +70,10 @@ class MainWindow(TemplateBaseClass):
 			self.x_scan_size = float(data['Scan Parameters']['X scan size (um)'])
 			self.y_step_size = float(data['Scan Parameters']['Y step size (um)'])
 			self.y_scan_size = float(data['Scan Parameters']['Y scan size (um)'])
-			# TODO test line scan plots
 
 			hist_data = data["Histogram data"]
 			hist_data = np.reshape(hist_data, newshape=(hist_data.shape[0], self.numb_pixels_X*self.numb_pixels_Y))
-			self.intensity_sums = np.sum(hist_data, axis=0)
+			self.intensity_sums = np.sum(hist_data, axis=0) #sum intensities for each pixel
 			self.intensity_sums = np.reshape(self.intensity_sums, newshape=(self.numb_pixels_X, self.numb_pixels_Y))
 			self.ui.intensity_sums_viewBox.view.invertY(False) # stop y axis invert
 			self.ui.intensity_sums_viewBox.setImage(self.intensity_sums, scale=
@@ -88,6 +87,7 @@ class MainWindow(TemplateBaseClass):
 			print(format(err))
 
 	def line_profile_update_plot(self):
+		""" Handle line profile for intensity sum viewbox """
 		if hasattr(self, "intensity_sums"):
 			roiPlot = self.ui.intensity_sums_viewBox.getRoiPlot()
 			roiPlot.clear()
@@ -144,10 +144,10 @@ class MainWindow(TemplateBaseClass):
 
 	def switch_compare(self):
 		"""
-		Handles compare checkbox. If checked, show second ROI that user can use for comparison to first ROI.
+		Handles compare checkbox. If checked, show second ROI on raw histogram data that user can use for comparison to first ROI.
 		"""
 		if self.ui.compare_checkBox.isChecked() and hasattr(self, "hist_image"):
-			if not hasattr(self, "roi2"):
+			if not hasattr(self, "roi2"): #create roi if doesn't exist yet
 				self.roi2 = pg.ROI(pos=[0,0], size=[int(self.x_scan_size/2), int(self.y_scan_size/2)], movable=True, pen='r')
 				self.roi2.addScaleHandle([1, 1], [0, 0])
 				self.roi2.addRotateHandle([0, 0], [1, 1])
@@ -162,12 +162,13 @@ class MainWindow(TemplateBaseClass):
 			else:
 				self.roi2.hide()
 				self.roi2_plot.hide()
-		else:
+		else: #if not checked, hide roi
 			if hasattr(self, "roi2"):
 				self.roi2.hide()
 				self.roi2_plot.hide()
 
 	def update_roi2_plot(self):
+		""" Update plot corresponding to second roi """
 		#Adapted from pyqtgraph imageview sourcecode
 		
 		image = self.ui.raw_hist_data_viewBox.getProcessedImage()
@@ -177,6 +178,7 @@ class MainWindow(TemplateBaseClass):
 		data, coords = self.roi2.getArrayRegion(image.view(np.ndarray), self.ui.raw_hist_data_viewBox.imageItem, axes, returnMappedCoords=True)
 		if data is None:
 			return
+
 		# Average data within entire ROI for each frame
 		data = data.mean(axis=max(axes)).mean(axis=min(axes))
 		xvals = self.ui.raw_hist_data_viewBox.tVals
@@ -199,7 +201,7 @@ class MainWindow(TemplateBaseClass):
 			filename_ext = os.path.basename(self.filename[0])
 			filename = os.path.splitext(filename_ext)[0] #get filename without extension
 			save_to = os.getcwd() + "\\" + filename + "_intensity_sums.txt"
-			np.savetxt(save_to, self.intensity_sums.T, fmt='%f') #save transpoed intensity sums, as original array handles x in cols and y in rows
+			np.savetxt(save_to, self.intensity_sums.T, fmt='%f') #save transposed intensity sums, as original array handles x in cols and y in rows
 		except:
 			pass
 
@@ -220,15 +222,15 @@ class MainWindow(TemplateBaseClass):
 	def traverse_dict_into_h5(self, dictionary, h5_output):
 		#Create an h5 file using .pkl with scan data and params
 		for key in dictionary:
-			if type(dictionary[key]) == dict:
+			if type(dictionary[key]) == dict: #if subdictionary, create a group
 				group = h5_output.create_group(key)
 				previous_dict = dictionary[key]
-				self.traverse_dict_into_h5(dictionary[key], group)
+				self.traverse_dict_into_h5(dictionary[key], group) #traverse subdictionary
 			else:
 				if key == "Histogram data" or key == "Time data":
 					h5_output.create_dataset(key, data=dictionary[key])
 				else:
-					h5_output.attrs[key] = dictionary[key]
+					h5_output.attrs[key] = dictionary[key] #if not dataset, create attribute
 
 	def close_application(self):
 		choice = QtGui.QMessageBox.question(self, 'EXIT!',

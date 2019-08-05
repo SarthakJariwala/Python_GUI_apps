@@ -40,7 +40,6 @@ def convolve_sig_resp(signal_array, response_array, t_array, tstep):
 #    
 #        return np.pad(array, (pad_length, 0), 'symmetric')
 
-    
     def signal_and_resp_forconv(signal_array, response_array):
         resp_pad_negtime = array_zeropad_neg(normalize_response(response_array, t_array), len(response_array) - 1)
         sig_pad_negtime = array_zeropad_neg(signal_array, len(signal_array) - 1)
@@ -51,8 +50,6 @@ def convolve_sig_resp(signal_array, response_array, t_array, tstep):
     convolution = tstep * fftconvolve(sig, resp, mode = 'same')#np.convolve(resp, sig, mode = 'same') 
 
     return convolution[len(signal_array) - 1 : (2*len(signal_array)) - 1]
-
-
 
 def convolution_plusnoise(signal_array, response_array, t_array, tstep, noiselevel):
     return convolve_sig_resp(signal_array, response_array, t_array, tstep) + noiselevel
@@ -147,8 +144,6 @@ def fit_herz_ode_global_3traces_fmin_tnc(t1, t2, t3, tstep, d1, d2, d3, irf, ini
     # plt.legend(loc = 'best')
     return bestfit_params, bestfit_model, data_array, time_array, irf 
 
-
-
 def multi_exp(t, params, num_exp):
     exp_array = np.empty((len(t), num_exp))
 
@@ -242,9 +237,7 @@ def fit_exp_stretch_diffev(t, tstep, data, irf,  bounds):
     # plt.semilogy(time_array, data_array,'b', label = 'Data')
     # plt.semilogy(time_array, bestfit_model, 'r', label = 'Fit')
     # plt.legend(loc = 'best')
-    return bestfit_params, t_avg, bestfit_model, data_array, time_array, irf  
-
-
+    return bestfit_params, t_avg, bestfit_model, data_array, time_array, irf
 
 def fit_multi_exp_fmin_tnc(t, tstep, data, irf, init_params, bounds, n):
     time_array = t
@@ -289,7 +282,6 @@ def fit_multi_exp_fmin_tnc(t, tstep, data, irf, init_params, bounds, n):
     # plt.semilogy(time_array, bestfit_model, 'r', label = 'Fit')
     # plt.legend(loc = 'best')
     return bestfit_params, bestfit_model, data_array, time_array, irf  
-
 
 def fit_multi_exp_diffev(t, tstep, data, irf,  bounds, n):
     time_array = t

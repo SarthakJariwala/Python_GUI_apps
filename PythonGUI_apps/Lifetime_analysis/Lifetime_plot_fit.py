@@ -54,13 +54,16 @@ class MainWindow(TemplateBaseClass):
         self.ui = WindowTemplate()
         self.ui.setupUi(self)
         self.ui.Res_comboBox.addItems(["0.004","0.008","0.016","0.032","0.064","0.128","0.256","0.512"])
-        #self.ui.FittingFunc_comboBox.addItems(["Stretched Exponential","Double Exponential", "Single Exponential"])
+        self.ui.FittingFunc_comboBox.addItems(["Stretched Exponential","Double Exponential", "Single Exponential"])
+        self.ui.FittingMethod_comboBox.addItems(["diff_ev", "fmin_tnc"])
         
+        #set up file menu
         self.ui.actionOpen.triggered.connect(self.open_file)
         self.ui.actionOpen_IRF_File.triggered.connect(self.open_irf_file)
         self.ui.actionSave.triggered.connect(self.save_file)
         self.ui.actionExit.triggered.connect(self.close_application)
         
+        #set up ui signals
         self.ui.plot_pushButton.clicked.connect(self.plot)
         self.ui.fit_pushButton.clicked.connect(self.call_fit_and_plot)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
@@ -74,6 +77,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.separate_irf_checkBox.stateChanged.connect(self.switch_open_irf)
         self.ui.export_data_pushButton.clicked.connect(self.export_data)
 
+        #set up plot color button
         self.plot_color_button = pg.ColorButton(color=(255,0,0))
         self.ui.plot_color_button_container.layout().addWidget(self.plot_color_button)
         self.plot_color = self.plot_color_button.color()
@@ -85,6 +89,7 @@ class MainWindow(TemplateBaseClass):
         self.show()
         
     def open_file(self):
+        """ Open data file """
 #        try:
         self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
@@ -97,6 +102,7 @@ class MainWindow(TemplateBaseClass):
             pass
 
     def open_irf_file(self):
+        """ Open file with irf - enabled if 'load separate irf' is checled """
         filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
             self.irf_file = np.loadtxt(filename[0], skiprows=10)
@@ -113,10 +119,11 @@ class MainWindow(TemplateBaseClass):
             pass
 
     def switch_open_irf(self):
+        """ Handle 'load separate irf' checkbox """
         self.ui.actionOpen_IRF_File.setEnabled(self.ui.separate_irf_checkBox.isChecked())
 
-
     def switch_fit_settings(self):
+        """ Enable bounds/initial guess groupboxes only when 'Fit with IRF' is checked """
         checked = self.ui.fit_with_irf_checkBox.isChecked()
         for func in "str de se".split(" "):
             boundsGb = eval("self.ui."+func+"_bounds_groupBox")
@@ -131,6 +138,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.FittingMethod_comboBox.setEnabled(checked)
 
     def switch_function_tab(self):
+        """ Switch bounds groupbox contents depending on selected fit function """
         fitting_func = self.ui.FittingFunc_comboBox.currentText()
         if fitting_func == "Stretched Exponential":
             self.ui.fitting_params_stackedWidget.setCurrentIndex(0)
@@ -139,8 +147,8 @@ class MainWindow(TemplateBaseClass):
         elif fitting_func == "Single Exponential":
             self.ui.fitting_params_stackedWidget.setCurrentIndex(2)
         
-
     def switch_init_params_groupBox(self):
+        """ Enable initial guess groupbox only when fmin_tnc fit method selected """
         if self.ui.FittingMethod_comboBox.currentText() == "diff_ev":
             for func in "str de se".split(" "):
                 initGb = eval("self.ui."+func+"_init_groupBox")
@@ -152,22 +160,28 @@ class MainWindow(TemplateBaseClass):
                 initGb.setEnabled(True)
 
     def plot_color_changed(self):
+        """ Grab new plot_color when color button value is changed """
         self.plot_color = self.plot_color_button.color()
     
-    def acquire_settings(self, mode="data"):# mode --looks whether argument is data or irf
+    def acquire_settings(self, mode="data"):
+        """
+        Acquire data or irf from channel specified in spinbox.
+
+        mode -- string specifying whether to use data or irf channel (default "data")
+        """
         self.resolution = float(self.ui.Res_comboBox.currentText())
         if mode == "data":
             channel = int(self.ui.Data_channel_spinBox.value())
         elif mode == "irf":
             channel = int(self.ui.irf_channel_spinBox.value())
         try:
-            try:
-                if self.ui.separate_irf_checkBox.isChecked() and mode=="irf":
+            try: #
+                if self.ui.separate_irf_checkBox.isChecked() and mode=="irf": #if separate irf, get from irf file
                     try:
                         y = self.irf_file[:,channel]
                     except:
                         y = self.irf_file.get_curve(channel)[1]
-                else:
+                else: #otherwise, get data/irf from data file
                     y = self.file[:,channel]
             except:
                 res, y = self.file.get_curve(channel)
@@ -184,7 +198,7 @@ class MainWindow(TemplateBaseClass):
 
     def plot(self):
         try:
-            x,y = self.acquire_settings()
+            x,y = self.acquire_settings() #get data
             if self.ui.normalize_checkBox.isChecked():
                 y = y / np.amax(y)
                 
@@ -200,8 +214,8 @@ class MainWindow(TemplateBaseClass):
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Time (ns)')
         
-    
     def make_semilog(self):
+        """ Switch y-log on/off """
         self.ui.plot.setLogMode(False,self.ui.log_checkBox.isChecked())
     
     def clear_plot(self):
@@ -209,18 +223,18 @@ class MainWindow(TemplateBaseClass):
         self.ui.Result_textBrowser.clear()
     
     def fit_and_plot(self):
+        """ Fit and plot without IRF """
         try:
-            x,y = self.acquire_settings()
-            
-            y_norm = y/np.max(y)
+            x,y = self.acquire_settings() #get data
+            y_norm = y/np.max(y) #normalized y
+
             # find the max intensity in the array and start things from there
             find_max_int = np.nonzero(y_norm == 1)
             y = y[np.asscalar(find_max_int[0]):]
             x = x[np.asscalar(find_max_int[0]):]
-            
+
             t = x
-            
-            time_fit = t 
+            time_fit = t
             TRPL_interp = np.interp(time_fit, t, y)
             
             fit_func = self.ui.FittingFunc_comboBox.currentText()
@@ -269,6 +283,7 @@ class MainWindow(TemplateBaseClass):
                                                    "\nA = " + str(a))
                 self.ui.average_lifetime_spinBox.setValue(tau)
             
+            #add fit params to data_list
             self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
             
             self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
@@ -280,9 +295,10 @@ class MainWindow(TemplateBaseClass):
             print(exc_type, exc_tb.tb_lineno)
 
     def fit_and_plot_with_irf(self):
+        """ Fit and plot with IRF """
         try:
-            x,y = self.acquire_settings()
-            _, irf_counts = self.acquire_settings(mode="irf")
+            x,y = self.acquire_settings() #get data
+            _, irf_counts = self.acquire_settings(mode="irf") #get irf counts
 
             #make sure Irf and data have the same length
             if len(y) != len(irf_counts):
@@ -290,8 +306,8 @@ class MainWindow(TemplateBaseClass):
                 irf_counts = irf_counts[0:min(len(y), len(irf_counts))]
                 x = x[0:min(len(y), len(irf_counts))]
 
-            y_norm = y/np.max(y)
-            irf_norm = irf_counts/np.amax(irf_counts)
+            y_norm = y/np.max(y) #normalized y
+            irf_norm = irf_counts/np.amax(irf_counts) #normalized irf
             
             t = x
             time_fit = t 
@@ -382,6 +398,7 @@ class MainWindow(TemplateBaseClass):
                     "\nnoise = %.5f counts" %(bestfit_params[0], bestfit_params[1], bestfit_params[2]))
                 self.ui.average_lifetime_spinBox.setValue(bestfit_params[1]) #set spinbox to tau value
 
+            #add fit params to data_list
             self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
         
         except Exception as err:
@@ -394,8 +411,8 @@ class MainWindow(TemplateBaseClass):
         else:
             self.fit_and_plot()
         if self.ui.calculate_srv_groupBox.isChecked():
-            self.calculate_srv()
-            self.data_list.append(self.get_srv_string())
+            self.calculate_srv() #calculate srv on plot
+            self.data_list.append(self.get_srv_string()) #add srv params to data_list
     
     def calculate_surface_lifetime(self):
         effective_lifetime = self.ui.average_lifetime_spinBox.value()
@@ -416,7 +433,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.srv_label.setText(str(self.srv))
 
     def get_srv_string(self):
-        #Get info from SRV Calculation groupbox as string
+        """ Get info from SRV Calculation groupbox as string """
         srv_string = "SRV Calculation:"\
                 + "\nAverage Lifetime (ns): " + str(self.ui.average_lifetime_spinBox.value()) \
                 + "\nBulk Lifetime (ns): " + str(self.ui.bulk_lifetime_spinBox.value()) \
@@ -431,7 +448,7 @@ class MainWindow(TemplateBaseClass):
         return srv_string
     
     def export_data(self):
-        #Save fit params and srv calculations stored in data_list as .txt
+        """ Save fit params and srv calculations stored in data_list as .txt """
         folder = os.path.dirname(self.filename[0])
         filename_ext = os.path.basename(self.filename[0])
         filename = os.path.splitext(filename_ext)[0] #get filename without extension

@@ -30,6 +30,7 @@ class PklTreeSearchView(DataBrowserView):
         self.search_lineEdit.textChanged.connect(self.on_new_search_text)
         
     def on_change_data_filename(self, fname=None):
+        """ Handle file change """
         self.tree_textEdit.setText("loading {}".format(fname))
         try:
             self.fname = fname        
@@ -64,6 +65,13 @@ class PklTreeSearchView(DataBrowserView):
         self.tree_textEdit.verticalScrollBar().setValue(old_scroll_pos)
 
     def traverse_dict(self, dictionary, previous_dict, level):
+        """
+        Visit all values in the dictionary and its subdictionaries.
+
+        dictionary -- dictionary to traverse
+        previous_dict -- dictionary one level up
+        level -- track how far to indent 
+        """
         for key in dictionary:
             if key not in previous_dict:
                 level -=1

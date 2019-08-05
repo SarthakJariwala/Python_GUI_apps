@@ -68,7 +68,7 @@ class H5ViewPlot(BaseApp):
         self.ui.show()
 
     def on_change_data_filename(self):
-        #Handle file change
+        """ Handle file change """
         try:
             fname = self.settings.data_filename.val 
             if os.path.isfile(fname):
@@ -79,7 +79,7 @@ class H5ViewPlot(BaseApp):
             pass
 
     def plot_dataset(self):
-        #Plot data set depending on dataset shape and plot type option.
+        """ Plot data set depending on dataset shape and plot type option. """
         self.plot = self.ui.data_plotWidget.getPlotItem()
         self.plot.clear()
 
@@ -102,7 +102,7 @@ class H5ViewPlot(BaseApp):
             self.ui.data_imageView.setImage(data, xvals=x_values)
 
     def on_data_selection(self):
-        #Handle dataset selection
+        """ Handle dataset selection """
         try:
             dataset_name = self.ui.dataset_listWidget.currentItem().text()
             self.dataset = self.h5treeview.dataset_dict[dataset_name]
@@ -120,7 +120,7 @@ class H5ViewPlot(BaseApp):
             pass
 
     def update_data_widget(self):
-        #Decide which widget to display based on dataset shape and plot type option.
+        """ Decide which widget to display based on dataset shape and plot type option. """
         if self.dataset_shape == 1:
             self.ui.data_stackedWidget.setCurrentIndex(0)
         elif self.dataset_shape == 2 and self.ui.plot_radioButton.isChecked():

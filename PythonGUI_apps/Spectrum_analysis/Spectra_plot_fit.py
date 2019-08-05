@@ -54,10 +54,9 @@ class MainWindow(TemplateBaseClass):
 		self.ui.setupUi(self)
 		
 		# self.ui.fitFunc_comboBox.addItems(["Single Gaussian","Single Lorentzian", "Double Gaussian", "Multiple Gaussians"])
-		
-#        self.ui.actionSave.triggered.connect(self.save_file)
 #        self.ui.actionExit.triggered.connect(self.close_application)
 		
+		##setup ui signals
 		self.ui.importSpec_pushButton.clicked.connect(self.open_file)
 		self.ui.importBck_pushButton.clicked.connect(self.open_bck_file)
 		self.ui.importWLRef_pushButton.clicked.connect(self.open_wlref_file)
@@ -103,7 +102,7 @@ class MainWindow(TemplateBaseClass):
 		
 		self.show()
 	
-	"""Open Single Spectrum Files"""    
+	""" Open Single Spectrum files """
 	def open_file(self):
 		try:
 			filename = QtWidgets.QFileDialog.getOpenFileName(self)
@@ -164,19 +163,14 @@ class MainWindow(TemplateBaseClass):
 			pass
 
 	def open_pkl_file(self):
+		""" Open pkl file to convert to txt """
 		try:
 			self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self)
 		except:
 			pass
 	
-	def save_file(self):# not used yet!
-		try:
-			filename = QtWidgets.QFileDialog.getSaveFileName(self)
-			np.savetxt(filename[0], self.out, fmt = '%.5f', header = 'Time, Raw_PL, Sim_PL', delimiter = ' ')
-		except:
-			pass
-
 	def switch_overall_tab(self):
+		""" Enable/disable fit settings on right depending on current tab """
 		if self.ui.tabWidget.currentIndex() == 0:
 			self.ui.fitting_settings_groupBox.setEnabled(True)
 			self.ui.fit_pushButton.setEnabled(True)
@@ -193,7 +187,9 @@ class MainWindow(TemplateBaseClass):
 			self.ui.fit_scan_pushButton.setEnabled(False)
 			self.ui.scan_fit_settings_groupBox.setEnabled(False)
 
+	""" Single spectrum functions """
 	def switch_bounds_and_guess_tab(self):
+		""" Show the appropriate bounds and initial guess params based on fit function """
 		fit_func = self.ui.fitFunc_comboBox.currentText()
 		if fit_func == "Single Gaussian" or fit_func == "Single Lorentzian":
 			self.ui.n_label.setEnabled(False)
@@ -218,6 +214,7 @@ class MainWindow(TemplateBaseClass):
 			self.ui.n_spinBox.setValue(3)
 
 	def switch_adjust_param(self):
+		""" Enable bounds and initial guess only when adjust parameters is checked """
 		checked = self.ui.adjust_param_checkBox.isChecked()
 		self.ui.bounds_groupBox.setEnabled(checked)
 		self.ui.guess_groupBox.setEnabled(checked)
@@ -251,106 +248,6 @@ class MainWindow(TemplateBaseClass):
 		self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
 		self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
 	
-	def plot_fit_scan(self):
-		try:
-			if self.ui.use_raw_scan_settings.isChecked():
-				data = self.spec_scan_file
-				num_x = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-				num_y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
-			else:
-				num_x = self.ui.num_x_spinBox.value()
-				num_y = self.ui.num_y_spinBox.value()
-			
-			numb_of_points = num_x * num_y #75*75
-			
-			fwhm = np.zeros(shape=(numb_of_points,1))
-			pk_pos = np.zeros(shape=(numb_of_points,1))
-#            pk_pos_plus = np.zeros(shape=(numb_of_points,1))
-#            pk_pos_minus = np.zeros(shape=(numb_of_points,1))
-			sigma = np.zeros(shape=(numb_of_points,1))
-			height = np.zeros(shape=(numb_of_points,1))
-			
-			for i in range(numb_of_points):
-				fwhm[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_fwhm']
-				pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_center']
-				sigma[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_sigma']
-				height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
-			
-			newshape = (num_x, num_y)
-			
-			param_selection = str(self.ui.comboBox.currentText())
-			self.img = np.reshape(eval(param_selection), newshape)
-
-			if self.ui.use_raw_scan_settings.isChecked():
-				self.ui.fit_scan_viewbox.setImage(self.img, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']))
-				scale = pg.ScaleBar(size=2,suffix='um')
-				scale.setParentItem(self.ui.fit_scan_viewbox.view)
-				scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-			else:
-				self.ui.fit_scan_viewbox.setImage(self.img)
-			
-			self.ui.fit_scan_viewbox.view.invertY(False)
-				
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
-			pass
-			
-	def plot_raw_scan(self):
-		try:
-			data = self.spec_scan_file
-			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
-			# TODO test line scan plots
-
-			intensities = data['Intensities'].T #this is only there because of how we are saving the data in the app
-			
-			intensities = np.reshape(intensities, newshape=(2048,numb_pixels_X,numb_pixels_Y))
-			
-			wavelengths = data['Wavelengths']
-			
-			self.ui.raw_scan_viewbox.view.invertY(False)
-			self.ui.raw_scan_viewbox.setImage(intensities, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']), xvals=wavelengths)
-			
-
-			#roi_plot = self.ui.raw_scan_viewBox.getRoiPlot()
-			#roi_plot.plot(data['Wavelengths'], intensities)
-			scale = pg.ScaleBar(size=2,suffix='um')
-			scale.setParentItem(self.ui.raw_scan_viewbox.view)
-			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-			
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
-
-	def plot_intensity_sums(self):
-		try:
-			data = self.spec_scan_file
-			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
-			# TODO test line scan plots
-
-			intensities = data['Intensities']
-
-			#intensities = np.reshape(intensities, newshape=(2048, numb_pixels_X*numb_pixels_Y))
-			
-			sums = np.sum(intensities, axis=-1)
-			sums = np.reshape(sums, newshape=(numb_pixels_X, numb_pixels_Y))
-			
-			self.ui.intensity_sums_viewBox.setImage(sums, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']))
-			self.ui.intensity_sums_viewBox.view.invertY(False)
-			
-			scale = pg.ScaleBar(size=2,suffix='um')
-			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
-			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
-
 	def normalize(self):
 		self.y = (self.y) / np.amax(self.y)
 	
@@ -483,6 +380,135 @@ class MainWindow(TemplateBaseClass):
 		
 		except Exception as e:
 			self.ui.result_textBrowser.setText(str(e))
+
+	def pub_ready_plot_export(self):
+		filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
+		try:
+			try:
+				data = self.spec_scan_file
+				param_selection = str(self.ui.comboBox.currentText())
+				if param_selection == 'pk_pos': label = 'PL Peak Position (n.m.)'
+				elif param_selection == 'fwhm': label = 'PL FWHM (n.m.)'
+				cpm.plot_confocal(self.img, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap="seismic", cbar_label=label)
+				plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+				plt.close()
+			except:
+				plt.figure(figsize=(8,6))
+				plt.tick_params(direction='out', length=8, width=3.5)
+				plt.plot(self.x, self.y)
+				plt.plot(self.x, self.result.best_fit,'k')
+				plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
+				plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
+				plt.tight_layout()
+				
+				plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+				plt.close()
+			
+		except AttributeError:
+			self.ui.result_textBrowser.setText("Need to fit the data first!")
+
+
+	""" Scan spectra functions """
+	def plot_fit_scan(self):
+		try:
+			if self.ui.use_raw_scan_settings.isChecked():
+				data = self.spec_scan_file
+				num_x = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
+				num_y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
+			else:
+				num_x = self.ui.num_x_spinBox.value()
+				num_y = self.ui.num_y_spinBox.value()
+			
+			numb_of_points = num_x * num_y #75*75
+			
+			fwhm = np.zeros(shape=(numb_of_points,1))
+			pk_pos = np.zeros(shape=(numb_of_points,1))
+#            pk_pos_plus = np.zeros(shape=(numb_of_points,1))
+#            pk_pos_minus = np.zeros(shape=(numb_of_points,1))
+			sigma = np.zeros(shape=(numb_of_points,1))
+			height = np.zeros(shape=(numb_of_points,1))
+			
+			for i in range(numb_of_points):
+				fwhm[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_fwhm']
+				pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_center']
+				sigma[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_sigma']
+				height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
+			
+			newshape = (num_x, num_y)
+			
+			param_selection = str(self.ui.comboBox.currentText())
+			self.img = np.reshape(eval(param_selection), newshape)
+
+			if self.ui.use_raw_scan_settings.isChecked():
+				self.ui.fit_scan_viewbox.setImage(self.img, scale=
+												  (data['Scan Parameters']['X step size (um)'],
+												   data['Scan Parameters']['Y step size (um)']))
+				scale = pg.ScaleBar(size=2,suffix='um')
+				scale.setParentItem(self.ui.fit_scan_viewbox.view)
+				scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+			else:
+				self.ui.fit_scan_viewbox.setImage(self.img)
+			
+			self.ui.fit_scan_viewbox.view.invertY(False)
+				
+		except Exception as e:
+			self.ui.result_textBrowser2.append(str(e))
+			pass
+			
+	def plot_raw_scan(self):
+		try:
+			data = self.spec_scan_file
+			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
+			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
+			# TODO test line scan plots
+
+			intensities = data['Intensities'].T #this is only there because of how we are saving the data in the app
+			
+			intensities = np.reshape(intensities, newshape=(2048,numb_pixels_X,numb_pixels_Y))
+			
+			wavelengths = data['Wavelengths']
+			
+			self.ui.raw_scan_viewbox.view.invertY(False)
+			self.ui.raw_scan_viewbox.setImage(intensities, scale=
+												  (data['Scan Parameters']['X step size (um)'],
+												   data['Scan Parameters']['Y step size (um)']), xvals=wavelengths)
+			
+
+			#roi_plot = self.ui.raw_scan_viewBox.getRoiPlot()
+			#roi_plot.plot(data['Wavelengths'], intensities)
+			scale = pg.ScaleBar(size=2,suffix='um')
+			scale.setParentItem(self.ui.raw_scan_viewbox.view)
+			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+			
+		except Exception as e:
+			self.ui.result_textBrowser2.append(str(e))
+
+	def plot_intensity_sums(self):
+		try:
+			data = self.spec_scan_file
+			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
+			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
+			# TODO test line scan plots
+
+			intensities = data['Intensities']
+
+			#intensities = np.reshape(intensities, newshape=(2048, numb_pixels_X*numb_pixels_Y))
+			
+			sums = np.sum(intensities, axis=-1)
+			sums = np.reshape(sums, newshape=(numb_pixels_X, numb_pixels_Y))
+			
+			self.ui.intensity_sums_viewBox.setImage(sums, scale=
+												  (data['Scan Parameters']['X step size (um)'],
+												   data['Scan Parameters']['Y step size (um)']))
+			self.ui.intensity_sums_viewBox.view.invertY(False)
+			
+			scale = pg.ScaleBar(size=2,suffix='um')
+			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
+			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+
+		except Exception as e:
+			self.ui.result_textBrowser2.append(str(e))
+
 	
 	def fit_and_plot_scan(self):
 #        self.ui.result_textBrowser.append("Starting Scan Fitting")
@@ -539,34 +565,10 @@ class MainWindow(TemplateBaseClass):
 			self.ui.result_textBrowser2.append(str(e))
 			pass
 
-	def pub_ready_plot_export(self):
-		filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
-		try:
-			try:
-				data = self.spec_scan_file
-				param_selection = str(self.ui.comboBox.currentText())
-				if param_selection == 'pk_pos': label = 'PL Peak Position (n.m.)'
-				elif param_selection == 'fwhm': label = 'PL FWHM (n.m.)'
-				cpm.plot_confocal(self.img, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap="seismic", cbar_label=label)
-				plt.savefig(filename[0],bbox_inches='tight', dpi=300)
-				plt.close()
-			except:
-				plt.figure(figsize=(8,6))
-				plt.tick_params(direction='out', length=8, width=3.5)
-				plt.plot(self.x, self.y)
-				plt.plot(self.x, self.result.best_fit,'k')
-				plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
-				plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
-				plt.tight_layout()
-				
-				plt.savefig(filename[0],bbox_inches='tight', dpi=300)
-				plt.close()
-			
-		except AttributeError:
-			self.ui.result_textBrowser.setText("Need to fit the data first!")
 
-	#Get data from ocean optics scan pkl file, and convert to txt
+	""" Pkl conversion functions """
 	def pkl_data_to_txt(self):
+		""" Get data from ocean optics scan pkl file, convert to txt"""
 		folder = os.path.dirname(self.pkl_to_convert[0])
 		filename_ext = os.path.basename(self.pkl_to_convert[0])
 		filename = os.path.splitext(filename_ext)[0] #get filename without extension
@@ -585,8 +587,8 @@ class MainWindow(TemplateBaseClass):
 
 		np.savetxt(folder +"/"+ filename +"_data.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="wavelength(nm), Intensities at different points")
 
-	#Get scan parameters from ocean optics scan pkl file, and convert to txt
 	def pkl_params_to_txt(self):
+		""" Get scan parameters from ocean optics scan pkl file, convert to txt """
 		folder = os.path.dirname(self.pkl_to_convert[0])
 		filename_ext = os.path.basename(self.pkl_to_convert[0])
 		filename = os.path.splitext(filename_ext)[0] #get filename without extension
@@ -611,7 +613,7 @@ class MainWindow(TemplateBaseClass):
 				f.write("%s\n" % str(item[1])) #write value
 
 	def pkl_to_h5(self):
-		#Convert scan .pkl file to h5
+		""" Convert scan .pkl file to h5 """
 		folder = os.path.dirname(self.pkl_to_convert[0])
 		filename_ext = os.path.basename(self.pkl_to_convert[0])
 		filename = os.path.splitext(filename_ext)[0] #get filename without extension
@@ -622,7 +624,12 @@ class MainWindow(TemplateBaseClass):
 		self.traverse_dict_into_h5(pkl_file, h5_file)
 
 	def traverse_dict_into_h5(self, dictionary, h5_output):
-		#Create an h5 file using .pkl with scan data and params
+		""" 
+		Create an h5 file using .pkl with scan data and params
+
+		dictionary -- dictionary to convert
+		h5_output -- h5 file or group to work in
+		"""
 		for key in dictionary:
 			if type(dictionary[key]) == dict:
 				group = h5_output.create_group(key)
@@ -632,7 +639,7 @@ class MainWindow(TemplateBaseClass):
 				if key == "Wavelengths" or key == "Intensities":
 					h5_output.create_dataset(key, data=dictionary[key])
 				else:
-					h5_output.attrs[key] = dictionary[key]	
+					h5_output.attrs[key] = dictionary[key]
 
 
 	def close_application(self):

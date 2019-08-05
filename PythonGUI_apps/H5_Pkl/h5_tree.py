@@ -2,7 +2,6 @@ from ScopeFoundry.data_browser import DataBrowserView
 from qtpy import QtWidgets
 import h5py
 
-
 class H5TreeSearchView(DataBrowserView):
     
     name = 'h5_tree_search'
@@ -29,6 +28,7 @@ class H5TreeSearchView(DataBrowserView):
         self.search_lineEdit.textChanged.connect(self.on_new_search_text)
         
     def on_change_data_filename(self, fname=None):
+        """ Handle file change """
         self.tree_textEdit.setText("loading {}".format(fname))
         try:
             #if using h5_plot_and_view
@@ -65,7 +65,6 @@ class H5TreeSearchView(DataBrowserView):
         self.tree_textEdit.verticalScrollBar().setValue(old_scroll_pos)
            
     def _visitfunc(self, name, node):
-        
         level = len(name.split('/'))
         indent = '&nbsp;'*4*(level-1)
     
@@ -74,7 +73,7 @@ class H5TreeSearchView(DataBrowserView):
         
         #search_text = self.settings['search_text'].lower()
         search_text = self.search_text
-        if search_text and (search_text in localname.lower()):
+        if search_text and (search_text in localname.lower()): #highlight terms that contain search text
             localname = """<span style="color: red;">{}</span>""".format(localname)
     
         if isinstance(node, h5py.Group):
@@ -91,7 +90,7 @@ class H5TreeSearchView(DataBrowserView):
                 self.dataset_dict[item_name] = node
 
 
-        for key, val in node.attrs.items():
+        for key, val in node.attrs.items(): #highlight terms that contain search text
             if search_text:
                 if search_text in str(key).lower(): 
                     key = """<span style="color: red;">{}</span>""".format(key)

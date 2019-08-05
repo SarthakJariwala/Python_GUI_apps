@@ -45,12 +45,13 @@ class MainWindow(TemplateBaseClass):
         self.absorbance_plot.setLabel('bottom', 'Wavelength', unit='nm')
         self.absorbance_plot.setLabel('left', 'Absorbance', unit='a.u.')
 
+        #setup correction region for uv vis
         self.correction_region = pg.LinearRegionItem()
-        #self.correction_region.setZValue(10)
         self.correction_region_min = 600
         self.correction_region_max = 900
         self.correction_region.setRegion((self.correction_region_min, self.correction_region_max))
         
+        #setup uv vis ui signals
         self.ui.actionLoad_data.triggered.connect(self.open_data_file)
         self.ui.plot_absorbance_pushButton.clicked.connect(self.plot_absorbance)
         self.ui.clear_uvvis_pushButton.clicked.connect(self.clear_uvvis)
@@ -65,13 +66,13 @@ class MainWindow(TemplateBaseClass):
         y_label = '(ahv)' + chr(0x00B2) #char is superscripted 2
         self.tauc_plot.setLabel('left', y_label)
 
+        #setup tauc ui signals
         self.ui.plot_tauc_pushButton.clicked.connect(self.plot_tauc)
         self.ui.clear_tauc_pushButton.clicked.connect(self.clear_tauc)
         self.ui.export_tauc_pushButton.clicked.connect(self.export_tauc)
 
         self.show()
 
-    """Open Scan Files"""
     def open_data_file(self):
         try:
             self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
@@ -82,13 +83,14 @@ class MainWindow(TemplateBaseClass):
             print(format(err))
 
     def update_correction_region(self):
+        """ Update correction region variables from region """
         self.correction_region_min, self.correction_region_max = self.correction_region.getRegion()
 
     def plot_absorbance(self):
         try:
             self.scatter_corrected = False
-            self.plotted_absorbance = self.Absorbance
-            if self.ui.correct_for_scattering_checkBox.isChecked():
+            self.plotted_absorbance = self.Absorbance #by default set to original absorbance data
+            if self.ui.correct_for_scattering_checkBox.isChecked(): #if checked, correct absorbance data
                 self.scatter_corrected = True
                 self.plotted_absorbance = self.Absorbance - np.mean(self.Absorbance[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)])
             self.absorbance_plot.plot(self.Wavelength, self.plotted_absorbance, pen='r', clear=True)
@@ -123,6 +125,7 @@ class MainWindow(TemplateBaseClass):
         self.tauc_plot.clear()
 
     def export_uv_vis(self):
+        """ Export publication ready uv vis figure """
         try:
             filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
             plt.figure(figsize=(8,6))
@@ -142,6 +145,7 @@ class MainWindow(TemplateBaseClass):
             pass
 
     def export_tauc(self):
+        """ Export publication ready tauc figure"""
         try:
             filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
             plt.figure(figsize=(8,6))

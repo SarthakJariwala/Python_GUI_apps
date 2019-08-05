@@ -73,21 +73,6 @@
                <pointsize>10</pointsize>
               </font>
              </property>
-             <item>
-              <property name="text">
-               <string>Stretched Exponential</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Double Exponential</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Single Exponential</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item row="2" column="0">
@@ -112,16 +97,6 @@
                <pointsize>10</pointsize>
               </font>
              </property>
-             <item>
-              <property name="text">
-               <string>diff_ev</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>fmin_tnc</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item row="0" column="1">
