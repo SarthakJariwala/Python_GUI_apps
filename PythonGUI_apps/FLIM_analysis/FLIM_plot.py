@@ -192,7 +192,7 @@ class MainWindow(TemplateBaseClass):
 			filename = os.path.splitext(filename_ext)[0] #get filename without extension
 			save_to = os.getcwd() + "\\" + filename + "_intensity_sums.png"
 			cpm.plot_confocal(self.intensity_sums, stepsize=np.abs(self.pkl_file['Scan Parameters']['X step size (um)']))
-			cpm.plt.savefig(save_to, bbox_inches='tight', dpi=300)
+			plt.savefig(save_to, bbox_inches='tight', dpi=300)
 		except:
 			pass
 
