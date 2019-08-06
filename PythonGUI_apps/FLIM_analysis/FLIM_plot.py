@@ -188,9 +188,10 @@ class MainWindow(TemplateBaseClass):
 
 	def save_intensities_image(self):
 		try:
+			folder = os.path.dirname(self.filename[0])
 			filename_ext = os.path.basename(self.filename[0])
 			filename = os.path.splitext(filename_ext)[0] #get filename without extension
-			save_to = os.getcwd() + "\\" + filename + "_intensity_sums.png"
+			save_to = folder + "\\" + filename + "_intensity_sums.png"
 			cpm.plot_confocal(self.intensity_sums, stepsize=np.abs(self.pkl_file['Scan Parameters']['X step size (um)']))
 			plt.savefig(save_to, bbox_inches='tight', dpi=300)
 		except:
@@ -198,9 +199,10 @@ class MainWindow(TemplateBaseClass):
 
 	def save_intensities_array(self):
 		try:
+			folder = os.path.dirname(self.filename[0])
 			filename_ext = os.path.basename(self.filename[0])
 			filename = os.path.splitext(filename_ext)[0] #get filename without extension
-			save_to = os.getcwd() + "\\" + filename + "_intensity_sums.txt"
+			save_to = folder + "\\" + filename + "_intensity_sums.txt"
 			np.savetxt(save_to, self.intensity_sums.T, fmt='%f') #save transposed intensity sums, as original array handles x in cols and y in rows
 		except:
 			pass
