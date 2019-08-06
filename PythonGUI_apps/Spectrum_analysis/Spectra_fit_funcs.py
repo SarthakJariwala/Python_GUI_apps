@@ -56,13 +56,22 @@ class Single_Gaussian(Spectra_Fit):
         result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
         return result
     
-    def gaussian_model_w_lims(self, center_min=None, center_max=None):
+    # def gaussian_model_w_lims(self, center_initial_guess=None, sigma_initial_guess=None, center_min=None, center_max=None):
+    #     x,y = self.background_correction()
+    #     gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
+    #     pars = gmodel.guess(y, x=x) # parameters - center, width, height
+    #     pars['g1_center'].set(center_initial_guess, min=center_min, max=center_max)
+    #     pars['g1_sigma'].set(sigma_initial_guess)
+    #     result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
+    #     return result #770 760 780   sigma 15 
+    def gaussian_model_w_lims(self, peak_pos, sigma, min_max_range):
         x,y = self.background_correction()
         gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
         pars = gmodel.guess(y, x=x) # parameters - center, width, height
-        pars['g1_center'].set(min=center_min, max=center_max)
+        pars['g1_center'].set(peak_pos, min=min_max_range[0], max=min_max_range[1])
+        pars['g1_sigma'].set(sigma)
         result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
-        return result
+        return result #770 760 780   sigma 15 
 
 class Single_Lorentzian(Spectra_Fit):
     """Fit a single Lorentzian to the spectrum
@@ -79,11 +88,20 @@ class Single_Lorentzian(Spectra_Fit):
         result = lmodel.fit(y, pars, x=x, nan_policy='propagate')
         return result
     
-    def lorentzian_model_w_lims(self, center_min = None, center_max = None):
+    # def lorentzian_model_w_lims(self, center_min = None, center_max = None):
+    #     x,y = self.background_correction()
+    #     lmodel = LorentzianModel(prefix = 'l1_') # calling lorentzian model
+    #     pars = lmodel.guess(y, x=x) # parameters - center, width, height
+    #     pars['l1_center'].set(min = center_min, max = center_max)
+    #     result = lmodel.fit(y, pars, x=x, nan_policy='propagate')
+    #     return result
+
+    def lorentzian_model_w_lims(self, peak_pos, sigma, min_max_range):
         x,y = self.background_correction()
         lmodel = LorentzianModel(prefix = 'l1_') # calling lorentzian model
         pars = lmodel.guess(y, x=x) # parameters - center, width, height
-        pars['l1_center'].set(min = center_min, max = center_max)
+        pars['l1_center'].set(peak_pos, min = min_max_range[0], max = min_max_range[1])
+        pars['l1_sigma'].set(sigma)
         result = lmodel.fit(y, pars, x=x, nan_policy='propagate')
         return result
 
@@ -96,18 +114,35 @@ class Double_Gaussian(Spectra_Fit):
     """
     
     def gaussian_model(self):
+
         x,y = self.background_correction()
         gmodel_1 = GaussianModel(prefix='g1_') # calling gaussian model
         pars = gmodel_1.guess(y, x=x) # parameters - center, width, height
-        pars['g1_center'].set(800, min = 795, max = 820)
-        pars['g1_sigma'].set(15)
+
+        gmodel_2 = GaussianModel(prefix='g2_')
+        pars.update(gmodel_2.make_params()) # update parameters - center, width, height
+
+        gmodel = gmodel_1 + gmodel_2
+        result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
+        return result
+
+    def gaussian_model_w_lims(self, peak_pos, sigma, min_max_range):
+        #center_initial_guesses - list containing initial guesses for peak centers. [center_guess1, center_guess2]
+        #sigma_initial_guesses - list containing initial guesses for sigma. [sigma1, sigma2]
+        #min_max_range - list containing lists of min and max for peak center. [ [min1, max1], [min2, max2] ] 
+        
+        x,y = self.background_correction()
+        gmodel_1 = GaussianModel(prefix='g1_') # calling gaussian model
+        pars = gmodel_1.guess(y, x=x) # parameters - center, width, height
+        pars['g1_center'].set(peak_pos[0], min = min_max_range[0][0], max = min_max_range[0][1])
+        pars['g1_sigma'].set(sigma[0])
         pars['g1_amplitude'].set(min=0)
 
         gmodel_2 = GaussianModel(prefix='g2_')
         pars.update(gmodel_2.make_params()) # update parameters - center, width, height
-        pars['g2_center'].set(767, min = 760, max = 775)
+        pars['g2_center'].set(peak_pos[1], min = min_max_range[1][0], max = min_max_range[1][1])
+        pars['g2_sigma'].set(sigma[1],  min = composite_pars['g1_sigma'].value)
         pars['g2_amplitude'].set(min = 0)
-        pars['g2_sigma'].set(min = pars['g1_sigma'].value)
 
         gmodel = gmodel_1 + gmodel_2
         result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
@@ -115,13 +150,45 @@ class Double_Gaussian(Spectra_Fit):
 
 class Multi_Gaussian(Spectra_Fit):
     
-    def __init__(self, data, ref, num_of_gaussians, peak_pos, min_max_range):
-        Spectra_Fit.__init__(self, data, ref)
+    # def __init__(self, data, ref, num_of_gaussians, peak_pos, sigma, min_max_range):
+    #     Spectra_Fit.__init__(self, data, ref)
+    #     self.num_of_gaussians = num_of_gaussians
+    #     self.peak_pos = peak_pos
+    #     self.min_max_range = min_max_range
+    def __init__(self, data, ref, num_of_gaussians, wlref=None):
+        Spectra_Fit.__init__(self, data, ref, wlref)
         self.num_of_gaussians = num_of_gaussians
+
+    def gaussian_model(self):
+        composite_model = None
+        composite_pars = None
+        
+        x,y = self.background_correction()
+                
+        for i in range(self.num_of_gaussians):
+
+            model = GaussianModel(prefix='g'+str(i+1)+'_')
+
+            if composite_pars is None:
+                composite_pars = model.guess(y, x=x)
+#                 composite_pars = model.make_params()
+               
+            else:
+                composite_pars.update(model.make_params())
+
+            if composite_model is None:
+                composite_model = model
+            else:
+                composite_model += model
+        
+        result = composite_model.fit(y, composite_pars, x=x, nan_policy='propagate')
+        return result
+        
+    def gaussian_model_w_lims(self, peak_pos, sigma, min_max_range):
         self.peak_pos = peak_pos
+        self.sigma = sigma
         self.min_max_range = min_max_range
         
-    def multi_gaussian(self):
         composite_model = None
         composite_pars = None
         
@@ -140,14 +207,14 @@ class Multi_Gaussian(Spectra_Fit):
 #                 composite_pars = model.make_params()
                 composite_pars['g'+str(i+1)+'_center'].set(self.peak_pos[i], 
                                                            min = self.min_max_range[0][0], max = self.min_max_range[0][1])
-                composite_pars['g'+str(i+1)+'_sigma'].set(15)
+                composite_pars['g'+str(i+1)+'_sigma'].set(self.sigma[i])
                 composite_pars['g'+str(i+1)+'_amplitude'].set(min = 0)
                                                 
             else:
                 composite_pars.update(model.make_params())
                 composite_pars['g'+str(i+1)+'_center'].set(self.peak_pos[i],
-                                                          min = self.min_max_range[1][0], max = self.min_max_range[1][1])
-                composite_pars['g'+str(i+1)+'_sigma'].set(min = composite_pars['g1_sigma'].value)
+                                                          min = self.min_max_range[i][0], max = self.min_max_range[i][1])
+                composite_pars['g'+str(i+1)+'_sigma'].set(self.sigma[i], min = composite_pars['g1_sigma'].value)
                 composite_pars['g'+str(i+1)+'_amplitude'].set(min = 0)
 
 
