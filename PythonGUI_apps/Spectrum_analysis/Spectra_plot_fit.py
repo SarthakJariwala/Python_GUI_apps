@@ -60,6 +60,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui.importSpec_pushButton.clicked.connect(self.open_file)
 		self.ui.importBck_pushButton.clicked.connect(self.open_bck_file)
 		self.ui.importWLRef_pushButton.clicked.connect(self.open_wlref_file)
+
 		self.ui.load_spectra_scan_pushButton.clicked.connect(self.open_spectra_scan_file)
 		self.ui.load_bck_file_pushButton.clicked.connect(self.open_spectra_bck_file)
 		self.ui.load_fitted_scan_pushButton.clicked.connect(self.open_fit_scan_file)
@@ -137,8 +138,14 @@ class MainWindow(TemplateBaseClass):
 	"""Open Scan Files"""
 	def open_spectra_scan_file(self):
 		try:
-			filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
+			filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5)")
+			if ".pkl" in filename[0]:
+				self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
+				self.scan_file_type = "pkl"
+			elif ".h5" in filename[0]:
+				self.spec_scan_file = h5py.File(filename[0], 'r')
+				self.scan_file_type = "h5"
+			self.get_data_params()
 			self.ui.result_textBrowser2.append("Done Loading - Spectra Scan File")
 		except Exception as e:
 			self.ui.result_textBrowser2.append(str(e))
@@ -262,13 +269,13 @@ class MainWindow(TemplateBaseClass):
 			return False
 	
 	"""Open param window and get peak center range values and assign it to variables to use later"""
-	# def configure_fit_params(self):
-	# 	self.param_window = ParamWindow()
+	def configure_scan_params(self):
+	 	self.param_window = ParamWindow()
 	# 	self.param_window.peak_range.connect(self.peak_range)
 	
-	def peak_range(self, peaks):
-		self.center_min = peaks[0]
-		self.center_max = peaks[1]
+	# def peak_range(self, peaks):
+	# 	self.center_min = peaks[0]
+	# 	self.center_max = peaks[1]
 		
 	
 	def fit_and_plot(self):
@@ -409,12 +416,41 @@ class MainWindow(TemplateBaseClass):
 
 
 	""" Scan spectra functions """
+	def get_data_params(self):
+		data = self.spec_scan_file
+		if self.scan_file_type == "pkl":
+			self.intensities = data['Intensities']
+			self.wavelengths = data['Wavelengths']
+			try:
+				self.x_scan_size = data['Scan Parameters']['X scan size (um)']
+				self.y_scan_size = data['Scan Parameters']['Y scan size (um)']
+				self.x_step_size = data['Scan Parameters']['X step size (um)']
+				self.y_step_size = data['Scan Parameters']['Y step size (um)']
+			except: # TODO test and debug loading pkl file w/o scan parameters
+				self.configure_scan_params()
+				while not hasattr(self, "scan_params_entered"):
+					pass
+				self.x_scan_size = self.param_window.ui.x_scan_size_spinBox.value()
+				self.y_scan_size = self.param_window.ui.y_scan_size_spinBox.value()
+				self.x_step_size = self.param_window.ui.x_step_size_spinBox.value()
+				self.y_step_size = self.param_window.ui.y_step_size_spinBox.value()
+
+		else: #run this if scan file is h5
+			self.x_scan_size = data['Scan Parameters'].attrs['X scan size (um)']
+			self.y_scan_size = data['Scan Parameters'].attrs['Y scan size (um)']
+			self.x_step_size = data['Scan Parameters'].attrs['X step size (um)']
+			self.y_step_size = data['Scan Parameters'].attrs['Y step size (um)']
+			self.intensities = data['Intensities'][()] #get dataset values
+			self.wavelengths = data['Wavelengths'][()]
+
+		self.numb_x_pixels = int(self.x_scan_size/self.x_step_size)
+		self.numb_y_pixels = int(self.y_scan_size/self.y_step_size)
+
 	def plot_fit_scan(self):
 		try:
 			if self.ui.use_raw_scan_settings.isChecked():
-				data = self.spec_scan_file
-				num_x = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-				num_y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
+				num_x = self.numb_x_pixels
+				num_y  =self.numb_y_pixels
 			else:
 				num_x = self.ui.num_x_spinBox.value()
 				num_y = self.ui.num_y_spinBox.value()
@@ -441,8 +477,8 @@ class MainWindow(TemplateBaseClass):
 
 			if self.ui.use_raw_scan_settings.isChecked():
 				self.ui.fit_scan_viewbox.setImage(self.img, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']))
+												  (self.x_step_size,
+												   self.y_step_size))
 				scale = pg.ScaleBar(size=2,suffix='um')
 				scale.setParentItem(self.ui.fit_scan_viewbox.view)
 				scale.anchor((1, 1), (1, 1), offset=(-30, -30))
@@ -457,21 +493,16 @@ class MainWindow(TemplateBaseClass):
 			
 	def plot_raw_scan(self):
 		try:
-			data = self.spec_scan_file
-			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
 			# TODO test line scan plots
 
-			intensities = data['Intensities'].T #this is only there because of how we are saving the data in the app
+			intensities = self.intensities.T #this is only there because of how we are saving the data in the app
 			
-			intensities = np.reshape(intensities, newshape=(2048,numb_pixels_X,numb_pixels_Y))
-			
-			wavelengths = data['Wavelengths']
+			intensities = np.reshape(intensities, newshape=(2048,self.numb_x_pixels, self.numb_y_pixels))
 			
 			self.ui.raw_scan_viewbox.view.invertY(False)
 			self.ui.raw_scan_viewbox.setImage(intensities, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']), xvals=wavelengths)
+												  (self.x_step_size,
+												   self.y_step_size), xvals=self.wavelengths)
 			
 
 			#roi_plot = self.ui.raw_scan_viewBox.getRoiPlot()
@@ -485,21 +516,16 @@ class MainWindow(TemplateBaseClass):
 
 	def plot_intensity_sums(self):
 		try:
-			data = self.spec_scan_file
-			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
 			# TODO test line scan plots
-
-			intensities = data['Intensities']
 
 			#intensities = np.reshape(intensities, newshape=(2048, numb_pixels_X*numb_pixels_Y))
 			
-			sums = np.sum(intensities, axis=-1)
-			sums = np.reshape(sums, newshape=(numb_pixels_X, numb_pixels_Y))
+			sums = np.sum(self.intensities, axis=-1)
+			sums = np.reshape(sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
 			
 			self.ui.intensity_sums_viewBox.setImage(sums, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']))
+												  (self.x_step_size,
+												   self.y_step_size))
 			self.ui.intensity_sums_viewBox.view.invertY(False)
 			
 			scale = pg.ScaleBar(size=2,suffix='um')
@@ -522,10 +548,10 @@ class MainWindow(TemplateBaseClass):
 			ref = self.bck_file
 			index = (ref[:,0]>start_nm) & (ref[:,0]<stop_nm)
 			
-			x = self.spec_scan_file['Wavelengths']
+			x = self.wavelengths
 			x = x[index]
 			
-			data_array = self.spec_scan_file['Intensities']
+			data_array = self.intensities
 			
 			result_dict = {}
 			
@@ -653,37 +679,35 @@ class MainWindow(TemplateBaseClass):
 		
 		
 """Parameter Window GUI and Functions"""
-# param_file_path = (base_path / "peak_bounds_input.ui").resolve()
+param_file_path = (base_path / "scan_params_input.ui").resolve()
 
-# param_uiFile = param_file_path
+param_uiFile = param_file_path
 
-# param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(param_uiFile)
+param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(param_uiFile)
 
-# class ParamWindow(param_TemplateBaseClass):
+class ParamWindow(param_TemplateBaseClass):
 	
-# 	peak_range = QtCore.pyqtSignal(list)
+	#peak_range = QtCore.pyqtSignal(list)
 	
-# 	def __init__(self):
-# #        super(param_TemplateBaseClass, self).__init__()
-# 		param_TemplateBaseClass.__init__(self)
+	def __init__(self):
+#        super(param_TemplateBaseClass, self).__init__()
+		param_TemplateBaseClass.__init__(self)
 		
-# 		# Create the param window
-# 		self.pui = param_WindowTemplate()
-# 		self.pui.setupUi(self)
+		# Create the param window
+		self.pui = param_WindowTemplate()
+		self.pui.setupUi(self)
 		
-# 		self.pui.pushButton.clicked.connect(self.done)
+		self.pui.done_pushButton.clicked.connect(self.done)
 		
-# 		self.show()
+		self.show()
 	
-# 	def current_peak_range(self):
-# 		center_min = self.pui.cent_min_doubleSpinBox.value()
-# 		center_max = self.pui.cent_max_doubleSpinBox.value()
-# 		return center_min, center_max
+
 	
-# 	def done(self):
-# 		center_min, center_max = self.current_peak_range()
-# 		self.peak_range.emit([center_min, center_max])
-# 		self.close()
+	def done(self):
+		#center_min, center_max = self.current_peak_range()
+		#self.peak_range.emit([center_min, center_max])
+		self.close()
+		self.scan_params_entered = True
 	
 """Run the Main Window"""    
 def run():

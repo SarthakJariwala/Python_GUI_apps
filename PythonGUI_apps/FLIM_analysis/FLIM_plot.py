@@ -33,7 +33,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui.setupUi(self)
 		
 		#set up ui signals
-		self.ui.load_scan_pushButton.clicked.connect(self.open_pkl_file)
+		self.ui.load_scan_pushButton.clicked.connect(self.open_file)
 		self.ui.plot_intensity_sums_pushButton.clicked.connect(self.plot_intensity_sums)
 		self.ui.plot_raw_hist_data_pushButton.clicked.connect(self.plot_raw_scan)
 		self.ui.save_intensities_image_pushButton.clicked.connect(self.save_intensities_image)
@@ -45,11 +45,18 @@ class MainWindow(TemplateBaseClass):
 
 		self.show()
 
-	def open_pkl_file(self):
+	def open_file(self):
 		""" Open FLIM scan file """
 		try:
-			self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			self.pkl_file = pickle.load(open(self.filename[0], 'rb'))
+			self.filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5)")
+			if ".pkl" in self.filename[0]:
+				self.flim_scan_file = pickle.load(open(self.filename[0], 'rb'))
+				self.scan_file_type = "pkl"
+			elif ".h5" in self.filename[0]:
+				self.flim_scan_file = h5py.File(self.filename[0], 'r')
+				self.scan_file_type = "h5"
+			self.get_data_params()
+			# self.pkl_file = pickle.load(open(self.filename[0], 'rb'))
 		except Exception as err:
 			print(format(err))
 
@@ -61,24 +68,37 @@ class MainWindow(TemplateBaseClass):
 		except:
 			pass
 
+	def get_data_params(self):
+
+		data = self.flim_scan_file
+		if self.scan_file_type == "pkl":
+			self.x_scan_size = data['Scan Parameters']['X scan size (um)']
+			self.y_scan_size = data['Scan Parameters']['Y scan size (um)']
+			self.x_step_size = data['Scan Parameters']['X step size (um)']
+			self.y_step_size = data['Scan Parameters']['Y step size (um)']
+			self.hist_data = data['Histogram data']
+			self.time_data = data['Time data']
+		else: #run this if scan file is h5
+			self.x_scan_size = data['Scan Parameters'].attrs['X scan size (um)']
+			self.y_scan_size = data['Scan Parameters'].attrs['Y scan size (um)']
+			self.x_step_size = data['Scan Parameters'].attrs['X step size (um)']
+			self.y_step_size = data['Scan Parameters'].attrs['Y step size (um)']
+			self.hist_data = data['Histogram data'][()] #get dataset values
+			self.time_data = data['Time data'][()]
+
+		self.numb_x_pixels = int(self.x_scan_size/self.x_step_size)
+		self.numb_y_pixels = int(self.y_scan_size/self.y_step_size)
+
+
 	def plot_intensity_sums(self):
 		try:
-			data = self.pkl_file
-			self.numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			self.numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
-			self.x_step_size = float(data['Scan Parameters']['X step size (um)'])
-			self.x_scan_size = float(data['Scan Parameters']['X scan size (um)'])
-			self.y_step_size = float(data['Scan Parameters']['Y step size (um)'])
-			self.y_scan_size = float(data['Scan Parameters']['Y scan size (um)'])
-
-			hist_data = data["Histogram data"]
-			hist_data = np.reshape(hist_data, newshape=(hist_data.shape[0], self.numb_pixels_X*self.numb_pixels_Y))
-			self.intensity_sums = np.sum(hist_data, axis=0) #sum intensities for each pixel
-			self.intensity_sums = np.reshape(self.intensity_sums, newshape=(self.numb_pixels_X, self.numb_pixels_Y))
+			self.hist_data = np.reshape(self.hist_data, newshape=(self.hist_data.shape[0], self.numb_x_pixels*self.numb_y_pixels))
+			self.intensity_sums = np.sum(self.hist_data, axis=0) #sum intensities for each pixel
+			self.intensity_sums = np.reshape(self.intensity_sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
 			self.ui.intensity_sums_viewBox.view.invertY(False) # stop y axis invert
 			self.ui.intensity_sums_viewBox.setImage(self.intensity_sums, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']))
+												  (self.x_step_size,
+												   self.y_step_size))
 			self.ui.intensity_sums_viewBox.roi.setSize([self.x_scan_size, self.y_step_size]) #line roi
 			scale = pg.ScaleBar(size=1,suffix='um')
 			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
@@ -112,23 +132,12 @@ class MainWindow(TemplateBaseClass):
 
 	def plot_raw_scan(self):
 		try:
-			data = self.pkl_file
-			self.numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			self.numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
-			self.x_step_size = float(data['Scan Parameters']['X step size (um)'])
-			self.x_scan_size = float(data['Scan Parameters']['X scan size (um)'])
-			self.y_step_size = float(data['Scan Parameters']['Y step size (um)'])
-			self.y_scan_size = float(data['Scan Parameters']['Y scan size (um)'])
-			# TODO test line scan plots
-			hist_data = data['Histogram data']
-			
-			self.hist_image = np.reshape(hist_data, newshape=(hist_data.shape[0],self.numb_pixels_X,self.numb_pixels_Y))
-			time_data = data['Time data']
-			self.times = time_data[:, 0, 0]*1e-3
+			self.hist_image = np.reshape(self.hist_data, newshape=(self.hist_data.shape[0],self.numb_x_pixels,self.numb_y_pixels))
+			self.times = self.time_data[:, 0, 0]*1e-3
 			self.ui.raw_hist_data_viewBox.view.invertY(False) # stops y-axis invert
 			self.ui.raw_hist_data_viewBox.setImage(self.hist_image, scale=
-												(data['Scan Parameters']['X step size (um)'],
-												data['Scan Parameters']['Y step size (um)']), xvals=self.times)
+												(self.x_step_size,
+												self.y_step_size), xvals=self.times)
 			self.ui.raw_hist_data_viewBox.roi.setSize([self.x_scan_size, self.y_scan_size])
 			# if self.ui.compare_checkBox.isChecked():
 			# 	self.ui.imv2.setImage(self.hist_image, scale= (data['Scan Parameters']['X step size (um)'],
