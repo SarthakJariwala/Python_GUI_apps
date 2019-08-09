@@ -51,3 +51,16 @@ pip install matplotlib scipy lmfit customplotting==0.1.4.dev0
 ## Screenshots
 ### Welcome Screen
 ![Welcome Screen](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_interface_1.png)
+### Lifetime Analysis
+![Lifetime Analysis](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Lifetime_analysis_2.PNG)
+### Spectrum Analysis
+![Single Spectrum](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Spectrum_analysis_1.PNG)
+![Scan Data](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Spectrum_analysis_2.PNG)
+### FLIM Analysis
+![FLIM Analysis](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_FLIM_analysis_1.PNG)
+### UV-Vis Analysis
+![UV-Vis Analysis](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_UVvis_analysis_1.PNG)
+### H5 & Pkl View
+![H5-pkl-viewer](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_h5_ViewPlot_analysis_1.PNG)
+### H5 Quick Plot
+![h5- quick plot](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_h5_ViewPlot_analysis_2.PNG)
