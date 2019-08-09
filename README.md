@@ -47,3 +47,7 @@ conda install numpy pyqt qtpy h5py pyqtgraph
 pip install ScopeFoundry
 pip install matplotlib scipy lmfit customplotting==0.1.4.dev0
 ```
+
+## Screenshots
+### Welcome Screen
+![Welcome Screen](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_interface_1.png)
