@@ -87,19 +87,28 @@ class MainWindow(TemplateBaseClass):
         self.out = None # output file after fitting
         self.data_list = []
         self.show()
+
         
     def open_file(self):
         """ Open data file """
 #        try:
         self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
-            self.file = np.loadtxt(self.filename[0], skiprows=10)
-#        except ValueError:
-#            self.file = np.loadtxt(filename[0], skiprows=10)
+            if ".csv" in self.filename[0] or ".txt" in self.filename[0]: #if txt or csv, prompt user to enter # of rows to skip
+                self.skip_rows_window = SkipRowsWindow()
+                self.skip_rows_window.skip_rows_signal.connect(self.open_with_skip_rows_window)
         except UnicodeDecodeError:
             self.file = read_picoharp_phd(self.filename[0])
         except:
             pass
+
+    def open_with_skip_rows_window(self):
+        """ Prompts user to enter how many rows to skip """
+        self.skip_rows = self.skip_rows_window.ui.skip_rows_spinBox.value()
+        if ".txt" in self.filename[0]:
+            self.file = np.loadtxt(self.filename[0], skiprows=self.skip_rows)
+        elif ".csv" in self.filename[0]:
+            self.file = np.genfromtxt(self.filename[0], skip_header=self.skip_rows, delimiter=",")
 
     def open_irf_file(self):
         """ Open file with irf - enabled if 'load separate irf' is checled """
@@ -465,7 +474,6 @@ class MainWindow(TemplateBaseClass):
         self.data_list = []
         file.close()
 
-
     def pub_ready_plot_export(self):
         try:
             filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
@@ -496,6 +504,28 @@ class MainWindow(TemplateBaseClass):
             sys.exit()
         else:
             pass
+
+"""Skip rows GUI"""
+ui_file_path = (base_path / "skip_rows.ui").resolve()
+skiprows_WindowTemplate, skiprows_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
+
+class SkipRowsWindow(skiprows_TemplateBaseClass):
+    
+    skip_rows_signal = QtCore.pyqtSignal() #signal to help with pass info back to MainWindow
+    
+    def __init__(self):
+        skiprows_TemplateBaseClass.__init__(self)
+
+        # Create the param window
+        self.ui = skiprows_WindowTemplate()
+        self.ui.setupUi(self)
+        self.ui.done_pushButton.clicked.connect(self.done)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.show()
+    
+    def done(self):
+        self.skip_rows_signal.emit()
+        self.close()
 
 def run():
     win = MainWindow()
