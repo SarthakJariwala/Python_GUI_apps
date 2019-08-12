@@ -96,8 +96,8 @@ class MainWindow(TemplateBaseClass):
 			if ".csv" in self.filename[0] or ".txt" in self.filename[0]: #if txt or csv, prompt user to enter # of rows to skip
 				self.skip_rows_window = SkipRowsWindow()
 				self.skip_rows_window.skip_rows_signal.connect(self.open_with_skip_rows_window)
-		except UnicodeDecodeError:
-			self.file = read_picoharp_phd(self.filename[0])
+			else:
+				self.file = read_picoharp_phd(self.filename[0])
 		except:
 			pass
 
@@ -116,8 +116,8 @@ class MainWindow(TemplateBaseClass):
 			if ".txt" in self.irf_filename[0] or ".csv" in self.irf_filename[0]:
 				self.irf_skip_rows_window = SkipRowsWindow()
 				self.irf_skip_rows_window.skip_rows_signal.connect(self.open_irf_with_skip_rows_window)
-		except UnicodeDecodeError:
-			self.irf_file = read_picoharp_phd(self.irf_filename[0])
+			else:
+				self.irf_file = read_picoharp_phd(self.irf_filename[0])
 		except:
 			pass
 	

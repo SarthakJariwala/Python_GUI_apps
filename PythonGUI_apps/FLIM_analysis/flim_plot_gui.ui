@@ -112,6 +112,13 @@
             </widget>
            </item>
            <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="analyze_lifetime_pushButton">
+             <property name="text">
+              <string>Analyze lifetime</string>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignLeft">
             <widget class="QCheckBox" name="compare_checkBox">
              <property name="text">
               <string>Compare ROIs</string>
