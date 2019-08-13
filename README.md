@@ -3,6 +3,8 @@ GUI Python apps written in python and qt for quick analysis of custom data. It a
 
 _**Python is not required to use GLabViz**_ (see **How to use?**)
 
+[_**DOWNLOAD HERE**_](https://github.com/SarthakJariwala/Python_GUI_apps/releases)
+
 The primary users for this Python package application are Ginger Lab members at the University of Washington, Seattle but is licensed under MIT License and open for everyone to use.
 
 ## Includes
@@ -33,7 +35,7 @@ The primary users for this Python package application are Ginger Lab members at 
 
 ## How to use?
 ### Standalone App - without Python or any dependencies (_only for Windows users_)
-* Under the releases page, download the latest release of the _**DataBrowser**_ zip file
+* Under the [releases](https://github.com/SarthakJariwala/Python_GUI_apps/releases) page, download the latest release of the _**DataBrowser**_ zip file
 * Extract the zip file and run _**DataBrowser.exe**_
 ### With Python and its dependencies
 ```
@@ -47,16 +49,16 @@ python DataBrowser.py
 ```
 
 #### Dependencies
-* ScopeFoundry
-* pyqtgraph 
+* [ScopeFoundry](https://github.com/ScopeFoundry/ScopeFoundry)
+* [pyqtgraph](http://www.pyqtgraph.org/) 
 * numpy
 * pyqt
 * qtpy
 * h5py
 * matplotlib
 * scipy
-* lmfit
-* customplotting
+* [lmfit](https://lmfit.github.io/lmfit-py/)
+* [customplotting](https://github.com/SarthakJariwala/Custom-Plotting)
 
 #### Installing dependencies from command-line
 ```
