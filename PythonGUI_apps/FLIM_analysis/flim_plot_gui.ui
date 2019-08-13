@@ -57,9 +57,9 @@
             </widget>
            </item>
            <item alignment="Qt::AlignLeft">
-            <widget class="QPushButton" name="analyze_spectrum_pushButton">
+            <widget class="QPushButton" name="analyze_psf_pushButton">
              <property name="text">
-              <string>Analyze spectrum</string>
+              <string>Analyze PSF</string>
              </property>
             </widget>
            </item>

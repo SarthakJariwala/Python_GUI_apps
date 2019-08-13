@@ -50,7 +50,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui.import_pkl_pushButton.clicked.connect(self.import_pkl_to_convert)
 		self.ui.pkl_to_h5_pushButton.clicked.connect(self.pkl_to_h5)
 		self.ui.analyze_lifetime_pushButton.clicked.connect(self.on_analyze_lifetime)
-		self.ui.analyze_spectrum_pushButton.clicked.connect(self.on_analyze_spectrum)
+		self.ui.analyze_psf_pushButton.clicked.connect(self.on_analyze_psf)
 
 		self.show()
 
@@ -139,7 +139,7 @@ class MainWindow(TemplateBaseClass):
 			except:
 				pass
 
-	def on_analyze_spectrum(self):
+	def on_analyze_psf(self):
 		self.spectrum_window = Spectra_plot_fit.MainWindow()
 		self.spectrum_window.show()
 		self.spectrum_window.opened_from_flim = True
@@ -234,10 +234,10 @@ class MainWindow(TemplateBaseClass):
 			filename_ext = os.path.basename(self.filename[0])
 			filename = os.path.splitext(filename_ext)[0] #get filename without extension
 			save_to = folder + "\\" + filename + "_intensity_sums.png"
-			cpm.plot_confocal(self.intensity_sums, stepsize=np.abs(self.pkl_file['Scan Parameters']['X step size (um)']))
+			cpm.plot_confocal(self.intensity_sums, FLIM_adjust=False, stepsize=np.abs(self.x_step_size))
 			plt.savefig(save_to, bbox_inches='tight', dpi=300)
-		except:
-			pass
+		except Exception as e:
+			print(format(e))
 
 	def save_intensities_array(self):
 		try:
