@@ -759,31 +759,6 @@
            <string>Load Settings</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_13">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>For Single Spectrum</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QPushButton" name="importSpec_pushButton">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Spectrum 
-File</string>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QPushButton" name="importBck_pushButton">
              <property name="font">
@@ -794,19 +769,6 @@ File</string>
              <property name="text">
               <string>Background 
 File</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QPushButton" name="importWLRef_pushButton">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>White Light
-Ref File</string>
              </property>
             </widget>
            </item>
@@ -837,6 +799,43 @@ Ref File</string>
              </property>
             </widget>
            </item>
+           <item row="6" column="0">
+            <widget class="QCheckBox" name="WLRef_checkBox">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Correct for White Light</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>For Single Spectrum</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QPushButton" name="importWLRef_pushButton">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>White Light
+Ref File</string>
+             </property>
+            </widget>
+           </item>
            <item row="4" column="0">
             <widget class="QRadioButton" name="subtract_bck_radioButton">
              <property name="font">
@@ -852,15 +851,37 @@ Ref File</string>
              </property>
             </widget>
            </item>
-           <item row="6" column="0">
-            <widget class="QCheckBox" name="WLRef_checkBox">
+           <item row="1" column="0">
+            <widget class="QPushButton" name="importSpec_pushButton">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
               </font>
              </property>
              <property name="text">
-              <string>Correct for White Light</string>
+              <string>Spectrum 
+File</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="0">
+            <widget class="QPushButton" name="export_data_pushButton">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Export data</string>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="0">
+            <widget class="QTextBrowser" name="result_textBrowser">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
              </property>
             </widget>
            </item>
@@ -879,7 +900,7 @@ Ref File</string>
             </widget>
            </item>
            <item row="11" column="0">
-            <widget class="QPushButton" name="export_fig_pushButton">
+            <widget class="QPushButton" name="export_single_figure_pushButton">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
@@ -888,6 +909,18 @@ Ref File</string>
              <property name="text">
               <string>Export Publication
 Ready Figure</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QRadioButton" name="plot_without_bck_radioButton">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Plot without Background</string>
              </property>
             </widget>
            </item>
@@ -904,24 +937,15 @@ Ready Figure</string>
              </property>
             </widget>
            </item>
-           <item row="12" column="0">
-            <widget class="QTextBrowser" name="result_textBrowser">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QRadioButton" name="plot_without_bck_radioButton">
+           <item row="13" column="0">
+            <widget class="QPushButton" name="clear_export_data_pushButton">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
               </font>
              </property>
              <property name="text">
-              <string>Plot without Background</string>
+              <string>Clear export data</string>
              </property>
             </widget>
            </item>
@@ -1223,6 +1247,19 @@ File</string>
              <property name="text">
               <string>Load Only
  Fit File</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="export_scan_figure_pushButton">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Export Fitted
+Scan</string>
              </property>
             </widget>
            </item>

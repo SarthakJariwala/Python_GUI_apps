@@ -74,7 +74,8 @@ class MainWindow(TemplateBaseClass):
 		self.ui.fit_scan_pushButton.clicked.connect(self.fit_and_plot_scan)
 		# self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
 		self.ui.clear_pushButton.clicked.connect(self.clear_plot)
-		self.ui.export_fig_pushButton.clicked.connect(self.pub_ready_plot_export)
+		self.ui.export_single_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
+		self.ui.export_scan_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
 
 		self.ui.import_pkl_pushButton.clicked.connect(self.open_pkl_file)
 		self.ui.data_txt_pushButton.clicked.connect(self.pkl_data_to_txt)
@@ -85,6 +86,9 @@ class MainWindow(TemplateBaseClass):
 		self.ui.tabWidget.currentChanged.connect(self.switch_overall_tab)
 		self.ui.fitFunc_comboBox.currentTextChanged.connect(self.switch_bounds_and_guess_tab)
 		self.ui.adjust_param_checkBox.stateChanged.connect(self.switch_adjust_param)
+
+		self.ui.export_data_pushButton.clicked.connect(self.export_data)
+		self.ui.clear_export_data_pushButton.clicked.connect(self.clear_export_data)
 
 		# for i in reversed(range(self.ui.bounds_groupBox.layout().count())):
 		# 	self.ui.bounds_groupBox.layout().itemAt(i).widget().deleteLater()
@@ -104,17 +108,20 @@ class MainWindow(TemplateBaseClass):
 		#variables accounting for data received from FLIM analysis
 		self.opened_from_flim = False #switched to True in FLIM_plot when "analyze lifetime" clicked
 		self.sum_data_from_flim = []
+
+		#container for data to append to txt file
+		self.data_list = []
 		
 		self.show()
 	
 	""" Open Single Spectrum files """
 	def open_file(self):
 		try:
-			filename = QtWidgets.QFileDialog.getOpenFileName(self)
+			self.single_spec_filename = QtWidgets.QFileDialog.getOpenFileName(self)
 			try:
-				self.file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+				self.file = np.loadtxt(self.single_spec_filename[0], skiprows = 16, delimiter='\t')
 			except:
-				self.file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+				self.file = np.genfromtxt(self.single_spec_filename[0], skip_header=1, skip_footer=3, delimiter='\t')
 			self.opened_from_flim = False
 		except:
 			pass
@@ -403,6 +410,7 @@ class MainWindow(TemplateBaseClass):
 						self.ui.plot.plot(self.x, comps['g3_'], pen='c', clear=False)
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 
+				self.data_list.append(self.ui.result_textBrowser.toPlainText())
 		
 		except Exception as e:
 			self.ui.result_textBrowser.append(str(e))
@@ -432,6 +440,27 @@ class MainWindow(TemplateBaseClass):
 			
 		except AttributeError:
 			self.ui.result_textBrowser.setText("Need to fit the data first!")
+
+	def export_data(self):
+		""" Save fit params and srv calculations stored in data_list as .txt """
+		folder = os.path.dirname(self.single_spec_filename[0])
+		filename_ext = os.path.basename(self.single_spec_filename[0])
+		filename = os.path.splitext(filename_ext)[0] #get filename without extension
+
+		path = folder + "/" + filename + "_fit_results.txt"
+		if not os.path.exists(path):
+			file = open(path, "w+")
+		else:
+			file = open(path, "a+")
+
+		for i in range(len(self.data_list)):
+			file.write(self.data_list[i] + "\n\n")
+
+		self.data_list = []
+		file.close()
+
+	def clear_export_data(self):
+		self.data_list = []
 
 
 	""" Scan spectra functions """
