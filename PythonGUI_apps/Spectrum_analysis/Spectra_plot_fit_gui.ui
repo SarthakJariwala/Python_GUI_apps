@@ -758,8 +758,8 @@
           <property name="title">
            <string>Load Settings</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <item>
+          <layout class="QGridLayout" name="gridLayout_13">
+           <item row="0" column="0">
             <widget class="QLabel" name="label_2">
              <property name="font">
               <font>
@@ -771,7 +771,7 @@
              </property>
             </widget>
            </item>
-           <item>
+           <item row="1" column="0">
             <widget class="QPushButton" name="importSpec_pushButton">
              <property name="font">
               <font>
@@ -784,7 +784,7 @@ File</string>
              </property>
             </widget>
            </item>
-           <item>
+           <item row="2" column="0">
             <widget class="QPushButton" name="importBck_pushButton">
              <property name="font">
               <font>
@@ -797,7 +797,7 @@ File</string>
              </property>
             </widget>
            </item>
-           <item>
+           <item row="3" column="0">
             <widget class="QPushButton" name="importWLRef_pushButton">
              <property name="font">
               <font>
@@ -810,31 +810,7 @@ Ref File</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QCheckBox" name="subtract_bck_checkBox">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Subtract Background</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="WLRef_checkBox">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Correct for White Light</string>
-             </property>
-            </widget>
-           </item>
-           <item>
+           <item row="7" column="0">
             <widget class="QCheckBox" name="norm_checkBox">
              <property name="font">
               <font>
@@ -846,21 +822,7 @@ Ref File</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="plot_pushButton">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-               <weight>50</weight>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Plot</string>
-             </property>
-            </widget>
-           </item>
-           <item>
+           <item row="9" column="0">
             <widget class="QCheckBox" name="clear_checkBox">
              <property name="font">
               <font>
@@ -875,20 +837,48 @@ Ref File</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="clear_pushButton">
+           <item row="4" column="0">
+            <widget class="QRadioButton" name="subtract_bck_radioButton">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
-               <strikeout>false</strikeout>
               </font>
              </property>
              <property name="text">
-              <string>Clear Plot</string>
+              <string>Subtract Background</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item>
+           <item row="6" column="0">
+            <widget class="QCheckBox" name="WLRef_checkBox">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Correct for White Light</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QPushButton" name="plot_pushButton">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+               <weight>50</weight>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Plot</string>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="0">
             <widget class="QPushButton" name="export_fig_pushButton">
              <property name="font">
               <font>
@@ -901,12 +891,37 @@ Ready Figure</string>
              </property>
             </widget>
            </item>
-           <item>
+           <item row="10" column="0">
+            <widget class="QPushButton" name="clear_pushButton">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+               <strikeout>false</strikeout>
+              </font>
+             </property>
+             <property name="text">
+              <string>Clear Plot</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="0">
             <widget class="QTextBrowser" name="result_textBrowser">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
               </font>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QRadioButton" name="plot_without_bck_radioButton">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Plot without Background</string>
              </property>
             </widget>
            </item>
@@ -1330,12 +1345,12 @@ File</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlotWidget</class>
+   <class>ImageView</class>
    <extends>QGraphicsView</extends>
    <header>pyqtgraph</header>
   </customwidget>
   <customwidget>
-   <class>ImageView</class>
+   <class>PlotWidget</class>
    <extends>QGraphicsView</extends>
    <header>pyqtgraph</header>
   </customwidget>

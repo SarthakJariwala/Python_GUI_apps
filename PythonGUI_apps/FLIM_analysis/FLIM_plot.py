@@ -10,6 +10,11 @@ import pickle
 import time
 from lmfit.models import GaussianModel
 import customplotting.mscope as cpm
+
+sys.path.append(os.path.abspath('../Lifetime_analysis'))
+sys.path.append(os.path.abspath('../Spectrum_analysis'))
+from Lifetime_analysis import Lifetime_plot_fit
+from Spectrum_analysis import Spectra_plot_fit
 # local modules
  
 pg.mkQApp()
@@ -24,7 +29,9 @@ uiFile = file_path
 WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 
 class MainWindow(TemplateBaseClass):  
-	
+
+	hist_data_signal = QtCore.pyqtSignal()
+
 	def __init__(self):
 		super(TemplateBaseClass, self).__init__()
 		
@@ -42,6 +49,8 @@ class MainWindow(TemplateBaseClass):
 		self.ui.intensity_sums_viewBox.roi.sigRegionChanged.connect(self.line_profile_update_plot)
 		self.ui.import_pkl_pushButton.clicked.connect(self.import_pkl_to_convert)
 		self.ui.pkl_to_h5_pushButton.clicked.connect(self.pkl_to_h5)
+		self.ui.analyze_lifetime_pushButton.clicked.connect(self.on_analyze_lifetime)
+		self.ui.analyze_spectrum_pushButton.clicked.connect(self.on_analyze_spectrum)
 
 		self.show()
 
@@ -130,6 +139,15 @@ class MainWindow(TemplateBaseClass):
 			except:
 				pass
 
+	def on_analyze_spectrum(self):
+		self.spectrum_window = Spectra_plot_fit.MainWindow()
+		self.spectrum_window.show()
+		self.spectrum_window.opened_from_flim = True
+		sum_data = self.ui.intensity_sums_viewBox.getRoiPlot().getPlotItem().curves[0].getData()
+		self.spectrum_window.sum_data_from_flim = np.asarray(sum_data)
+		self.spectrum_window.ui.plot_without_bck_radioButton.setChecked(True)
+		self.spectrum_window.ui.result_textBrowser.setText("Data successfully loaded from FLIM analysis.")
+
 	def plot_raw_scan(self):
 		try:
 			self.hist_image = np.reshape(self.hist_data, newshape=(self.hist_data.shape[0],self.numb_x_pixels,self.numb_y_pixels))
@@ -191,9 +209,24 @@ class MainWindow(TemplateBaseClass):
 		# Average data within entire ROI for each frame
 		data = data.mean(axis=max(axes)).mean(axis=min(axes))
 		xvals = self.ui.raw_hist_data_viewBox.tVals
-		if hasattr(self, "roi2_plot"):
+		if hasattr(self, "roi2_plot"): #make sure second plot is properly cleared everytime
 			self.roi2_plot.clear()
+			c = self.ui.raw_hist_data_viewBox.getRoiPlot().getPlotItem().curves.pop()
+			c.scene().removeItem(c)
 		self.roi2_plot = self.ui.raw_hist_data_viewBox.getRoiPlot().plot(xvals, data, pen='r')
+
+	def get_raw_hist_curve(self, curve_index):
+		#curve_index = 0 for original roi
+		#curve_index = 1 for second comparison roi
+		curves = self.ui.raw_hist_data_viewBox.getRoiPlot().getPlotItem().curves
+		return curves[curve_index].getData()
+
+	def on_analyze_lifetime(self):
+		self.lifetime_window = Lifetime_plot_fit.MainWindow()
+		self.lifetime_window.show()
+		self.lifetime_window.opened_from_flim = True
+		self.lifetime_window.hist_data_from_flim = np.asarray(self.get_raw_hist_curve(0))
+		self.lifetime_window.ui.Result_textBrowser.setText("Data successfully loaded from FLIM analysis.")
 
 	def save_intensities_image(self):
 		try:

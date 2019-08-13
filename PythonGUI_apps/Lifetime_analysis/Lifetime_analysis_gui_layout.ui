@@ -1038,6 +1038,13 @@
           <string>Export Settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
+          <item row="2" column="0">
+           <widget class="QPushButton" name="export_data_pushButton">
+            <property name="text">
+             <string>Export data</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="0">
            <widget class="QCheckBox" name="save_w_fit_checkBox">
             <property name="font">
@@ -1053,7 +1060,14 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="2" column="1">
+           <widget class="QPushButton" name="clear_export_data_pushButton">
+            <property name="text">
+             <string>Clear export data</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="2">
            <widget class="QPushButton" name="export_plot_pushButton">
             <property name="font">
              <font>
@@ -1064,13 +1078,6 @@
             </property>
             <property name="text">
              <string>Export figure</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QPushButton" name="export_data_pushButton">
-            <property name="text">
-             <string>Export data</string>
             </property>
            </widget>
           </item>

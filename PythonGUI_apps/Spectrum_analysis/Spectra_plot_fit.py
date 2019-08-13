@@ -100,6 +100,10 @@ class MainWindow(TemplateBaseClass):
 		# Peak parameters if adjust params is selected
 		self.center_min = None
 		self.center_max = None
+
+		#variables accounting for data received from FLIM analysis
+		self.opened_from_flim = False #switched to True in FLIM_plot when "analyze lifetime" clicked
+		self.sum_data_from_flim = []
 		
 		self.show()
 	
@@ -111,6 +115,7 @@ class MainWindow(TemplateBaseClass):
 				self.file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
 			except:
 				self.file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+			self.opened_from_flim = False
 		except:
 			pass
 	
@@ -226,23 +231,42 @@ class MainWindow(TemplateBaseClass):
 		self.ui.bounds_groupBox.setEnabled(checked)
 		self.ui.guess_groupBox.setEnabled(checked)
 
+	def check_loaded_files(self):
+		""" 
+		Check if 'subtract background' or 'white light correction' is checked 
+		and if required files have been loaded. 
+		"""
+		if self.ui.subtract_bck_radioButton.isChecked() and self.bck_file is None:
+			self.ui.result_textBrowser.setText("You need to load a background file.")
+		elif self.wlref_file is not None and self.ui.WLRef_checkBox.isChecked() == False:
+			self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
+		elif self.wlref_file is None and self.ui.WLRef_checkBox.isChecked():
+			self.ui.result_textBrowser.setText("You need to load a White Light Ref file.")
+		else:
+			return True
+
 	def plot(self):
 		try:
-			self.x = self.file[:,0]
-			self.y = self.file[:,1]
-			
-			if self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
-				bck_y = self.bck_file[:,1]
-				self.y = self.y - bck_y
-			
-			elif self.ui.subtract_bck_checkBox.isChecked() == False and self.ui.WLRef_checkBox.isChecked() == True:
-				wlref_y = self.wlref_file[:,1]
-				self.y = (self.y)/wlref_y
-			
-			elif self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == True:
-				bck_y = self.bck_file[:,1]
-				wlref_y = self.wlref_file[:,1]
-				self.y = (self.y-bck_y)/wlref_y
+			if self.opened_from_flim:
+				self.x, self.y = self.sum_data_from_flim
+			elif self.file is None:
+				self.ui.result_textBrowser.setText("You need to load a data file.")	
+			else:
+				self.x = self.file[:,0]
+				self.y = self.file[:,1]
+
+			if self.check_loaded_files == True: #check the following conditions if all required files have been provided
+				if self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
+					bck_y = self.bck_file[:,1]
+					self.y = self.y - bck_y
+				elif self.ui.subtract_bck_radioButton.isChecked() == False and self.ui.WLRef_checkBox.isChecked() == True:
+					wlref_y = self.wlref_file[:,1]
+					self.y = (self.y)/wlref_y
+				
+				elif self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == True:
+					bck_y = self.bck_file[:,1]
+					wlref_y = self.wlref_file[:,1]
+					self.y = (self.y-bck_y)/wlref_y
 			
 			
 			if self.ui.norm_checkBox.isChecked():
@@ -267,30 +291,25 @@ class MainWindow(TemplateBaseClass):
 			return True
 		elif self.ui.clear_checkBox.isChecked() == False:
 			return False
-	
-	"""Open param window and get peak center range values and assign it to variables to use later"""
-	def configure_scan_params(self):
-	 	self.param_window = ParamWindow()
-	# 	self.param_window.peak_range.connect(self.peak_range)
-	
-	# def peak_range(self, peaks):
-	# 	self.center_min = peaks[0]
-	# 	self.center_max = peaks[1]
-		
-	
+
 	def fit_and_plot(self):
 		fit_func = self.ui.fitFunc_comboBox.currentText()
 		
 		try:
-			
-			if self.ui.subtract_bck_checkBox.isChecked() == False:
-				self.ui.result_textBrowser.setText("You need to check the subtract background option!")
-			
-			elif self.wlref_file is not None and self.ui.WLRef_checkBox.isChecked() == False:
-				self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
-				
+			self.plot()
+			if self.opened_from_flim:
+				self.file = self.sum_data_from_flim.T
+			if self.ui.plot_without_bck_radioButton.isChecked(): #if plot w/o bck, create dummy bck_file
+				self.bck_file = np.zeros(shape=(self.file.shape[0], 2))
+				self.bck_file[:,0] = self.file[:,0]
+ 
+			# if self.ui.subtract_bck_radioButton.isChecked() == False:
+			# 	self.ui.result_textBrowser.setText("You need to check the subtract background option!")
+			if self.check_loaded_files is None:
+				pass
 			else:
-				if fit_func == "Single Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+
+				if fit_func == "Single Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
 					single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
 					if self.ui.adjust_param_checkBox.isChecked():
 						center1_min = self.ui.single_peakcenter1_min_spinBox.value()
@@ -305,7 +324,7 @@ class MainWindow(TemplateBaseClass):
 					self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 				
-				elif fit_func == "Single Lorentzian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+				elif fit_func == "Single Lorentzian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
 					single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
 					
 					if self.ui.adjust_param_checkBox.isChecked():
@@ -321,7 +340,7 @@ class MainWindow(TemplateBaseClass):
 					self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 				
-				elif fit_func == "Double Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+				elif fit_func == "Double Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
 					double_gauss = Double_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
 					if self.ui.adjust_param_checkBox.isChecked():
 						center1_min = self.ui.double_peakcenter1_min_spinBox.value()
@@ -350,7 +369,7 @@ class MainWindow(TemplateBaseClass):
 
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 				
-				elif fit_func == "Triple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
+				elif fit_func == "Triple Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
 					#currently only works for triple gaussian (n=3)
 					multiple_gauss = Multi_Gaussian(self.file, self.bck_file, 3, wlref=self.wlref_file)
 					if self.ui.adjust_param_checkBox.isChecked():
@@ -386,7 +405,7 @@ class MainWindow(TemplateBaseClass):
 
 		
 		except Exception as e:
-			self.ui.result_textBrowser.setText(str(e))
+			self.ui.result_textBrowser.append(str(e))
 
 	def pub_ready_plot_export(self):
 		filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
@@ -421,19 +440,19 @@ class MainWindow(TemplateBaseClass):
 		if self.scan_file_type == "pkl":
 			self.intensities = data['Intensities']
 			self.wavelengths = data['Wavelengths']
-			try:
-				self.x_scan_size = data['Scan Parameters']['X scan size (um)']
-				self.y_scan_size = data['Scan Parameters']['Y scan size (um)']
-				self.x_step_size = data['Scan Parameters']['X step size (um)']
-				self.y_step_size = data['Scan Parameters']['Y step size (um)']
-			except: # TODO test and debug loading pkl file w/o scan parameters
-				self.configure_scan_params()
-				while not hasattr(self, "scan_params_entered"):
-					pass
-				self.x_scan_size = self.param_window.ui.x_scan_size_spinBox.value()
-				self.y_scan_size = self.param_window.ui.y_scan_size_spinBox.value()
-				self.x_step_size = self.param_window.ui.x_step_size_spinBox.value()
-				self.y_step_size = self.param_window.ui.y_step_size_spinBox.value()
+			# try:
+			self.x_scan_size = data['Scan Parameters']['X scan size (um)']
+			self.y_scan_size = data['Scan Parameters']['Y scan size (um)']
+			self.x_step_size = data['Scan Parameters']['X step size (um)']
+			self.y_step_size = data['Scan Parameters']['Y step size (um)']
+			# except: # TODO test and debug loading pkl file w/o scan parameters
+			# 	self.configure_scan_params()
+			# 	while not hasattr(self, "scan_params_entered"):
+			# 		pass
+			# 	self.x_scan_size = self.param_window.ui.x_scan_size_spinBox.value()
+			# 	self.y_scan_size = self.param_window.ui.y_scan_size_spinBox.value()
+			# 	self.x_step_size = self.param_window.ui.x_step_size_spinBox.value()
+			# 	self.y_step_size = self.param_window.ui.y_step_size_spinBox.value()
 
 		else: #run this if scan file is h5
 			self.x_scan_size = data['Scan Parameters'].attrs['X scan size (um)']
@@ -445,6 +464,15 @@ class MainWindow(TemplateBaseClass):
 
 		self.numb_x_pixels = int(self.x_scan_size/self.x_step_size)
 		self.numb_y_pixels = int(self.y_scan_size/self.y_step_size)
+
+		"""Open param window and get peak center range values and assign it to variables to use later"""
+	# def configure_scan_params(self):
+	#  	self.param_window = ParamWindow()
+	# 	self.param_window.peak_range.connect(self.peak_range)
+	
+	# def peak_range(self, peaks):
+	# 	self.center_min = peaks[0]
+	# 	self.center_max = peaks[1]
 
 	def plot_fit_scan(self):
 		try:
@@ -679,35 +707,35 @@ class MainWindow(TemplateBaseClass):
 		
 		
 """Parameter Window GUI and Functions"""
-param_file_path = (base_path / "scan_params_input.ui").resolve()
+# param_file_path = (base_path / "scan_params_input.ui").resolve()
 
-param_uiFile = param_file_path
+# param_uiFile = param_file_path
 
-param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(param_uiFile)
+# param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(param_uiFile)
 
-class ParamWindow(param_TemplateBaseClass):
+# class ParamWindow(param_TemplateBaseClass):
 	
-	#peak_range = QtCore.pyqtSignal(list)
+# 	#peak_range = QtCore.pyqtSignal(list)
 	
-	def __init__(self):
-#        super(param_TemplateBaseClass, self).__init__()
-		param_TemplateBaseClass.__init__(self)
+# 	def __init__(self):
+# #        super(param_TemplateBaseClass, self).__init__()
+# 		param_TemplateBaseClass.__init__(self)
 		
-		# Create the param window
-		self.pui = param_WindowTemplate()
-		self.pui.setupUi(self)
+# 		# Create the param window
+# 		self.pui = param_WindowTemplate()
+# 		self.pui.setupUi(self)
 		
-		self.pui.done_pushButton.clicked.connect(self.done)
+# 		self.pui.done_pushButton.clicked.connect(self.done)
 		
-		self.show()
+# 		self.show()
 	
 
 	
-	def done(self):
-		#center_min, center_max = self.current_peak_range()
-		#self.peak_range.emit([center_min, center_max])
-		self.close()
-		self.scan_params_entered = True
+# 	def done(self):
+# 		#center_min, center_max = self.current_peak_range()
+# 		#self.peak_range.emit([center_min, center_max])
+# 		self.close()
+# 		self.scan_params_entered = True
 	
 """Run the Main Window"""    
 def run():
