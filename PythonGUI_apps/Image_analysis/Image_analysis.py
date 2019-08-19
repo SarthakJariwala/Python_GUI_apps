@@ -137,7 +137,7 @@ class MainWindow(TemplateBaseClass):
 		if self.ui.spot_radioButton.isChecked():
 			self.camera_pixel_size = 7.4
 		elif self.ui.pixera_radioButton.isChecked():
-			self.camera_pixel_size = 0
+			self.camera_pixel_size = 3
 
 	def close_application(self):
 		choice = QtGui.QMessageBox.question(self, 'EXIT!',
