@@ -129,7 +129,7 @@ class MainWindow(TemplateBaseClass):
 			data, coords = roi.getArrayRegion(image.view(np.ndarray), self.ui.intensity_sums_viewBox.imageItem, axes, returnMappedCoords=True)
 
 			#calculate sums along columns in region
-			sums_to_plot = np.sum(data, axis=0)
+			sums_to_plot = np.mean(data, axis=0)
 
 			#get scan x-coordinates in region
 			x_values = coords[1][0]

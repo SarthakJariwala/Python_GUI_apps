@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1059</width>
+    <width>1029</width>
     <height>743</height>
    </rect>
   </property>
@@ -51,14 +51,21 @@
        </item>
        <item row="0" column="0">
         <layout class="QGridLayout" name="gridLayout">
-         <item row="1" column="2">
-          <widget class="QCheckBox" name="custom_pixel_size_checkBox">
+         <item row="6" column="0">
+          <widget class="QPushButton" name="load_image_pushButton">
            <property name="text">
-            <string>Custom pixel size (um)</string>
+            <string>Load image</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="3">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="greyscale_checkBox">
+           <property name="text">
+            <string>Greyscale image</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
           <widget class="QComboBox" name="magnification_comboBox">
            <item>
             <property name="text">
@@ -75,30 +82,61 @@
              <string>100</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>150</string>
+            </property>
+           </item>
           </widget>
          </item>
-         <item row="1" column="3">
-          <widget class="QDoubleSpinBox" name="custom_pixel_size_spinBox">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
+         <item row="3" column="0">
           <widget class="QLabel" name="label_7">
            <property name="text">
             <string>Magnification</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="0" colspan="2">
-          <widget class="QPushButton" name="load_image_pushButton">
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="custom_pixel_size_checkBox">
            <property name="text">
-            <string>Load image</string>
+            <string>Custom pixel size (um)</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="2" colspan="2">
+         <item row="5" column="1">
+          <widget class="QDoubleSpinBox" name="custom_pixel_size_spinBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="2">
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string>Camera</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QRadioButton" name="spot_radioButton">
+              <property name="text">
+               <string>SPOT</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="pixera_radioButton">
+              <property name="text">
+               <string>Pixera</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="8" column="0">
           <widget class="QPushButton" name="update_scaling_factor_pushButton">
            <property name="text">
             <string>Update scaling factor</string>
@@ -117,7 +155,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1059</width>
+     <width>1029</width>
      <height>31</height>
     </rect>
    </property>

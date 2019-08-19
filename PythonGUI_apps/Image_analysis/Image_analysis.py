@@ -35,10 +35,10 @@ class MainWindow(TemplateBaseClass):
 		self.roi = self.imv.roi
 		self.roi.translateSnap = True
 		self.roi.scaleSnap = True
+		self.update_camera() #initialize camera pixel size
 		self.update_scaling_factor() #initialize scaling_factor
 
-		self.roi_plot = self.imv.getRoiPlot().getPlotItem()
-
+		self.roi_plot = self.imv.getRoiPlot().getPlotItem() #get roi plot
 		self.ui.image_groupBox.layout().addWidget(self.imv)
 
 		#set up ui signals
@@ -46,6 +46,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui.load_image_pushButton.clicked.connect(self.load_image)
 		self.ui.custom_pixel_size_checkBox.stateChanged.connect(self.switch_custom_pixel_size)
 		self.ui.update_scaling_factor_pushButton.clicked.connect(self.update_scaling_factor)
+		self.ui.spot_radioButton.toggled.connect(self.update_camera)
 
 		self.num_plots = 0
 		self.show()
@@ -57,25 +58,29 @@ class MainWindow(TemplateBaseClass):
 		try:
 			file = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd())
 			self.original_image = Image.open(file[0])
-			self.original_image = self.original_image.rotate(-90, expand=True)
+			#self.original_image = self.original_image.rotate(-90, expand=True)
 			self.resize_to_scaling_factor(self.original_image)
 		except Exception as err:
 			print(format(err))
 
 	def resize_to_scaling_factor(self, image):
+		"""
+		Handles loading of image according to scaling_factor
+		"""
 		image = image.resize((round(image.size[0]*self.scaling_factor), round(image.size[1]*self.scaling_factor)))
-		image_array = np.asarray(image)
+		if self.ui.greyscale_checkBox.isChecked():
+			image = image.convert("L") #convert to greyscale
+		image_array = np.asarray(image).T #correct numpy array auto-flip
 		width = image_array.shape[0]
 		height = image_array.shape[1]
 		try:
-			x_vals = np.arange(width)
+			x_vals = np.arange(width) #imv x-axis
 			self.imv.setImage(img=image_array, xvals= x_vals)
 			self.roi.setPos((0,0))
 			self.roi.setSize([width, height * self.scaling_factor]) #set line roi
 			self.line_profile_update_plot()
 		except:
 			pass
-
 
 	def line_profile_update_plot(self):
 		""" Handle line profile for intensity sum viewbox """
@@ -118,16 +123,21 @@ class MainWindow(TemplateBaseClass):
 		if self.ui.custom_pixel_size_checkBox.isChecked():
 			self.scaling_factor = self.ui.custom_pixel_size_spinBox.value()
 		else:
-			pixel_size = 7.4
-			self.scaling_factor = pixel_size/int(self.ui.magnification_comboBox.currentText())
-		self.roi.snapSize = self.scaling_factor
+			self.scaling_factor = self.camera_pixel_size/int(self.ui.magnification_comboBox.currentText())
+		self.roi.snapSize = self.scaling_factor #roi snaps to multiples of scaling_factor
 		if hasattr(self, "original_image"):
-			self.resize_to_scaling_factor(self.original_image)
+			self.resize_to_scaling_factor(self.original_image) #resize image, sets up roi
 
 	def switch_custom_pixel_size(self):
 		checked = self.ui.custom_pixel_size_checkBox.isChecked()
 		self.ui.custom_pixel_size_spinBox.setEnabled(checked)
 		self.ui.magnification_comboBox.setEnabled(not checked)
+
+	def update_camera(self):
+		if self.ui.spot_radioButton.isChecked():
+			self.camera_pixel_size = 7.4
+		elif self.ui.pixera_radioButton.isChecked():
+			self.camera_pixel_size = 0
 
 	def close_application(self):
 		choice = QtGui.QMessageBox.question(self, 'EXIT!',
