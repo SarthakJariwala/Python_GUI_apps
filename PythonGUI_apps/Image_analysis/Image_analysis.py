@@ -35,17 +35,19 @@ class MainWindow(TemplateBaseClass):
 		self.roi = self.imv.roi
 		self.roi.translateSnap = True
 		self.roi.scaleSnap = True
-		self.calc_scaling_factor() #initialize scaling_factor
-		self.roi.snapSize = self.scaling_factor #roi snaps to multiples of scaling_factor
-		self.roi.sigRegionChanged.connect(self.line_profile_update_plot)
+		self.update_scaling_factor() #initialize scaling_factor
+
 		self.roi_plot = self.imv.getRoiPlot().getPlotItem()
 
 		self.ui.image_groupBox.layout().addWidget(self.imv)
 
 		#set up ui signals
+		self.roi.sigRegionChanged.connect(self.line_profile_update_plot)
 		self.ui.load_image_pushButton.clicked.connect(self.load_image)
 		self.ui.custom_pixel_size_checkBox.stateChanged.connect(self.switch_custom_pixel_size)
+		self.ui.update_scaling_factor_pushButton.clicked.connect(self.update_scaling_factor)
 
+		self.num_plots = 0
 		self.show()
 
 	def load_image(self):
@@ -54,28 +56,30 @@ class MainWindow(TemplateBaseClass):
 		"""
 		try:
 			file = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd())
-			image = Image.open(file[0])
-			image = image.rotate(-90, expand=True)
-			image_array = np.asarray(image)
-			try:
-				width = image_array.shape[0]
-				height = image_array.shape[1]
-				x_vals = np.arange(width)
-				self.imv.setImage(img=image_array, xvals= x_vals)
-				self.calc_scaling_factor()
-				self.roi.setPos((0,0))
-				self.roi.setSize([width, height*self.scaling_factor]) #set line roi
-				self.line_profile_update_plot()
-			except:
-				pass
+			self.original_image = Image.open(file[0])
+			self.original_image = self.original_image.rotate(-90, expand=True)
+			self.resize_to_scaling_factor(self.original_image)
 		except Exception as err:
 			print(format(err))
 
+	def resize_to_scaling_factor(self, image):
+		image = image.resize((round(image.size[0]*self.scaling_factor), round(image.size[1]*self.scaling_factor)))
+		image_array = np.asarray(image)
+		width = image_array.shape[0]
+		height = image_array.shape[1]
+		try:
+			x_vals = np.arange(width)
+			self.imv.setImage(img=image_array, xvals= x_vals)
+			self.roi.setPos((0,0))
+			self.roi.setSize([width, height * self.scaling_factor]) #set line roi
+			self.line_profile_update_plot()
+		except:
+			pass
+
+
 	def line_profile_update_plot(self):
 		""" Handle line profile for intensity sum viewbox """
-		#if hasattr(self, "intensity_sums"):
 		self.roi_plot.clear()
-
 		image = self.imv.getProcessedImage()
 
 		# Extract image data from ROI
@@ -84,8 +88,7 @@ class MainWindow(TemplateBaseClass):
 		if data is None:
 			return
 
-		self.calc_scaling_factor()
-		x_values = coords[1][0] * self.scaling_factor #adjust x-axis roi plot
+		x_values = coords[1][0]
 
 		#calculate sums along columns in region
 		if len(data.shape) == 2: #if grayscale, average intensities 
@@ -108,7 +111,7 @@ class MainWindow(TemplateBaseClass):
 			except:
 				pass
 
-	def calc_scaling_factor(self):
+	def update_scaling_factor(self):
 		"""
 		Calculate scaling factor
 		"""
@@ -117,6 +120,9 @@ class MainWindow(TemplateBaseClass):
 		else:
 			pixel_size = 7.4
 			self.scaling_factor = pixel_size/int(self.ui.magnification_comboBox.currentText())
+		self.roi.snapSize = self.scaling_factor
+		if hasattr(self, "original_image"):
+			self.resize_to_scaling_factor(self.original_image)
 
 	def switch_custom_pixel_size(self):
 		checked = self.ui.custom_pixel_size_checkBox.isChecked()
