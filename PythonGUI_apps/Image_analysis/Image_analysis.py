@@ -10,6 +10,7 @@ from PIL import Image
 # local modules
  
 pg.mkQApp()
+pg.setConfigOption('imageAxisOrder', 'col-major') 
 
 base_path = Path(__file__).parent
 file_path = (base_path / "image_analysis_gui.ui").resolve()
@@ -17,6 +18,10 @@ file_path = (base_path / "image_analysis_gui.ui").resolve()
 uiFile = file_path
 
 WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
+
+def updateDelay(scale, time):
+	""" Hack fix for scalebar inaccuracy"""
+	QtCore.QTimer.singleShot(time, scale.updateBar)
 
 class MainWindow(TemplateBaseClass):  
 
@@ -45,10 +50,9 @@ class MainWindow(TemplateBaseClass):
 		self.roi.sigRegionChanged.connect(self.line_profile_update_plot)
 		self.ui.load_image_pushButton.clicked.connect(self.load_image)
 		self.ui.custom_pixel_size_checkBox.stateChanged.connect(self.switch_custom_pixel_size)
-		self.ui.update_scaling_factor_pushButton.clicked.connect(self.update_scaling_factor)
+		self.ui.update_scaling_factor_pushButton.clicked.connect(self.reload_image)
 		self.ui.spot_radioButton.toggled.connect(self.update_camera)
 
-		self.num_plots = 0
 		self.show()
 
 	def load_image(self):
@@ -58,7 +62,7 @@ class MainWindow(TemplateBaseClass):
 		try:
 			file = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd())
 			self.original_image = Image.open(file[0])
-			#self.original_image = self.original_image.rotate(-90, expand=True)
+			self.original_image = self.original_image.rotate(-90, expand=True)
 			self.resize_to_scaling_factor(self.original_image)
 		except Exception as err:
 			print(format(err))
@@ -67,17 +71,25 @@ class MainWindow(TemplateBaseClass):
 		"""
 		Handles loading of image according to scaling_factor
 		"""
+		self.update_camera() #initialize camera pixel size
+		self.update_scaling_factor() #initialize scaling_factor
 		image = image.resize((round(image.size[0]*self.scaling_factor), round(image.size[1]*self.scaling_factor)))
 		if self.ui.greyscale_checkBox.isChecked():
 			image = image.convert("L") #convert to greyscale
-		image_array = np.asarray(image).T #correct numpy array auto-flip
+		image_array = np.array(image) #correct numpy array auto-flip
+
 		width = image_array.shape[0]
 		height = image_array.shape[1]
 		try:
 			x_vals = np.arange(width) #imv x-axis
-			self.imv.setImage(img=image_array, xvals= x_vals)
+			self.imv.setImage(image_array, xvals= x_vals)
 			self.roi.setPos((0,0))
-			self.roi.setSize([width, height * self.scaling_factor]) #set line roi
+			self.roi.setSize([width, self.camera_pixel_size])
+
+			scale = pg.ScaleBar(size=1,suffix='um')
+			scale.setParentItem(self.imv.view)
+			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+			self.imv.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
 			self.line_profile_update_plot()
 		except:
 			pass
@@ -121,10 +133,13 @@ class MainWindow(TemplateBaseClass):
 		Calculate scaling factor
 		"""
 		if self.ui.custom_pixel_size_checkBox.isChecked():
-			self.scaling_factor = self.ui.custom_pixel_size_spinBox.value()
+			self.camera_pixel_size = self.ui.custom_pixel_size_spinBox.value()
+			self.scaling_factor = self.camera_pixel_size
 		else:
 			self.scaling_factor = self.camera_pixel_size/int(self.ui.magnification_comboBox.currentText())
 		self.roi.snapSize = self.scaling_factor #roi snaps to multiples of scaling_factor
+
+	def reload_image(self):
 		if hasattr(self, "original_image"):
 			self.resize_to_scaling_factor(self.original_image) #resize image, sets up roi
 

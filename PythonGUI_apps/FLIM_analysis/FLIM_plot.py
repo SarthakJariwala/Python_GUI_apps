@@ -112,7 +112,7 @@ class MainWindow(TemplateBaseClass):
                                                   (self.x_step_size,
                                                    self.y_step_size))
             self.ui.intensity_sums_viewBox.roi.setSize([self.x_scan_size, self.y_step_size]) #line roi
-            scale = pg.ScaleBar(size=3,suffix='um')
+            scale = pg.ScaleBar(size=1,suffix='um')
             scale.setParentItem(self.ui.intensity_sums_viewBox.view)
             scale.anchor((1, 1), (1, 1), offset=(-30, -30))
             self.ui.intensity_sums_viewBox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))

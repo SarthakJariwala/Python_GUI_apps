@@ -44,6 +44,10 @@ uiFile = file_path
 
 WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 
+def updateDelay(scale, time):
+	""" Hack fix for scalebar inaccuracy"""
+	QtCore.QTimer.singleShot(time, scale.updateBar)
+
 class MainWindow(TemplateBaseClass):  
 	
 	def __init__(self):
@@ -539,11 +543,12 @@ class MainWindow(TemplateBaseClass):
 				scale = pg.ScaleBar(size=2,suffix='um')
 				scale.setParentItem(self.ui.fit_scan_viewbox.view)
 				scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+				self.ui.fit_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
 			else:
 				self.ui.fit_scan_viewbox.setImage(self.img)
 			
 			self.ui.fit_scan_viewbox.view.invertY(False)
-				
+
 		except Exception as e:
 			self.ui.result_textBrowser2.append(str(e))
 			pass
@@ -553,20 +558,18 @@ class MainWindow(TemplateBaseClass):
 			# TODO test line scan plots
 
 			intensities = self.intensities.T #this is only there because of how we are saving the data in the app
-			
-			intensities = np.reshape(intensities, newshape=(2048,self.numb_x_pixels, self.numb_y_pixels))
-			
-			self.ui.raw_scan_viewbox.view.invertY(False)
+			intensities = np.reshape(intensities, newshape=(2048,self.numb_x_pixels, self.numb_y_pixels)) 
 			self.ui.raw_scan_viewbox.setImage(intensities, scale=
 												  (self.x_step_size,
 												   self.y_step_size), xvals=self.wavelengths)
 			
-
 			#roi_plot = self.ui.raw_scan_viewBox.getRoiPlot()
 			#roi_plot.plot(data['Wavelengths'], intensities)
+			self.ui.raw_scan_viewbox.view.invertY(False)
 			scale = pg.ScaleBar(size=2,suffix='um')
 			scale.setParentItem(self.ui.raw_scan_viewbox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+			self.ui.raw_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
 			
 		except Exception as e:
 			self.ui.result_textBrowser2.append(str(e))
@@ -588,6 +591,7 @@ class MainWindow(TemplateBaseClass):
 			scale = pg.ScaleBar(size=2,suffix='um')
 			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+			self.ui.intensity_sums_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
 
 		except Exception as e:
 			self.ui.result_textBrowser2.append(str(e))
