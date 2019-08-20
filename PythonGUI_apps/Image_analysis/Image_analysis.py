@@ -62,7 +62,7 @@ class MainWindow(TemplateBaseClass):
 		try:
 			file = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd())
 			self.original_image = Image.open(file[0])
-			self.original_image = self.original_image.rotate(-90, expand=True)
+			self.original_image = self.original_image.rotate(-90, expand=True) #correct image orientation
 			self.resize_to_scaling_factor(self.original_image)
 		except Exception as err:
 			print(format(err))
@@ -76,7 +76,7 @@ class MainWindow(TemplateBaseClass):
 		image = image.resize((round(image.size[0]*self.scaling_factor), round(image.size[1]*self.scaling_factor)))
 		if self.ui.greyscale_checkBox.isChecked():
 			image = image.convert("L") #convert to greyscale
-		image_array = np.array(image) #correct numpy array auto-flip
+		image_array = np.array(image)
 
 		width = image_array.shape[0]
 		height = image_array.shape[1]

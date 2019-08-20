@@ -29,6 +29,7 @@ uiFile = file_path
 WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 
 def updateDelay(scale, time):
+    """ Hack fix for scalebar inaccuracy """
     QtCore.QTimer.singleShot(time, scale.updateBar)
 
 class MainWindow(TemplateBaseClass):  
