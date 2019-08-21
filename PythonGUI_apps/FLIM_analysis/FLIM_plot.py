@@ -19,7 +19,7 @@ from Spectrum_analysis import Spectra_plot_fit
  
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
-pg.setConfigOption('imageAxisOrder', 'row-major')
+
 
 base_path = Path(__file__).parent
 file_path = (base_path / "flim_plot_gui.ui").resolve()
@@ -37,6 +37,7 @@ class MainWindow(TemplateBaseClass):
     hist_data_signal = QtCore.pyqtSignal()
 
     def __init__(self):
+        pg.setConfigOption('imageAxisOrder', 'row-major')
         super(TemplateBaseClass, self).__init__()
         
         # Create the main window

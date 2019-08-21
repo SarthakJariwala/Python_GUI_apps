@@ -35,7 +35,7 @@ plt.rc('axes', linewidth=3.5)
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
-pg.setConfigOption('imageAxisOrder', 'row-major')
+
 
 base_path = Path(__file__).parent
 file_path = (base_path / "Spectra_plot_fit_gui.ui").resolve()
@@ -51,6 +51,7 @@ def updateDelay(scale, time):
 class MainWindow(TemplateBaseClass):  
 	
 	def __init__(self):
+		pg.setConfigOption('imageAxisOrder', 'row-major')
 		super(TemplateBaseClass, self).__init__()
 		
 		# Create the main window

@@ -10,7 +10,7 @@ from PIL import Image
 # local modules
  
 pg.mkQApp()
-pg.setConfigOption('imageAxisOrder', 'col-major') 
+
 
 base_path = Path(__file__).parent
 file_path = (base_path / "image_analysis_gui.ui").resolve()
@@ -26,6 +26,7 @@ def updateDelay(scale, time):
 class MainWindow(TemplateBaseClass):  
 
 	def __init__(self):
+		pg.setConfigOption('imageAxisOrder', 'col-major') 
 		super(TemplateBaseClass, self).__init__()
 		
 		# Create the main window
