@@ -10,7 +10,7 @@ from PIL import Image
 # local modules
  
 pg.mkQApp()
-pg.setConfigOption('imageAxisOrder', 'col-major') 
+pg.setConfigOption('imageAxisOrder', 'row-major') 
 
 base_path = Path(__file__).parent
 file_path = (base_path / "image_analysis_gui.ui").resolve()
@@ -36,8 +36,9 @@ class MainWindow(TemplateBaseClass):
 		self.imv = pg.ImageView()
 		self.imv.getView().setAspectLocked(lock=False, ratio=1)
 		self.imv.getView().setMouseEnabled(x=True, y=True)
-		self.imv.getView().invertY(False)
+		#self.imv.getView().invertY(False)
 		self.roi = self.imv.roi
+
 		self.roi.translateSnap = True
 		self.roi.scaleSnap = True
 		self.update_camera() #initialize camera pixel size
@@ -62,7 +63,7 @@ class MainWindow(TemplateBaseClass):
 		try:
 			file = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd())
 			self.original_image = Image.open(file[0])
-			self.original_image = self.original_image.rotate(-90, expand=True) #correct image orientation
+			#self.original_image = self.original_image.rotate(-90, expand=True) #correct image orientation
 			self.resize_to_scaling_factor(self.original_image)
 		except Exception as err:
 			print(format(err))
@@ -73,18 +74,29 @@ class MainWindow(TemplateBaseClass):
 		"""
 		self.update_camera() #initialize camera pixel size
 		self.update_scaling_factor() #initialize scaling_factor
-		image = image.resize((round(image.size[0]*self.scaling_factor), round(image.size[1]*self.scaling_factor)))
+
+		if self.ui.pixera_radioButton.isChecked():
+			image = self.original_image
+		elif self.ui.spot_radioButton.isChecked():
+			image = self.original_image.resize((round(image.size[0]*self.scaling_factor), round(image.size[1]*self.scaling_factor)))
+			
 		if self.ui.greyscale_checkBox.isChecked():
 			image = image.convert("L") #convert to greyscale
-		image_array = np.array(image)
 
+		image_array = np.array(image)
 		width = image_array.shape[0]
 		height = image_array.shape[1]
+		if self.ui.pixera_radioButton.isChecked():
+			width = width * self.scaling_factor
+			height = height * self.scaling_factor
+		
 		try:
-			x_vals = np.arange(width) #imv x-axis
+			x_vals = np.arange(width)
 			self.imv.setImage(image_array, xvals= x_vals)
-			self.roi.setPos((0,0))
-			self.roi.setSize([width, self.camera_pixel_size])
+			
+			roi_height = self.scaling_factor * height
+			self.roi.setPos((0,height - roi_height))
+			self.roi.setSize([width, roi_height])
 
 			scale = pg.ScaleBar(size=1,suffix='um')
 			scale.setParentItem(self.imv.view)
@@ -151,8 +163,10 @@ class MainWindow(TemplateBaseClass):
 	def update_camera(self):
 		if self.ui.spot_radioButton.isChecked():
 			self.camera_pixel_size = 7.4
+			self.ui.greyscale_checkBox.setChecked(False)
 		elif self.ui.pixera_radioButton.isChecked():
 			self.camera_pixel_size = 3
+			self.ui.greyscale_checkBox.setChecked(True)
 
 	def close_application(self):
 		choice = QtGui.QMessageBox.question(self, 'EXIT!',
