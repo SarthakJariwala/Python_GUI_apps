@@ -10,7 +10,7 @@ from PIL import Image
 # local modules
  
 pg.mkQApp()
-pg.setConfigOption('imageAxisOrder', 'row-major') 
+pg.setConfigOption('imageAxisOrder', 'col-major') 
 
 base_path = Path(__file__).parent
 file_path = (base_path / "image_analysis_gui.ui").resolve()
@@ -36,11 +36,13 @@ class MainWindow(TemplateBaseClass):
 		self.imv = pg.ImageView()
 		self.imv.getView().setAspectLocked(lock=False, ratio=1)
 		self.imv.getView().setMouseEnabled(x=True, y=True)
-		#self.imv.getView().invertY(False)
+		self.imv.getView().invertY(False)
 		self.roi = self.imv.roi
 
 		self.roi.translateSnap = True
 		self.roi.scaleSnap = True
+		self.roi.removeHandle(1)
+		self.roi.addScaleHandle([0, 0], [1, 1])
 		self.update_camera() #initialize camera pixel size
 		self.update_scaling_factor() #initialize scaling_factor
 
@@ -53,9 +55,11 @@ class MainWindow(TemplateBaseClass):
 		self.ui.custom_pixel_size_checkBox.stateChanged.connect(self.switch_custom_pixel_size)
 		self.ui.update_scaling_factor_pushButton.clicked.connect(self.reload_image)
 		self.ui.spot_radioButton.toggled.connect(self.update_camera)
+		self.ui.custom_pixel_size_spinBox.valueChanged.connect(self.update_scaling_factor)
 
 		self.show()
 
+		#row major. invert y false, rotate false
 	def load_image(self):
 		"""
 		Prompts the user to select a text file containing image data.
@@ -63,7 +67,7 @@ class MainWindow(TemplateBaseClass):
 		try:
 			file = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd())
 			self.original_image = Image.open(file[0])
-			#self.original_image = self.original_image.rotate(-90, expand=True) #correct image orientation
+			self.original_image = self.original_image.rotate(-90, expand=True) #correct image orientation
 			self.resize_to_scaling_factor(self.original_image)
 		except Exception as err:
 			print(format(err))
@@ -72,8 +76,6 @@ class MainWindow(TemplateBaseClass):
 		"""
 		Handles loading of image according to scaling_factor
 		"""
-		self.update_camera() #initialize camera pixel size
-		self.update_scaling_factor() #initialize scaling_factor
 
 		if self.ui.pixera_radioButton.isChecked():
 			image = self.original_image
@@ -86,18 +88,15 @@ class MainWindow(TemplateBaseClass):
 		image_array = np.array(image)
 		width = image_array.shape[0]
 		height = image_array.shape[1]
-		if self.ui.pixera_radioButton.isChecked():
-			width = width * self.scaling_factor
-			height = height * self.scaling_factor
 		
 		try:
 			x_vals = np.arange(width)
+			if self.ui.pixera_radioButton.isChecked():
+				x_vals = x_vals * self.scaling_factor
 			self.imv.setImage(image_array, xvals= x_vals)
-			
 			roi_height = self.scaling_factor * height
-			self.roi.setPos((0,height - roi_height))
+			self.roi.setPos((0, 0))
 			self.roi.setSize([width, roi_height])
-
 			scale = pg.ScaleBar(size=1,suffix='um')
 			scale.setParentItem(self.imv.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
@@ -117,27 +116,29 @@ class MainWindow(TemplateBaseClass):
 		if data is None:
 			return
 
-		x_values = coords[1][0]
-
-		#calculate sums along columns in region
+		x_values = coords[0,:,0]
+		if self.ui.pixera_radioButton.isChecked():
+			x_values = x_values * self.scaling_factor
+		
+		#calculate average along columns in region
 		if len(data.shape) == 2: #if grayscale, average intensities 
-			sums_to_plot = np.mean(data, axis=0)
+			avg_to_plot = np.mean(data, axis=-1)
 			try:
-				self.roi_plot.plot(x_values, sums_to_plot)
+				self.roi_plot.plot(x_values, avg_to_plot)
 			except:
 				pass
 		elif len(data.shape) > 2: #if rgb arrays, plot individual components
 			r_values = data[:,:,0]
 			g_values = data[:,:,1]
 			b_values = data[:,:,2]
-			r_avg = np.mean(r_values, axis=0) #average red values across columns
-			g_avg = np.mean(g_values, axis=0) #average green values
-			b_avg = np.mean(b_values, axis=0) #average blue values
+			r_avg = np.mean(r_values, axis=-1) #average red values across columns
+			g_avg = np.mean(g_values, axis=-1) #average green values
+			b_avg = np.mean(b_values, axis=-1) #average blue values
 			try:
 				self.roi_plot.plot(x_values, r_avg, pen='r')
 				self.roi_plot.plot(x_values, g_avg, pen='g')
 				self.roi_plot.plot(x_values, b_avg, pen='b')
-			except:
+			except Exception as e:
 				pass
 
 	def update_scaling_factor(self):
@@ -164,10 +165,11 @@ class MainWindow(TemplateBaseClass):
 		if self.ui.spot_radioButton.isChecked():
 			self.camera_pixel_size = 7.4
 			self.ui.greyscale_checkBox.setChecked(False)
+			self.update_scaling_factor()
 		elif self.ui.pixera_radioButton.isChecked():
 			self.camera_pixel_size = 3
 			self.ui.greyscale_checkBox.setChecked(True)
-
+			self.update_scaling_factor()
 	def close_application(self):
 		choice = QtGui.QMessageBox.question(self, 'EXIT!',
 											"Do you want to exit the app?",
