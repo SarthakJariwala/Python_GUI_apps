@@ -37,17 +37,22 @@ class MainWindow(TemplateBaseClass):
 		self.imv.getView().setAspectLocked(lock=False, ratio=1)
 		self.imv.getView().setMouseEnabled(x=True, y=True)
 		self.imv.getView().invertY(False)
+		self.imv.ui.roiBtn.setEnabled(False)
 		self.roi = self.imv.roi
-
 		self.roi.translateSnap = True
 		self.roi.scaleSnap = True
-		self.roi.removeHandle(1)
-		self.roi.addScaleHandle([0, 0], [1, 1])
+		#self.roi.removeHandle(1)
+		#self.roi.addScaleHandle([0, 0], [1, 1])
 		self.update_camera() #initialize camera pixel size
 		self.update_scaling_factor() #initialize scaling_factor
 
 		self.roi_plot = self.imv.getRoiPlot().getPlotItem() #get roi plot
 		self.ui.image_groupBox.layout().addWidget(self.imv)
+
+		#setup plot
+		self.rgb_plot_layout=pg.GraphicsLayoutWidget()
+		self.ui.rgb_plot_groupBox.layout().addWidget(self.rgb_plot_layout)
+		self.rgb_plot = self.rgb_plot_layout.addPlot()
 
 		#set up ui signals
 		self.roi.sigRegionChanged.connect(self.line_profile_update_plot)
@@ -90,24 +95,37 @@ class MainWindow(TemplateBaseClass):
 		height = image_array.shape[1]
 		
 		try:
-			x_vals = np.arange(width)
+			if self.ui.vertical_radioButton.isChecked():
+				x_vals = np.arange(width)
+			elif self.ui.horizontal_radioButton.isChecked():
+				x_vals = np.arange(height)
+
 			if self.ui.pixera_radioButton.isChecked():
 				x_vals = x_vals * self.scaling_factor
+			
 			self.imv.setImage(image_array, xvals= x_vals)
-			roi_height = self.scaling_factor * height
+			
+			if self.ui.vertical_radioButton.isChecked():
+				roi_height = self.scaling_factor * height
+				self.roi.setSize([width, roi_height])
+			elif self.ui.horizontal_radioButton.isChecked():
+				roi_height = self.scaling_factor * width
+				self.roi.setSize([roi_height, height])
+
 			self.roi.setPos((0, 0))
-			self.roi.setSize([width, roi_height])
+			
 			scale = pg.ScaleBar(size=1,suffix='um')
 			scale.setParentItem(self.imv.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
 			self.imv.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+			self.roi.show()
 			self.line_profile_update_plot()
 		except:
 			pass
 
 	def line_profile_update_plot(self):
 		""" Handle line profile for intensity sum viewbox """
-		self.roi_plot.clear()
+		self.rgb_plot.clear()
 		image = self.imv.getProcessedImage()
 
 		# Extract image data from ROI
@@ -116,28 +134,40 @@ class MainWindow(TemplateBaseClass):
 		if data is None:
 			return
 
-		x_values = coords[0,:,0]
+		if self.ui.vertical_radioButton.isChecked():
+			x_values = coords[0,:,0]
+		elif self.ui.horizontal_radioButton.isChecked():
+			x_values = coords[1,0,:]
+
 		if self.ui.pixera_radioButton.isChecked():
 			x_values = x_values * self.scaling_factor
 		
 		#calculate average along columns in region
 		if len(data.shape) == 2: #if grayscale, average intensities 
-			avg_to_plot = np.mean(data, axis=-1)
+			if self.ui.vertical_radioButton.isChecked():
+				avg_to_plot = np.mean(data, axis=-1)
+			elif self.ui.horizontal_radioButton.isChecked():
+				avg_to_plot = np.mean(data, axis=0)
 			try:
-				self.roi_plot.plot(x_values, avg_to_plot)
+				self.rgb_plot.plot(x_values, avg_to_plot)
 			except:
 				pass
 		elif len(data.shape) > 2: #if rgb arrays, plot individual components
 			r_values = data[:,:,0]
 			g_values = data[:,:,1]
 			b_values = data[:,:,2]
-			r_avg = np.mean(r_values, axis=-1) #average red values across columns
-			g_avg = np.mean(g_values, axis=-1) #average green values
-			b_avg = np.mean(b_values, axis=-1) #average blue values
+			if self.ui.vertical_radioButton.isChecked():
+				r_avg = np.mean(r_values, axis=-1) #average red values across columns
+				g_avg = np.mean(g_values, axis=-1) #average green values
+				b_avg = np.mean(b_values, axis=-1) #average blue values
+			elif self.ui.horizontal_radioButton.isChecked():
+				r_avg = np.mean(r_values, axis=0)
+				g_avg = np.mean(g_values, axis=0)
+				b_avg = np.mean(b_values, axis=0)
 			try:
-				self.roi_plot.plot(x_values, r_avg, pen='r')
-				self.roi_plot.plot(x_values, g_avg, pen='g')
-				self.roi_plot.plot(x_values, b_avg, pen='b')
+				self.rgb_plot.plot(x_values, r_avg, pen='r')
+				self.rgb_plot.plot(x_values, g_avg, pen='g')
+				self.rgb_plot.plot(x_values, b_avg, pen='b')
 			except Exception as e:
 				pass
 
@@ -170,6 +200,7 @@ class MainWindow(TemplateBaseClass):
 			self.camera_pixel_size = 3
 			self.ui.greyscale_checkBox.setChecked(True)
 			self.update_scaling_factor()
+
 	def close_application(self):
 		choice = QtGui.QMessageBox.question(self, 'EXIT!',
 											"Do you want to exit the app?",
