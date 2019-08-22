@@ -33,36 +33,41 @@ class MainWindow(TemplateBaseClass):
 		self.ui = WindowTemplate()
 		self.ui.setupUi(self)
 
-		#setup imageview
-		self.imv = pg.ImageView()
-		self.imv.getView().setAspectLocked(lock=False, ratio=1)
-		self.imv.getView().setMouseEnabled(x=True, y=True)
-		self.imv.getView().invertY(False)
-		self.imv.ui.roiBtn.setEnabled(False)
-		self.roi = self.imv.roi
+		#setup image plot
+		self.image_plot_layout=pg.GraphicsLayoutWidget()
+		self.ui.image_groupBox.layout().addWidget(self.image_plot_layout)
+		self.image_plot = self.image_plot_layout.addPlot()
+		self.img_item = pg.ImageItem()
+		self.image_plot.addItem(self.img_item)
+		self.image_plot_view = self.image_plot.getViewBox()
+
+		#setup lookup table
+		self.hist_lut = pg.HistogramLUTItem()
+		self.image_plot_layout.addItem(self.hist_lut)
+
+		#region of interest - allows user to select scan area
+		self.roi = pg.ROI([0,0],[10, 10], movable=True)
+		self.roi.addScaleHandle([1, 1], [0, 0])
+		self.roi.addRotateHandle([0, 0], [1, 1])
 		self.roi.translateSnap = True
 		self.roi.scaleSnap = True
-		#self.roi.removeHandle(1)
-		#self.roi.addScaleHandle([0, 0], [1, 1])
-		self.update_camera() #initialize camera pixel size
-		self.update_scaling_factor() #initialize scaling_factor
+		self.roi.sigRegionChanged.connect(self.line_profile_update_plot)
+		self.image_plot.addItem(self.roi)
 
-		self.roi_plot = self.imv.getRoiPlot().getPlotItem() #get roi plot
-		self.ui.image_groupBox.layout().addWidget(self.imv)
-
-		#setup plot
+		#setup rgb plot
 		self.rgb_plot_layout=pg.GraphicsLayoutWidget()
 		self.ui.rgb_plot_groupBox.layout().addWidget(self.rgb_plot_layout)
 		self.rgb_plot = self.rgb_plot_layout.addPlot()
 
 		#set up ui signals
-		self.roi.sigRegionChanged.connect(self.line_profile_update_plot)
 		self.ui.load_image_pushButton.clicked.connect(self.load_image)
 		self.ui.custom_pixel_size_checkBox.stateChanged.connect(self.switch_custom_pixel_size)
 		self.ui.update_scaling_factor_pushButton.clicked.connect(self.reload_image)
 		self.ui.spot_radioButton.toggled.connect(self.update_camera)
 		self.ui.custom_pixel_size_spinBox.valueChanged.connect(self.update_scaling_factor)
 
+		self.update_camera() #initialize camera pixel size
+		self.update_scaling_factor() #initialize scaling_factor
 		self.show()
 
 		#row major. invert y false, rotate false
@@ -91,20 +96,18 @@ class MainWindow(TemplateBaseClass):
 		if self.ui.greyscale_checkBox.isChecked():
 			image = image.convert("L") #convert to greyscale
 
-		image_array = np.array(image)
-		width = image_array.shape[0]
-		height = image_array.shape[1]
+		self.image_array = np.array(image)
+		width = self.image_array.shape[0]
+		height = self.image_array.shape[1]
 		
 		try:
-			if self.ui.vertical_radioButton.isChecked():
-				x_vals = np.arange(width)
-			elif self.ui.horizontal_radioButton.isChecked():
-				x_vals = np.arange(height)
+			#set image bounds with qrect
+			self.img_item_rect = QtCore.QRectF(0, 0, width, height)
+			self.img_item.setImage(image=self.image_array)
+			self.img_item.setRect(self.img_item_rect)
 
-			if self.ui.pixera_radioButton.isChecked():
-				x_vals = x_vals * self.scaling_factor
-			
-			self.imv.setImage(image_array, xvals= x_vals)
+			if self.ui.greyscale_checkBox.isChecked():
+				self.hist_lut.setImageItem(self.img_item)
 			
 			if self.ui.vertical_radioButton.isChecked():
 				roi_height = self.scaling_factor * height
@@ -113,13 +116,6 @@ class MainWindow(TemplateBaseClass):
 				roi_height = self.scaling_factor * width
 				self.roi.setSize([roi_height, height])
 
-			self.roi.setPos((0, 0))
-			
-			scale = pg.ScaleBar(size=1,suffix='um')
-			scale.setParentItem(self.imv.view)
-			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-			self.imv.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
-			self.roi.show()
 			self.line_profile_update_plot()
 		except:
 			pass
@@ -127,11 +123,9 @@ class MainWindow(TemplateBaseClass):
 	def line_profile_update_plot(self):
 		""" Handle line profile for intensity sum viewbox """
 		self.rgb_plot.clear()
-		image = self.imv.getProcessedImage()
 
 		# Extract image data from ROI
-		axes = (self.imv.axes['x'], self.imv.axes['y'])
-		data, coords = self.roi.getArrayRegion(image.view(np.ndarray), self.imv.imageItem, axes, returnMappedCoords=True)
+		data, coords = self.roi.getArrayRegion(self.image_array, self.img_item, returnMappedCoords=True)
 		if data is None:
 			return
 
