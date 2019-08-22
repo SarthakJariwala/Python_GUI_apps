@@ -9,57 +9,57 @@ The primary users for this Python package application are Ginger Lab members at 
 
 ## Includes
 * Fluorescence Lifetime Analysis
-    * analyze lifetime
-    * fit data with or without IRF
-    * fit with stretched, single, or double exponential functions by diff_ev or fmin_tnc
-    * calculate surface recombination velocity
-    * export graph and fit results
+    * Analyze lifetime
+    * Fit data with or without IRF
+    * Fit with stretched, single, or double exponential functions by diff_ev or fmin_tnc
+    * Calculate surface recombination velocity
+    * Export graph and fit results
 * Spectra Analysis
-    * analyze single spectrum
-        * fit with or without background and white light
-        * fit with single Lorentzian, single Gaussian, double Gaussian, triple Gaussian models
-        * export graph and fit results
-    * analyze spectra scan
-        * load spectra scan data in .h5 or .pkl files
-        * plot raw scan data
-        * plot scan intensity sums
-        * plot fitted scan by pk_pos, fwhm, sigma, or height
-        * export fitted scan
+    * Analyze single spectrum
+        * Fit with or without background and white light
+        * Fit with single Lorentzian, single Gaussian, double Gaussian, triple Gaussian models
+        * Export graph and fit results
+    * Analyze spectra scan
+        * Load spectra scan data in .h5 or .pkl files
+        * Plot raw scan data
+        * Plot scan intensity sums
+        * Plot fitted scan by pk_pos, fwhm, sigma, or height
+        * Export fitted scan
     * .pkl to .txt, .pkl to .h5 converters
 * Fluorescence Lifetime Imaging Microscopy (FLIM) Data Analysis
-    * load lifetime scans in .h5 or .pkl files
-    * plot histogram intensity sums and analyze PSF
-    * export intensities array and intensities image
-    * plot raw histogram data and analyze lifetime
-    * compare lifetime in two different regions
+    * Load lifetime scans in .h5 or .pkl files
+    * Plot histogram intensity sums and analyze PSF
+    * Export intensities array and intensities image
+    * Plot raw histogram data and analyze lifetime
+    * Compare lifetime in two different regions
 * Photluminescence Quantum Efficiency (PLQE) Analysis
-    * plot PLQE data
-    * calculate PLQE
+    * Plot PLQE data
+    * Calculate PLQE
 * UV-Vis Data Analysis
-    * plot UV-Vis data
-    * correct UV-Vis data for scattering
-    * plot Tauc data
-    * calculate bandgap
-    * export UV-Vis and Tauc plots
+    * Plot UV-Vis data
+    * Correct UV-Vis data for scattering
+    * Plot Tauc data
+    * Calculate bandgap
+    * Export UV-Vis and Tauc plots
 * General *H5* View and Plot
-    * load .h5 file to view file structure
-    * plot datasets as a graph or an image
+    * Load .h5 file to view file structure
+    * Plot datasets as a graph or an image
 * *H5* and *PKL* File Viewer
-    * load .h5 or .pkl file to view file structure
+    * Load .h5 or .pkl file to view file structure
 * Image Analysis
-    * load image on SPOT or Pixera settings, or specify pixel size
-    * handle RGB and greyscale images 
-    * select magnification
-    * color profile horizontally or vertically
+    * Load image on SPOT or Pixera settings, or specify pixel size
+    * Handle RGB and greyscale images 
+    * Select magnification
+    * Color profile horizontally or vertically
 
 ## Screenshots
 ### Welcome Screen
 ![Welcome Screen](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_interface_1.png)
 ### Lifetime Analysis
-![Lifetime Analysis](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Lifetime_analysis_2.PNG)
+![Lifetime Analysis](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Lifetime_analysis_2.png)
 ### Spectra Analysis
-![Single Spectrum](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Spectrum_analysis_1.PNG)
-![Scan Data](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Spectrum_analysis_2.PNG)
+![Single Spectrum](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Spectrum_analysis_1.png)
+![Scan Data](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Spectrum_analysis_2.png)
 ### FLIM Analysis
 ![FLIM Analysis](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_FLIM_analysis_2.png)
 ### UV-Vis Analysis
