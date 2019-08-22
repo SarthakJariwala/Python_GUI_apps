@@ -69,7 +69,7 @@ The primary users for this Python package application are Ginger Lab members at 
 ### H5 Quick Plot
 ![h5- quick plot](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_h5_ViewPlot_analysis_2.PNG)
 ### Image Analysis
-![Image Analysis](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Image_analysis_1.PNG.png)
+![Image Analysis](https://github.com/SarthakJariwala/Python_GUI_apps/blob/master/Screenshots/GLabViz_Image_analysis_1.png)
 
 ## How to use?
 ### Standalone App - without Python or any dependencies (_only for Windows users_)
