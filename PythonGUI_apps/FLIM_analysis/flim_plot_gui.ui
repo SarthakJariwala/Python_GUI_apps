@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>FLIM Analysis</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
@@ -53,6 +53,13 @@
             <widget class="QPushButton" name="save_intensities_image_pushButton">
              <property name="text">
               <string>Save intensities image</string>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="analyze_psf_pushButton">
+             <property name="text">
+              <string>Analyze PSF</string>
              </property>
             </widget>
            </item>
@@ -108,6 +115,13 @@
             <widget class="QPushButton" name="plot_raw_hist_data_pushButton">
              <property name="text">
               <string>Plot</string>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="analyze_lifetime_pushButton">
+             <property name="text">
+              <string>Analyze lifetime</string>
              </property>
             </widget>
            </item>

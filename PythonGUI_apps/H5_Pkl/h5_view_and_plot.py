@@ -13,13 +13,14 @@ import argparse
 from .h5_tree import H5TreeSearchView
 from .pkl_tree import PklTreeSearchView
 
-pg.setConfigOption('imageAxisOrder', 'row-major')
+
 
 class H5ViewPlot(BaseApp):
     
     name = "h5_view_plot"
     
     def __init__(self, argv):
+        pg.setConfigOption('imageAxisOrder', 'row-major')
         BaseApp.__init__(self, argv)
         self.setup()
         parser = argparse.ArgumentParser()

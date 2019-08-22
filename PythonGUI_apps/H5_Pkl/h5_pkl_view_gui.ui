@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ScopeFoundry Data Browser</string>
+   <string>H5/pkl View</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -78,7 +78,7 @@
      <x>0</x>
      <y>0</y>
      <width>856</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

@@ -36,7 +36,7 @@ plt.rc('axes', linewidth=3.5)
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
-#pg.setConfigOption('crashWarning', True)
+##pg.setConfigOption('crashWarning', True)
 
 base_path = Path(__file__).parent
 file_path = (base_path / "Lifetime_analysis_gui_layout.ui").resolve()
@@ -45,7 +45,7 @@ uiFile = file_path
 
 WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 
-class MainWindow(TemplateBaseClass):  
+class MainWindow(TemplateBaseClass):
     
     def __init__(self):
         TemplateBaseClass.__init__(self)
@@ -76,6 +76,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.FittingMethod_comboBox.currentTextChanged.connect(self.switch_init_params_groupBox)
         self.ui.separate_irf_checkBox.stateChanged.connect(self.switch_open_irf)
         self.ui.export_data_pushButton.clicked.connect(self.export_data)
+        self.ui.clear_export_data_pushButton.clicked.connect(self.clear_export_data)
 
         #set up plot color button
         self.plot_color_button = pg.ColorButton(color=(255,0,0))
@@ -86,6 +87,11 @@ class MainWindow(TemplateBaseClass):
         self.file = None
         self.out = None # output file after fitting
         self.data_list = []
+
+        #variables accounting for data received from FLIM analysis
+        self.opened_from_flim = False #switched to True in FLIM_plot when "analyze lifetime" clicked
+        self.hist_data_from_flim = [] #container for flim roi data
+
         self.show()
         
     def open_file(self):
@@ -93,24 +99,42 @@ class MainWindow(TemplateBaseClass):
 #        try:
         self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
-            self.file = np.loadtxt(self.filename[0], skiprows=10)
-#        except ValueError:
-#            self.file = np.loadtxt(filename[0], skiprows=10)
-        except UnicodeDecodeError:
-            self.file = read_picoharp_phd(self.filename[0])
+            if ".csv" in self.filename[0] or ".txt" in self.filename[0]: #if txt or csv, prompt user to enter # of rows to skip
+                self.skip_rows_window = SkipRowsWindow()
+                self.skip_rows_window.skip_rows_signal.connect(self.open_with_skip_rows_window)
+            else:
+                self.file = read_picoharp_phd(self.filename[0])
+            self.opened_from_flim = False
         except:
             pass
 
+    def open_with_skip_rows_window(self):
+        """ Prompts user to enter how many rows to skip """
+        skip_rows = self.skip_rows_window.ui.skip_rows_spinBox.value()
+        if ".txt" in self.filename[0]:
+            self.file = np.loadtxt(self.filename[0], skiprows=skip_rows)
+        elif ".csv" in self.filename[0]:
+            self.file = np.genfromtxt(self.filename[0], skip_header=skip_rows, delimiter=",")
+
     def open_irf_file(self):
         """ Open file with irf - enabled if 'load separate irf' is checled """
-        filename = QtWidgets.QFileDialog.getOpenFileName(self)
+        self.irf_filename = QtWidgets.QFileDialog.getOpenFileName(self)
         try:
-            self.irf_file = np.loadtxt(filename[0], skiprows=10)
-        except UnicodeDecodeError:
-            self.irf_file = read_picoharp_phd(filename[0])
+            if ".txt" in self.irf_filename[0] or ".csv" in self.irf_filename[0]:
+                self.irf_skip_rows_window = SkipRowsWindow()
+                self.irf_skip_rows_window.skip_rows_signal.connect(self.open_irf_with_skip_rows_window)
+            else:
+                self.irf_file = read_picoharp_phd(self.irf_filename[0])
         except:
             pass
     
+    def open_irf_with_skip_rows_window(self):
+        irf_skip_rows = self.irf_skip_rows_window.ui.skip_rows_spinBox.value()
+        if ".txt" in self.irf_filename[0]:
+            self.irf_file = np.loadtxt(self.irf_filename[0], skiprows=irf_skip_rows)
+        elif ".csv" in self.irf_filename[0]:
+            self.irf_file = np.genfrontxt(self.irf_filename[0], skip_header=irf_skip_rows, delimiter=",")
+
     def save_file(self):
         try:
             filename = QtWidgets.QFileDialog.getSaveFileName(self)
@@ -198,7 +222,10 @@ class MainWindow(TemplateBaseClass):
 
     def plot(self):
         try:
-            x,y = self.acquire_settings() #get data
+            if self.opened_from_flim:
+                x, y = self.hist_data_from_flim
+            else:
+                x,y = self.acquire_settings() #get data
             if self.ui.normalize_checkBox.isChecked():
                 y = y / np.amax(y)
                 
@@ -225,185 +252,198 @@ class MainWindow(TemplateBaseClass):
     def fit_and_plot(self):
         """ Fit and plot without IRF """
         try:
-            x,y = self.acquire_settings() #get data
-            y_norm = y/np.max(y) #normalized y
+            if not hasattr(self, "file"):
+                self.ui.Result_textBrowser.setText("You need to load a data file.")
+            else:
+                if self.opened_from_flim:
+                    x, y = self.hist_data_from_flim
+                else:
+                    x,y = self.acquire_settings() #get data
+                y_norm = y/np.max(y) #normalized y
 
-            # find the max intensity in the array and start things from there
-            find_max_int = np.nonzero(y_norm == 1)
-            y = y[np.asscalar(find_max_int[0]):]
-            x = x[np.asscalar(find_max_int[0]):]
+                # find the max intensity in the array and start things from there
+                find_max_int = np.nonzero(y_norm == 1)
+                y = y[np.asscalar(find_max_int[0]):]
+                x = x[np.asscalar(find_max_int[0]):]
 
-            t = x
-            time_fit = t
-            TRPL_interp = np.interp(time_fit, t, y)
-            
-            fit_func = self.ui.FittingFunc_comboBox.currentText()
-            self.ui.plot.plot(t, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
-            
-            if fit_func == "Stretched Exponential": #stretch exponential tab
-                tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
-                self.out = np.empty((len(t), 3))
-                self.out[:,0] = t #time
-                self.out[:,1] = TRPL_interp #Raw PL 
-                self.out[:,2] = PL_fit # PL fit
-                self.ui.plot.plot(t, PL_fit, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
-                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential"
-                                                   "\nFit Method: " + "diff_ev" + #TODO : change when diff_ev and fmin_tnc implemented for non-irf
-                                                   "\nAverage Lifetime = " + str(avg_tau)+ " ns"
-                                                   "\nCharacteristic Tau = " + str(tc)+" ns"
-                                                   "\nBeta = "+str(beta))
-                self.ui.average_lifetime_spinBox.setValue(avg_tau)
-            
-            elif fit_func == "Double Exponential": #double exponential tab
-                tau1, a1, tau2, a2, avg_tau, PL_fit = double_exp_fit(TRPL_interp, t)
-                self.out = np.empty((len(t), 3))
-                self.out[:,0] = t #time
-                self.out[:,1] = TRPL_interp #Raw PL 
-                self.out[:,2] = PL_fit # PL fit
-                self.ui.plot.plot(t, PL_fit, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
-                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
-                                                   "\nFit Method: " + "diff_ev" +
-                                                   "\nAverage Lifetime = " + str(avg_tau)+ " ns"
-                                                   "\nTau 1 = " + str(tau1)+" ns"
-                                                   "\nA 1 = " + str(a1)+
-                                                   "\nTau 2 = " + str(tau2)+" ns"
-                                                   "\nA 2 = " + str(a2))
-                #TODO - once tau_avg implemented, set average lifetime spinbox to tau_avg value
-            
-            elif fit_func == "Single Exponential": #single exponential tab
-                tau, a, PL_fit = single_exp_fit(TRPL_interp, t)
-                self.out = np.empty((len(t), 3))
-                self.out[:,0] = t #time
-                self.out[:,1] = TRPL_interp #Raw PL 
-                self.out[:,2] = PL_fit # PL fit
-                self.ui.plot.plot(t, PL_fit, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
-                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
-                                                   "\nFit Method: " + "diff_ev" +
-                                                   "\nLifetime = " + str(tau)+ " ns"
-                                                   "\nA = " + str(a))
-                self.ui.average_lifetime_spinBox.setValue(tau)
-            
-            #add fit params to data_list
-            self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-            
-            self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
-            self.ui.plot.setLabel('bottom', 'Time (ns)')
-            return self.out
+                t = x
+                time_fit = t
+                TRPL_interp = np.interp(time_fit, t, y)
+                
+                fit_func = self.ui.FittingFunc_comboBox.currentText()
+                self.ui.plot.plot(t, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
+                
+                if fit_func == "Stretched Exponential": #stretch exponential tab
+                    tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
+                    self.out = np.empty((len(t), 3))
+                    self.out[:,0] = t #time
+                    self.out[:,1] = TRPL_interp #Raw PL 
+                    self.out[:,2] = PL_fit # PL fit
+                    self.ui.plot.plot(t, PL_fit, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
+                    self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential"
+                                                       "\nFit Method: " + "diff_ev" + #TODO : change when diff_ev and fmin_tnc implemented for non-irf
+                                                       "\nAverage Lifetime = " + str(avg_tau)+ " ns"
+                                                       "\nCharacteristic Tau = " + str(tc)+" ns"
+                                                       "\nBeta = "+str(beta))
+                    self.ui.average_lifetime_spinBox.setValue(avg_tau)
+                
+                elif fit_func == "Double Exponential": #double exponential tab
+                    tau1, a1, tau2, a2, avg_tau, PL_fit = double_exp_fit(TRPL_interp, t)
+                    self.out = np.empty((len(t), 3))
+                    self.out[:,0] = t #time
+                    self.out[:,1] = TRPL_interp #Raw PL 
+                    self.out[:,2] = PL_fit # PL fit
+                    self.ui.plot.plot(t, PL_fit, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
+                    self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential"
+                                                       "\nFit Method: " + "diff_ev" +
+                                                       "\nAverage Lifetime = " + str(avg_tau)+ " ns"
+                                                       "\nTau 1 = " + str(tau1)+" ns"
+                                                       "\nA 1 = " + str(a1)+
+                                                       "\nTau 2 = " + str(tau2)+" ns"
+                                                       "\nA 2 = " + str(a2))
+                    #TODO - once tau_avg implemented, set average lifetime spinbox to tau_avg value
+                
+                elif fit_func == "Single Exponential": #single exponential tab
+                    tau, a, PL_fit = single_exp_fit(TRPL_interp, t)
+                    self.out = np.empty((len(t), 3))
+                    self.out[:,0] = t #time
+                    self.out[:,1] = TRPL_interp #Raw PL 
+                    self.out[:,2] = PL_fit # PL fit
+                    self.ui.plot.plot(t, PL_fit, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
+                    self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
+                                                       "\nFit Method: " + "diff_ev" +
+                                                       "\nLifetime = " + str(tau)+ " ns"
+                                                       "\nA = " + str(a))
+                    self.ui.average_lifetime_spinBox.setValue(tau)
+                
+                #add fit params to data_list
+                self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
+                
+                self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
+                self.ui.plot.setLabel('bottom', 'Time (ns)')
+                return self.out
         
-        except Exception as err:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            print(exc_type, exc_tb.tb_lineno)
+        except Exception as e:
+            self.ui.Result_textBrowser.append(format(e))
 
     def fit_and_plot_with_irf(self):
         """ Fit and plot with IRF """
         try:
-            x,y = self.acquire_settings() #get data
-            _, irf_counts = self.acquire_settings(mode="irf") #get irf counts
-
-            #make sure Irf and data have the same length
-            if len(y) != len(irf_counts):
-                y = y[0:min(len(y), len(irf_counts))]
-                irf_counts = irf_counts[0:min(len(y), len(irf_counts))]
-                x = x[0:min(len(y), len(irf_counts))]
-
-            y_norm = y/np.max(y) #normalized y
-            irf_norm = irf_counts/np.amax(irf_counts) #normalized irf
-            
-            t = x
-            time_fit = t 
-            y = y_norm
-            irf_counts = irf_norm
-            
-            TRPL_interp = np.interp(time_fit, t, y)
-
-            fit_func = self.ui.FittingFunc_comboBox.currentText()
-            self.ui.plot.plot(t, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
-            if fit_func == "Stretched Exponential": #stretched exponential tab
-                tc_bounds = (self.ui.str_tc_min_spinBox.value(), self.ui.str_tc_max_spinBox.value()) #(0, 10000)
-                a_bounds = (self.ui.str_a_min_spinBox.value(), self.ui.str_a_max_spinBox.value())#(0.9, 1.1)
-                beta_bounds = (self.ui.str_beta_min_spinBox.value(), self.ui.str_beta_max_spinBox.value())#(0,1)
-                noise_bounds = (self.ui.str_noise_min_spinBox.value(), self.ui.str_noise_max_spinBox.value())#(0, 1e4)
-                stretch_exp_bounds = [tc_bounds, beta_bounds, a_bounds, noise_bounds]
-                stretch_exp_init_params = [self.ui.str_tc_init_spinBox.value(), self.ui.str_a_init_spinBox.value(), self.ui.str_beta_init_spinBox.value(), self.ui.str_noise_init_spinBox.value()]
-
-                #tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
-#                resolution = float(self.ui.Res_comboBox.currentText())
-                if self.ui.FittingMethod_comboBox.currentText() == "diff_ev":
-                    bestfit_params, t_avg, bestfit_model, data_array, time_array, irf = fit_exp_stretch_diffev(t, self.resolution, TRPL_interp, irf_counts, stretch_exp_bounds)
-                else: #if fmin_tnc fitting method selected
-                    bestfit_params, t_avg, bestfit_model, data_array, time_array, irf  = fit_exp_stretch_fmin_tnc(t, self.resolution, TRPL_interp, irf_counts, stretch_exp_init_params, stretch_exp_bounds)
-                self.out = np.empty((len(t), 3))
-                self.out[:,0] = t #time
-                self.out[:,1] = TRPL_interp #Raw PL 
-                self.out[:,2] = bestfit_model # PL fit
-                self.ui.plot.plot(t, bestfit_model, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
-                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential with IRF"
-                    "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
-                    "\ntau_avg = %.5f ns"
-                    "\nbeta = %.5f"
-                    "\ntau_c = %.5f ns"
-                    "\na = %.5f \nnoise = %.5f counts" %(t_avg, bestfit_params[1], bestfit_params[0], bestfit_params[2], bestfit_params[3]))
-                #self.effective_lifetime = t_avg
-                self.ui.average_lifetime_spinBox.setValue(t_avg)
-            
-            elif fit_func == "Double Exponential": #double exponential tab
-                a1_bounds = (self.ui.de_a1_min_spinBox.value(), self.ui.de_a1_max_spinBox.value())
-                tau1_bounds = (self.ui.de_tau1_min_spinBox.value(), self.ui.de_tau1_max_spinBox.value())
-                a2_bounds = (self.ui.de_a2_min_spinBox.value(), self.ui.de_a2_max_spinBox.value())
-                tau2_bounds = (self.ui.de_tau2_min_spinBox.value(), self.ui.de_tau2_max_spinBox.value())
-                noise_bounds = (self.ui.de_noise_min_spinBox.value(), self.ui.de_noise_max_spinBox.value())
-                double_exp_bounds = [a1_bounds, tau1_bounds, a2_bounds, tau2_bounds, noise_bounds]
-                double_exp_init_params = [self.ui.de_a1_init_spinBox.value(), self.ui.de_tau1_init_spinBox.value(), self.ui.de_a2_init_spinBox.value(), 
-                    self.ui.de_tau2_init_spinBox.value(), self.ui.de_noise_init_spinBox.value()]
-
-                if self.ui.FittingMethod_comboBox.currentText() == "diff_ev":
-                    bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_diffev(t, self.resolution, TRPL_interp, irf_counts,  double_exp_bounds, 2)
-                    #bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_diffev(t, resolution, TRPL_interp, irf_counts, double_exp_init_bounds, 2)
+            self.ui.Result_textBrowser.clear()
+            if not hasattr(self, "file"):
+                self.ui.Result_textBrowser.append("You need to load a data file.")
+            if not hasattr(self, "irf_file") and self.ui.separate_irf_checkBox.isChecked():
+                self.ui.Result_textBrowser.append("You need to load an IRF file.")
+            else:
+                if self.opened_from_flim:
+                    x,y = self.hist_data_from_flim
                 else:
-                    bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_fmin_tnc(t, self.resolution, TRPL_interp, irf_counts, double_exp_init_params, double_exp_bounds, 2)
-                self.out = np.empty((len(t), 3))
-                self.out[:,0] = t #time
-                self.out[:,1] = TRPL_interp #Raw PL 
-                self.out[:,2] = bestfit_model # PL fit
-                self.ui.plot.plot(t, bestfit_model, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
-                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential with IRF"
-                    "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
-                    "\na1 = %.5f"
-                    "\ntau1 = %.5f ns"
-                    "\na2 = %.5f"
-                    "\ntau2 = %.5f ns"
-                    "\nnoise = %.5f counts" %(bestfit_params[0], bestfit_params[1], bestfit_params[2], bestfit_params[3], bestfit_params[4]))
-                #TODO - once tau_avg implemented, set average lifetime spinbox to tau_avg value
+                    x,y = self.acquire_settings() #get data
+                _, irf_counts = self.acquire_settings(mode="irf") #get irf counts
 
-            elif fit_func == "Single Exponential": #single exponential tab
-                a_bounds = (self.ui.se_a_min_spinBox.value(), self.ui.se_a_max_spinBox.value())
-                tau_bounds = (self.ui.se_tau_min_spinBox.value(), self.ui.se_tau_max_spinBox.value())
-                noise_bounds = (self.ui.se_noise_min_spinBox.value(), self.ui.se_noise_max_spinBox.value())
-                single_exp_bounds = [a_bounds, tau_bounds, noise_bounds]
-                single_exp_init_params = [self.ui.se_a_init_spinBox.value(), self.ui.se_tau_init_spinBox.value(), self.ui.se_noise_init_spinBox.value()]
+                #make sure Irf and data have the same length
+                if len(y) != len(irf_counts):
+                    y = y[0:min(len(y), len(irf_counts))]
+                    irf_counts = irf_counts[0:min(len(y), len(irf_counts))]
+                    x = x[0:min(len(y), len(irf_counts))]
 
-                if self.ui.FittingMethod_comboBox.currentText() == "diff_ev":
-                    bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_diffev(t, self.resolution, TRPL_interp, irf_counts, single_exp_bounds, 1)
-                else:
-                    bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_fmin_tnc(t, self.resolution, TRPL_interp, irf_counts, single_exp_init_params, single_exp_bounds, 1)
-                self.out = np.empty((len(t), 3))
-                self.out[:,0] = t #time
-                self.out[:,1] = TRPL_interp #Raw PL 
-                self.out[:,2] = bestfit_model # PL fit
-                self.ui.plot.plot(t, bestfit_model, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
-                self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential with IRF"
-                    "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
-                    "\na = %.5f"
-                    "\ntau = %.5f ns"
-                    "\nnoise = %.5f counts" %(bestfit_params[0], bestfit_params[1], bestfit_params[2]))
-                self.ui.average_lifetime_spinBox.setValue(bestfit_params[1]) #set spinbox to tau value
+                y_norm = y/np.max(y) #normalized y
+                irf_norm = irf_counts/np.amax(irf_counts) #normalized irf
+                
+                t = x
+                time_fit = t 
+                y = y_norm
+                irf_counts = irf_norm
+                
+                TRPL_interp = np.interp(time_fit, t, y)
 
-            #add fit params to data_list
-            self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-        
-        except Exception as err:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            print(exc_type, exc_tb.tb_lineno)
+                fit_func = self.ui.FittingFunc_comboBox.currentText()
+                self.ui.plot.plot(t, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
+                if fit_func == "Stretched Exponential": #stretched exponential tab
+                    tc_bounds = (self.ui.str_tc_min_spinBox.value(), self.ui.str_tc_max_spinBox.value()) #(0, 10000)
+                    a_bounds = (self.ui.str_a_min_spinBox.value(), self.ui.str_a_max_spinBox.value())#(0.9, 1.1)
+                    beta_bounds = (self.ui.str_beta_min_spinBox.value(), self.ui.str_beta_max_spinBox.value())#(0,1)
+                    noise_bounds = (self.ui.str_noise_min_spinBox.value(), self.ui.str_noise_max_spinBox.value())#(0, 1e4)
+                    stretch_exp_bounds = [tc_bounds, beta_bounds, a_bounds, noise_bounds]
+                    stretch_exp_init_params = [self.ui.str_tc_init_spinBox.value(), self.ui.str_a_init_spinBox.value(), self.ui.str_beta_init_spinBox.value(), self.ui.str_noise_init_spinBox.value()]
+
+                    #tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
+    #                resolution = float(self.ui.Res_comboBox.currentText())
+                    if self.ui.FittingMethod_comboBox.currentText() == "diff_ev":
+                        bestfit_params, t_avg, bestfit_model, data_array, time_array, irf = fit_exp_stretch_diffev(t, self.resolution, TRPL_interp, irf_counts, stretch_exp_bounds)
+                    else: #if fmin_tnc fitting method selected
+                        bestfit_params, t_avg, bestfit_model, data_array, time_array, irf  = fit_exp_stretch_fmin_tnc(t, self.resolution, TRPL_interp, irf_counts, stretch_exp_init_params, stretch_exp_bounds)
+                    self.out = np.empty((len(t), 3))
+                    self.out[:,0] = t #time
+                    self.out[:,1] = TRPL_interp #Raw PL 
+                    self.out[:,2] = bestfit_model # PL fit
+                    self.ui.plot.plot(t, bestfit_model, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
+                    self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Stretched Exponential with IRF"
+                        "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
+                        "\ntau_avg = %.5f ns"
+                        "\nbeta = %.5f"
+                        "\ntau_c = %.5f ns"
+                        "\na = %.5f \nnoise = %.5f counts" %(t_avg, bestfit_params[1], bestfit_params[0], bestfit_params[2], bestfit_params[3]))
+                    #self.effective_lifetime = t_avg
+                    self.ui.average_lifetime_spinBox.setValue(t_avg)
+                
+                elif fit_func == "Double Exponential": #double exponential tab
+                    a1_bounds = (self.ui.de_a1_min_spinBox.value(), self.ui.de_a1_max_spinBox.value())
+                    tau1_bounds = (self.ui.de_tau1_min_spinBox.value(), self.ui.de_tau1_max_spinBox.value())
+                    a2_bounds = (self.ui.de_a2_min_spinBox.value(), self.ui.de_a2_max_spinBox.value())
+                    tau2_bounds = (self.ui.de_tau2_min_spinBox.value(), self.ui.de_tau2_max_spinBox.value())
+                    noise_bounds = (self.ui.de_noise_min_spinBox.value(), self.ui.de_noise_max_spinBox.value())
+                    double_exp_bounds = [a1_bounds, tau1_bounds, a2_bounds, tau2_bounds, noise_bounds]
+                    double_exp_init_params = [self.ui.de_a1_init_spinBox.value(), self.ui.de_tau1_init_spinBox.value(), self.ui.de_a2_init_spinBox.value(), 
+                        self.ui.de_tau2_init_spinBox.value(), self.ui.de_noise_init_spinBox.value()]
+
+                    if self.ui.FittingMethod_comboBox.currentText() == "diff_ev":
+                        bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_diffev(t, self.resolution, TRPL_interp, irf_counts,  double_exp_bounds, 2)
+                        #bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_diffev(t, resolution, TRPL_interp, irf_counts, double_exp_init_bounds, 2)
+                    else:
+                        bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_fmin_tnc(t, self.resolution, TRPL_interp, irf_counts, double_exp_init_params, double_exp_bounds, 2)
+                    self.out = np.empty((len(t), 3))
+                    self.out[:,0] = t #time
+                    self.out[:,1] = TRPL_interp #Raw PL 
+                    self.out[:,2] = bestfit_model # PL fit
+                    self.ui.plot.plot(t, bestfit_model, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
+                    self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Double Exponential with IRF"
+                        "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
+                        "\na1 = %.5f"
+                        "\ntau1 = %.5f ns"
+                        "\na2 = %.5f"
+                        "\ntau2 = %.5f ns"
+                        "\nnoise = %.5f counts" %(bestfit_params[0], bestfit_params[1], bestfit_params[2], bestfit_params[3], bestfit_params[4]))
+                    #TODO - once tau_avg implemented, set average lifetime spinbox to tau_avg value
+
+                elif fit_func == "Single Exponential": #single exponential tab
+                    a_bounds = (self.ui.se_a_min_spinBox.value(), self.ui.se_a_max_spinBox.value())
+                    tau_bounds = (self.ui.se_tau_min_spinBox.value(), self.ui.se_tau_max_spinBox.value())
+                    noise_bounds = (self.ui.se_noise_min_spinBox.value(), self.ui.se_noise_max_spinBox.value())
+                    single_exp_bounds = [a_bounds, tau_bounds, noise_bounds]
+                    single_exp_init_params = [self.ui.se_a_init_spinBox.value(), self.ui.se_tau_init_spinBox.value(), self.ui.se_noise_init_spinBox.value()]
+
+                    if self.ui.FittingMethod_comboBox.currentText() == "diff_ev":
+                        bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_diffev(t, self.resolution, TRPL_interp, irf_counts, single_exp_bounds, 1)
+                    else:
+                        bestfit_params, bestfit_model, data_array, time_array, irf = fit_multi_exp_fmin_tnc(t, self.resolution, TRPL_interp, irf_counts, single_exp_init_params, single_exp_bounds, 1)
+                    self.out = np.empty((len(t), 3))
+                    self.out[:,0] = t #time
+                    self.out[:,1] = TRPL_interp #Raw PL 
+                    self.out[:,2] = bestfit_model # PL fit
+                    self.ui.plot.plot(t, bestfit_model, clear=self.ui.clear_plot_checkBox.isChecked(), pen='k')
+                    self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential with IRF"
+                        "\nFit Method: "+ self.ui.FittingMethod_comboBox.currentText() +
+                        "\na = %.5f"
+                        "\ntau = %.5f ns"
+                        "\nnoise = %.5f counts" %(bestfit_params[0], bestfit_params[1], bestfit_params[2]))
+                    self.ui.average_lifetime_spinBox.setValue(bestfit_params[1]) #set spinbox to tau value
+
+                #add fit params to data_list
+                self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
+            
+        except Exception as e:
+            self.ui.Result_textBrowser.append(format(e))
 
     def call_fit_and_plot(self):
         if self.ui.fit_with_irf_checkBox.isChecked():
@@ -465,6 +505,8 @@ class MainWindow(TemplateBaseClass):
         self.data_list = []
         file.close()
 
+    def clear_export_data(self):
+        self.data_list = []
 
     def pub_ready_plot_export(self):
         try:
@@ -496,6 +538,28 @@ class MainWindow(TemplateBaseClass):
             sys.exit()
         else:
             pass
+
+"""Skip rows GUI"""
+ui_file_path = (base_path / "skip_rows.ui").resolve()
+skiprows_WindowTemplate, skiprows_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
+
+class SkipRowsWindow(skiprows_TemplateBaseClass):
+    
+    skip_rows_signal = QtCore.pyqtSignal() #signal to help with pass info back to MainWindow
+    
+    def __init__(self):
+        skiprows_TemplateBaseClass.__init__(self)
+
+        # Create the param window
+        self.ui = skiprows_WindowTemplate()
+        self.ui.setupUi(self)
+        self.ui.done_pushButton.clicked.connect(self.done)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.show()
+    
+    def done(self):
+        self.skip_rows_signal.emit()
+        self.close()
 
 def run():
     win = MainWindow()

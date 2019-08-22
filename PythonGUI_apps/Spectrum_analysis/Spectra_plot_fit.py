@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import pickle
 import time
 from lmfit.models import GaussianModel
+from scipy import interpolate
 import customplotting.mscope as cpm
 # local modules
 try:
@@ -35,7 +36,7 @@ plt.rc('axes', linewidth=3.5)
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
-pg.setConfigOption('imageAxisOrder', 'row-major')
+
 
 base_path = Path(__file__).parent
 file_path = (base_path / "Spectra_plot_fit_gui.ui").resolve()
@@ -44,9 +45,14 @@ uiFile = file_path
 
 WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 
+def updateDelay(scale, time):
+	""" Hack fix for scalebar inaccuracy"""
+	QtCore.QTimer.singleShot(time, scale.updateBar)
+
 class MainWindow(TemplateBaseClass):  
 	
 	def __init__(self):
+		pg.setConfigOption('imageAxisOrder', 'row-major')
 		super(TemplateBaseClass, self).__init__()
 		
 		# Create the main window
@@ -60,6 +66,7 @@ class MainWindow(TemplateBaseClass):
 		self.ui.importSpec_pushButton.clicked.connect(self.open_file)
 		self.ui.importBck_pushButton.clicked.connect(self.open_bck_file)
 		self.ui.importWLRef_pushButton.clicked.connect(self.open_wlref_file)
+
 		self.ui.load_spectra_scan_pushButton.clicked.connect(self.open_spectra_scan_file)
 		self.ui.load_bck_file_pushButton.clicked.connect(self.open_spectra_bck_file)
 		self.ui.load_fitted_scan_pushButton.clicked.connect(self.open_fit_scan_file)
@@ -73,7 +80,8 @@ class MainWindow(TemplateBaseClass):
 		self.ui.fit_scan_pushButton.clicked.connect(self.fit_and_plot_scan)
 		# self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
 		self.ui.clear_pushButton.clicked.connect(self.clear_plot)
-		self.ui.export_fig_pushButton.clicked.connect(self.pub_ready_plot_export)
+		self.ui.export_single_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
+		self.ui.export_scan_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
 
 		self.ui.import_pkl_pushButton.clicked.connect(self.open_pkl_file)
 		self.ui.data_txt_pushButton.clicked.connect(self.pkl_data_to_txt)
@@ -84,6 +92,9 @@ class MainWindow(TemplateBaseClass):
 		self.ui.tabWidget.currentChanged.connect(self.switch_overall_tab)
 		self.ui.fitFunc_comboBox.currentTextChanged.connect(self.switch_bounds_and_guess_tab)
 		self.ui.adjust_param_checkBox.stateChanged.connect(self.switch_adjust_param)
+
+		self.ui.export_data_pushButton.clicked.connect(self.export_data)
+		self.ui.clear_export_data_pushButton.clicked.connect(self.clear_export_data)
 
 		# for i in reversed(range(self.ui.bounds_groupBox.layout().count())):
 		# 	self.ui.bounds_groupBox.layout().itemAt(i).widget().deleteLater()
@@ -99,17 +110,25 @@ class MainWindow(TemplateBaseClass):
 		# Peak parameters if adjust params is selected
 		self.center_min = None
 		self.center_max = None
+
+		#variables accounting for data received from FLIM analysis
+		self.opened_from_flim = False #switched to True in FLIM_plot when "analyze lifetime" clicked
+		self.sum_data_from_flim = []
+
+		#container for data to append to txt file
+		self.data_list = []
 		
 		self.show()
 	
 	""" Open Single Spectrum files """
 	def open_file(self):
 		try:
-			filename = QtWidgets.QFileDialog.getOpenFileName(self)
+			self.single_spec_filename = QtWidgets.QFileDialog.getOpenFileName(self)
 			try:
-				self.file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+				self.file = np.loadtxt(self.single_spec_filename[0], skiprows = 16, delimiter='\t')
 			except:
-				self.file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+				self.file = np.genfromtxt(self.single_spec_filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+			self.opened_from_flim = False
 		except:
 			pass
 	
@@ -137,8 +156,14 @@ class MainWindow(TemplateBaseClass):
 	"""Open Scan Files"""
 	def open_spectra_scan_file(self):
 		try:
-			filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
+			filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5)")
+			if ".pkl" in filename[0]:
+				self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
+				self.scan_file_type = "pkl"
+			elif ".h5" in filename[0]:
+				self.spec_scan_file = h5py.File(filename[0], 'r')
+				self.scan_file_type = "h5"
+			self.get_data_params()
 			self.ui.result_textBrowser2.append("Done Loading - Spectra Scan File")
 		except Exception as e:
 			self.ui.result_textBrowser2.append(str(e))
@@ -219,23 +244,52 @@ class MainWindow(TemplateBaseClass):
 		self.ui.bounds_groupBox.setEnabled(checked)
 		self.ui.guess_groupBox.setEnabled(checked)
 
+	def check_loaded_files(self):
+		""" 
+		Check if 'subtract background' or 'white light correction' is checked 
+		and if required files have been loaded. 
+		"""
+		if self.ui.subtract_bck_radioButton.isChecked() and self.bck_file is None:
+			self.ui.result_textBrowser.setText("You need to load a background file.")
+		elif self.wlref_file is not None and self.ui.WLRef_checkBox.isChecked() == False:
+			self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
+		elif self.wlref_file is None and self.ui.WLRef_checkBox.isChecked():
+			self.ui.result_textBrowser.setText("You need to load a White Light Ref file.")
+		else:
+			return True
+
 	def plot(self):
 		try:
-			self.x = self.file[:,0]
-			self.y = self.file[:,1]
-			
-			if self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
-				bck_y = self.bck_file[:,1]
-				self.y = self.y - bck_y
-			
-			elif self.ui.subtract_bck_checkBox.isChecked() == False and self.ui.WLRef_checkBox.isChecked() == True:
-				wlref_y = self.wlref_file[:,1]
-				self.y = (self.y)/wlref_y
-			
-			elif self.ui.subtract_bck_checkBox.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == True:
-				bck_y = self.bck_file[:,1]
-				wlref_y = self.wlref_file[:,1]
-				self.y = (self.y-bck_y)/wlref_y
+			if self.opened_from_flim:
+				flim_data = self.sum_data_from_flim.T
+				interp = interpolate.interp1d(flim_data[:,0], flim_data[:,1])
+				x_range = [flim_data[:,0][0], flim_data[:,0][-1]]
+				xnew = np.linspace(x_range[0], x_range[1], 100 )
+				ynew = interp(xnew)
+				self.file = np.zeros((xnew.shape[0], 2))
+				self.file[:,0] = xnew
+				self.file[:,1] = ynew
+				self.x = xnew
+				self.y = ynew
+
+			elif self.file is None: #elif
+				self.ui.result_textBrowser.setText("You need to load a data file.")	
+			else:
+				self.x = self.file[:,0]
+				self.y = self.file[:,1]
+
+			if self.check_loaded_files == True: #check the following conditions if all required files have been provided
+				if self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
+					bck_y = self.bck_file[:,1]
+					self.y = self.y - bck_y
+				elif self.ui.subtract_bck_radioButton.isChecked() == False and self.ui.WLRef_checkBox.isChecked() == True:
+					wlref_y = self.wlref_file[:,1]
+					self.y = (self.y)/wlref_y
+				
+				elif self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == True:
+					bck_y = self.bck_file[:,1]
+					wlref_y = self.wlref_file[:,1]
+					self.y = (self.y-bck_y)/wlref_y
 			
 			
 			if self.ui.norm_checkBox.isChecked():
@@ -260,30 +314,28 @@ class MainWindow(TemplateBaseClass):
 			return True
 		elif self.ui.clear_checkBox.isChecked() == False:
 			return False
-	
-	"""Open param window and get peak center range values and assign it to variables to use later"""
-	# def configure_fit_params(self):
-	# 	self.param_window = ParamWindow()
-	# 	self.param_window.peak_range.connect(self.peak_range)
-	
-	def peak_range(self, peaks):
-		self.center_min = peaks[0]
-		self.center_max = peaks[1]
-		
-	
+
 	def fit_and_plot(self):
 		fit_func = self.ui.fitFunc_comboBox.currentText()
 		
 		try:
-			
-			if self.ui.subtract_bck_checkBox.isChecked() == False:
-				self.ui.result_textBrowser.setText("You need to check the subtract background option!")
-			
-			elif self.wlref_file is not None and self.ui.WLRef_checkBox.isChecked() == False:
-				self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
-				
+			self.plot()
+			if self.opened_from_flim:
+				self.file = np.zeros((self.x.shape[0], 2))
+				self.file[:,0] = self.x
+				self.file[:,1] = self.y
+
+			if self.ui.plot_without_bck_radioButton.isChecked(): #if plot w/o bck, create dummy bck_file
+				self.bck_file = np.zeros(shape=(self.file.shape[0], 2))
+				self.bck_file[:,0] = self.file[:,0]
+ 
+			# if self.ui.subtract_bck_radioButton.isChecked() == False:
+			# 	self.ui.result_textBrowser.setText("You need to check the subtract background option!")
+			if self.check_loaded_files is None:
+				pass
 			else:
-				if fit_func == "Single Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+
+				if fit_func == "Single Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
 					single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
 					if self.ui.adjust_param_checkBox.isChecked():
 						center1_min = self.ui.single_peakcenter1_min_spinBox.value()
@@ -298,7 +350,7 @@ class MainWindow(TemplateBaseClass):
 					self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 				
-				elif fit_func == "Single Lorentzian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+				elif fit_func == "Single Lorentzian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
 					single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
 					
 					if self.ui.adjust_param_checkBox.isChecked():
@@ -314,7 +366,7 @@ class MainWindow(TemplateBaseClass):
 					self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 				
-				elif fit_func == "Double Gaussian" and self.ui.subtract_bck_checkBox.isChecked() == True:
+				elif fit_func == "Double Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
 					double_gauss = Double_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
 					if self.ui.adjust_param_checkBox.isChecked():
 						center1_min = self.ui.double_peakcenter1_min_spinBox.value()
@@ -343,7 +395,7 @@ class MainWindow(TemplateBaseClass):
 
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 				
-				elif fit_func == "Triple Gaussians" and self.ui.subtract_bck_checkBox.isChecked() == True:
+				elif fit_func == "Triple Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
 					#currently only works for triple gaussian (n=3)
 					multiple_gauss = Multi_Gaussian(self.file, self.bck_file, 3, wlref=self.wlref_file)
 					if self.ui.adjust_param_checkBox.isChecked():
@@ -377,9 +429,10 @@ class MainWindow(TemplateBaseClass):
 						self.ui.plot.plot(self.x, comps['g3_'], pen='c', clear=False)
 					self.ui.result_textBrowser.setText(self.result.fit_report())
 
+				self.data_list.append(self.ui.result_textBrowser.toPlainText())
 		
 		except Exception as e:
-			self.ui.result_textBrowser.setText(str(e))
+			self.ui.result_textBrowser.append(str(e))
 
 	def pub_ready_plot_export(self):
 		filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
@@ -407,14 +460,73 @@ class MainWindow(TemplateBaseClass):
 		except AttributeError:
 			self.ui.result_textBrowser.setText("Need to fit the data first!")
 
+	def export_data(self):
+		""" Save fit params and srv calculations stored in data_list as .txt """
+		folder = os.path.dirname(self.single_spec_filename[0])
+		filename_ext = os.path.basename(self.single_spec_filename[0])
+		filename = os.path.splitext(filename_ext)[0] #get filename without extension
+
+		path = folder + "/" + filename + "_fit_results.txt"
+		if not os.path.exists(path):
+			file = open(path, "w+")
+		else:
+			file = open(path, "a+")
+
+		for i in range(len(self.data_list)):
+			file.write(self.data_list[i] + "\n\n")
+
+		self.data_list = []
+		file.close()
+
+	def clear_export_data(self):
+		self.data_list = []
+
 
 	""" Scan spectra functions """
+	def get_data_params(self):
+		data = self.spec_scan_file
+		if self.scan_file_type == "pkl":
+			self.intensities = data['Intensities']
+			self.wavelengths = data['Wavelengths']
+			# try:
+			self.x_scan_size = data['Scan Parameters']['X scan size (um)']
+			self.y_scan_size = data['Scan Parameters']['Y scan size (um)']
+			self.x_step_size = data['Scan Parameters']['X step size (um)']
+			self.y_step_size = data['Scan Parameters']['Y step size (um)']
+			# except: # TODO test and debug loading pkl file w/o scan parameters
+			# 	self.configure_scan_params()
+			# 	while not hasattr(self, "scan_params_entered"):
+			# 		pass
+			# 	self.x_scan_size = self.param_window.ui.x_scan_size_spinBox.value()
+			# 	self.y_scan_size = self.param_window.ui.y_scan_size_spinBox.value()
+			# 	self.x_step_size = self.param_window.ui.x_step_size_spinBox.value()
+			# 	self.y_step_size = self.param_window.ui.y_step_size_spinBox.value()
+
+		else: #run this if scan file is h5
+			self.x_scan_size = data['Scan Parameters'].attrs['X scan size (um)']
+			self.y_scan_size = data['Scan Parameters'].attrs['Y scan size (um)']
+			self.x_step_size = data['Scan Parameters'].attrs['X step size (um)']
+			self.y_step_size = data['Scan Parameters'].attrs['Y step size (um)']
+			self.intensities = data['Intensities'][()] #get dataset values
+			self.wavelengths = data['Wavelengths'][()]
+
+		self.numb_x_pixels = int(self.x_scan_size/self.x_step_size)
+		self.numb_y_pixels = int(self.y_scan_size/self.y_step_size)
+
+		"""Open param window and get peak center range values and assign it to variables to use later"""
+	# def configure_scan_params(self):
+	#  	self.param_window = ParamWindow()
+	# 	self.param_window.peak_range.connect(self.peak_range)
+	
+	# def peak_range(self, peaks):
+	# 	self.center_min = peaks[0]
+	# 	self.center_max = peaks[1]
+
 	def plot_fit_scan(self):
 		try:
 			if self.ui.use_raw_scan_settings.isChecked():
-				data = self.spec_scan_file
-				num_x = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-				num_y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
+				num_x = self.numb_x_pixels
+				num_y  =self.numb_y_pixels
 			else:
 				num_x = self.ui.num_x_spinBox.value()
 				num_y = self.ui.num_y_spinBox.value()
@@ -441,70 +553,60 @@ class MainWindow(TemplateBaseClass):
 
 			if self.ui.use_raw_scan_settings.isChecked():
 				self.ui.fit_scan_viewbox.setImage(self.img, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']))
+												  (self.x_step_size,
+												   self.y_step_size))
 				scale = pg.ScaleBar(size=2,suffix='um')
 				scale.setParentItem(self.ui.fit_scan_viewbox.view)
 				scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+				self.ui.fit_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
 			else:
 				self.ui.fit_scan_viewbox.setImage(self.img)
 			
 			self.ui.fit_scan_viewbox.view.invertY(False)
-				
+
 		except Exception as e:
 			self.ui.result_textBrowser2.append(str(e))
 			pass
 			
 	def plot_raw_scan(self):
 		try:
-			data = self.spec_scan_file
-			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
 			# TODO test line scan plots
 
-			intensities = data['Intensities'].T #this is only there because of how we are saving the data in the app
-			
-			intensities = np.reshape(intensities, newshape=(2048,numb_pixels_X,numb_pixels_Y))
-			
-			wavelengths = data['Wavelengths']
-			
-			self.ui.raw_scan_viewbox.view.invertY(False)
+			intensities = self.intensities.T #this is only there because of how we are saving the data in the app
+			intensities = np.reshape(intensities, newshape=(2048,self.numb_x_pixels, self.numb_y_pixels)) 
 			self.ui.raw_scan_viewbox.setImage(intensities, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']), xvals=wavelengths)
+												  (self.x_step_size,
+												   self.y_step_size), xvals=self.wavelengths)
 			
-
 			#roi_plot = self.ui.raw_scan_viewBox.getRoiPlot()
 			#roi_plot.plot(data['Wavelengths'], intensities)
+			self.ui.raw_scan_viewbox.view.invertY(False)
 			scale = pg.ScaleBar(size=2,suffix='um')
 			scale.setParentItem(self.ui.raw_scan_viewbox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+			self.ui.raw_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
 			
 		except Exception as e:
 			self.ui.result_textBrowser2.append(str(e))
 
 	def plot_intensity_sums(self):
 		try:
-			data = self.spec_scan_file
-			numb_pixels_X = int((data['Scan Parameters']['X scan size (um)'])/(data['Scan Parameters']['X step size (um)']))
-			numb_pixels_Y = int((data['Scan Parameters']['Y scan size (um)'])/(data['Scan Parameters']['Y step size (um)']))
 			# TODO test line scan plots
-
-			intensities = data['Intensities']
 
 			#intensities = np.reshape(intensities, newshape=(2048, numb_pixels_X*numb_pixels_Y))
 			
-			sums = np.sum(intensities, axis=-1)
-			sums = np.reshape(sums, newshape=(numb_pixels_X, numb_pixels_Y))
+			sums = np.sum(self.intensities, axis=-1)
+			sums = np.reshape(sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
 			
 			self.ui.intensity_sums_viewBox.setImage(sums, scale=
-												  (data['Scan Parameters']['X step size (um)'],
-												   data['Scan Parameters']['Y step size (um)']))
+												  (self.x_step_size,
+												   self.y_step_size))
 			self.ui.intensity_sums_viewBox.view.invertY(False)
 			
 			scale = pg.ScaleBar(size=2,suffix='um')
 			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+			self.ui.intensity_sums_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
 
 		except Exception as e:
 			self.ui.result_textBrowser2.append(str(e))
@@ -522,10 +624,10 @@ class MainWindow(TemplateBaseClass):
 			ref = self.bck_file
 			index = (ref[:,0]>start_nm) & (ref[:,0]<stop_nm)
 			
-			x = self.spec_scan_file['Wavelengths']
+			x = self.wavelengths
 			x = x[index]
 			
-			data_array = self.spec_scan_file['Intensities']
+			data_array = self.intensities
 			
 			result_dict = {}
 			
@@ -653,7 +755,7 @@ class MainWindow(TemplateBaseClass):
 		
 		
 """Parameter Window GUI and Functions"""
-# param_file_path = (base_path / "peak_bounds_input.ui").resolve()
+# param_file_path = (base_path / "scan_params_input.ui").resolve()
 
 # param_uiFile = param_file_path
 
@@ -661,7 +763,7 @@ class MainWindow(TemplateBaseClass):
 
 # class ParamWindow(param_TemplateBaseClass):
 	
-# 	peak_range = QtCore.pyqtSignal(list)
+# 	#peak_range = QtCore.pyqtSignal(list)
 	
 # 	def __init__(self):
 # #        super(param_TemplateBaseClass, self).__init__()
@@ -671,19 +773,17 @@ class MainWindow(TemplateBaseClass):
 # 		self.pui = param_WindowTemplate()
 # 		self.pui.setupUi(self)
 		
-# 		self.pui.pushButton.clicked.connect(self.done)
+# 		self.pui.done_pushButton.clicked.connect(self.done)
 		
 # 		self.show()
 	
-# 	def current_peak_range(self):
-# 		center_min = self.pui.cent_min_doubleSpinBox.value()
-# 		center_max = self.pui.cent_max_doubleSpinBox.value()
-# 		return center_min, center_max
+
 	
 # 	def done(self):
-# 		center_min, center_max = self.current_peak_range()
-# 		self.peak_range.emit([center_min, center_max])
+# 		#center_min, center_max = self.current_peak_range()
+# 		#self.peak_range.emit([center_min, center_max])
 # 		self.close()
+# 		self.scan_params_entered = True
 	
 """Run the Main Window"""    
 def run():
