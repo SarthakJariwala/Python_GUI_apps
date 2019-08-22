@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import pickle
 import time
 from lmfit.models import GaussianModel
+from scipy import interpolate
 import customplotting.mscope as cpm
 # local modules
 try:
@@ -260,8 +261,18 @@ class MainWindow(TemplateBaseClass):
 	def plot(self):
 		try:
 			if self.opened_from_flim:
-				self.x, self.y = self.sum_data_from_flim
-			elif self.file is None:
+				flim_data = self.sum_data_from_flim.T
+				interp = interpolate.interp1d(flim_data[:,0], flim_data[:,1])
+				x_range = [flim_data[:,0][0], flim_data[:,0][-1]]
+				xnew = np.linspace(x_range[0], x_range[1], 100 )
+				ynew = interp(xnew)
+				self.file = np.zeros((xnew.shape[0], 2))
+				self.file[:,0] = xnew
+				self.file[:,1] = ynew
+				self.x = xnew
+				self.y = ynew
+
+			elif self.file is None: #elif
 				self.ui.result_textBrowser.setText("You need to load a data file.")	
 			else:
 				self.x = self.file[:,0]
@@ -310,7 +321,10 @@ class MainWindow(TemplateBaseClass):
 		try:
 			self.plot()
 			if self.opened_from_flim:
-				self.file = self.sum_data_from_flim.T
+				self.file = np.zeros((self.x.shape[0], 2))
+				self.file[:,0] = self.x
+				self.file[:,1] = self.y
+
 			if self.ui.plot_without_bck_radioButton.isChecked(): #if plot w/o bck, create dummy bck_file
 				self.bck_file = np.zeros(shape=(self.file.shape[0], 2))
 				self.bck_file[:,0] = self.file[:,0]
