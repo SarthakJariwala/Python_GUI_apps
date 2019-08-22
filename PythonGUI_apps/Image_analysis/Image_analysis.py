@@ -64,7 +64,6 @@ class MainWindow(TemplateBaseClass):
 		self.ui.custom_pixel_size_checkBox.stateChanged.connect(self.switch_custom_pixel_size)
 		self.ui.update_scaling_factor_pushButton.clicked.connect(self.reload_image)
 		self.ui.spot_radioButton.toggled.connect(self.update_camera)
-		self.ui.custom_pixel_size_spinBox.valueChanged.connect(self.update_scaling_factor)
 
 		self.update_camera() #initialize camera pixel size
 		self.update_scaling_factor() #initialize scaling_factor
@@ -87,6 +86,7 @@ class MainWindow(TemplateBaseClass):
 		"""
 		Handles loading of image according to scaling_factor
 		"""
+		self.update_scaling_factor()
 
 		if self.ui.pixera_radioButton.isChecked():
 			image = self.original_image
