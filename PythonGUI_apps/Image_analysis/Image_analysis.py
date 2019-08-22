@@ -62,7 +62,7 @@ class MainWindow(TemplateBaseClass):
 		#set up ui signals
 		self.ui.load_image_pushButton.clicked.connect(self.load_image)
 		self.ui.custom_pixel_size_checkBox.stateChanged.connect(self.switch_custom_pixel_size)
-		self.ui.update_scaling_factor_pushButton.clicked.connect(self.reload_image)
+		self.ui.update_settings_pushButton.clicked.connect(self.reload_image)
 		self.ui.spot_radioButton.toggled.connect(self.update_camera)
 
 		self.update_camera() #initialize camera pixel size
@@ -88,10 +88,14 @@ class MainWindow(TemplateBaseClass):
 		"""
 		self.update_scaling_factor()
 
-		if self.ui.pixera_radioButton.isChecked():
-			image = self.original_image
-		elif self.ui.spot_radioButton.isChecked():
+		if self.ui.spot_radioButton.isChecked() and self.ui.resize_image_checkBox.isChecked():
 			image = self.original_image.resize((round(image.size[0]*self.scaling_factor), round(image.size[1]*self.scaling_factor)))
+			self.image_plot.getAxis("bottom").setScale(scale = 1)
+			self.image_plot.getAxis("left").setScale(scale = 1)
+		else:
+			image = self.original_image
+			self.image_plot.getAxis("bottom").setScale(scale = self.scaling_factor)
+			self.image_plot.getAxis("left").setScale(scale = self.scaling_factor)
 			
 		if self.ui.greyscale_checkBox.isChecked():
 			image = image.convert("L") #convert to greyscale
@@ -106,8 +110,8 @@ class MainWindow(TemplateBaseClass):
 			self.img_item.setImage(image=self.image_array)
 			self.img_item.setRect(self.img_item_rect)
 
-			if self.ui.greyscale_checkBox.isChecked():
-				self.hist_lut.setImageItem(self.img_item)
+			# if self.ui.greyscale_checkBox.isChecked():
+			# 	self.hist_lut.setImageItem(self.img_item)
 			
 			if self.ui.vertical_radioButton.isChecked():
 				roi_height = self.scaling_factor * height
@@ -135,11 +139,11 @@ class MainWindow(TemplateBaseClass):
 		elif self.ui.horizontal_radioButton.isChecked():
 			x_values = coords[1,0,:]
 
-		if self.ui.pixera_radioButton.isChecked():
+		if self.ui.pixera_radioButton.isChecked() or (self.ui.spot_radioButton.isChecked() and not self.ui.resize_image_checkBox.isChecked()):
 			x_values = x_values * self.scaling_factor
 		
 		#calculate average along columns in region
-		if len(data.shape) == 2: #if grayscale, average intensities 
+		if len(data.shape) <= 2: #if grayscale, average intensities 
 			if self.ui.vertical_radioButton.isChecked():
 				avg_to_plot = np.mean(data, axis=-1)
 			elif self.ui.horizontal_radioButton.isChecked():
@@ -191,10 +195,12 @@ class MainWindow(TemplateBaseClass):
 		if self.ui.spot_radioButton.isChecked():
 			self.camera_pixel_size = 7.4
 			self.ui.greyscale_checkBox.setChecked(False)
+			self.ui.resize_image_checkBox.setEnabled(True)
 			self.update_scaling_factor()
 		elif self.ui.pixera_radioButton.isChecked():
 			self.camera_pixel_size = 3
 			self.ui.greyscale_checkBox.setChecked(True)
+			self.ui.resize_image_checkBox.setEnabled(False)
 			self.update_scaling_factor()
 
 	def close_application(self):
