@@ -115,7 +115,8 @@ class MainWindow(TemplateBaseClass):
 			elif self.ui.horizontal_radioButton.isChecked():
 				roi_height = self.scaling_factor * width
 				self.roi.setSize([roi_height, height])
-
+			self.roi.setAngle(0)
+			self.roi.setPos(0, 0)
 			self.line_profile_update_plot()
 		except:
 			pass
