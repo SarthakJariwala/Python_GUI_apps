@@ -5,7 +5,7 @@ import pyqtgraph as pg
 from pyqtgraph import exporters
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 import matplotlib.pyplot as plt
-
+import pandas as pd
 import numpy as np
 import time
 
@@ -69,13 +69,27 @@ class MainWindow(TemplateBaseClass):
 		""" Open data file """
 		try:
 			self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			self.data = np.loadtxt(self.filename[0], delimiter = '\t', skiprows = 1)
+			#self.data = np.loadtxt(self.filename[0], delimiter = '\t', skiprows = 1)
+			if ".txt" in self.filename[0]:
+				self.data = np.loadtxt(self.filename[0], delimiter = '\t', skiprows = 1)
+			elif ".csv" in self.filename[0]:
+				self.data = np.loadtxt(self.filename[0], delimiter = ',', skiprows = 1)
+			self.cs_window = ColSelectionWindow(self.data)
+			self.cs_window.col_selection_signal.connect(self.open_with_col_selection)
 			self.nm = np.copy(self.data[:,0])
-			self.ref_data = np.copy(self.data[:,1])
-			self.inpath_data = np.copy(self.data[:,2])
-			self.outpath_data = np.copy(self.data[:,3])
+			#self.ref_data = np.copy(self.data[:,1])
+			#self.inpath_data = np.copy(self.data[:,2])
+			#self.outpath_data = np.copy(self.data[:,3])
 		except Exception as err:
 			print(format(err))
+
+	def open_with_col_selection(self):
+		ref_data_col = self.cs_window.ui.ref_spinBox.value() - 1 #subtract since spinboxes refer to column num and not index
+		inpath_data_col = self.cs_window.ui.inpath_spinBox.value() - 1
+		outpath_data_col = self.cs_window.ui.outpath_spinBox.value() - 1
+		self.ref_data = np.copy(self.data[:,ref_data_col])
+		self.inpath_data = np.copy(self.data[:,inpath_data_col])
+		self.outpath_data = np.copy(self.data[:,outpath_data_col])
 
 	def update_laser_spinBoxes(self):
 		""" Update laser spinboxes based on line rois """
@@ -157,6 +171,33 @@ class MainWindow(TemplateBaseClass):
 
 	def clear(self):
 		self.plot.clear()
+
+"""Table view GUI"""
+ui_file_path = (base_path / "column_selection_gui.ui").resolve()
+col_selection_WindowTemplate, col_selection_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
+
+class ColSelectionWindow(col_selection_TemplateBaseClass):
+	
+	col_selection_signal = QtCore.pyqtSignal() #signal to help with pass info back to MainWindow
+	
+	def __init__(self, data):
+		col_selection_TemplateBaseClass.__init__(self)
+		# Create the param window
+		self.ui = col_selection_WindowTemplate()
+		self.ui.setupUi(self)
+		self.ui.done_pushButton.clicked.connect(self.done)
+		
+		self.table_widget = pg.TableWidget()
+		self.ui.data_preview_groupBox.layout().addWidget(self.table_widget)
+
+		self.table_widget.setData(data)
+
+		self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+		self.show()
+	
+	def done(self):
+		self.col_selection_signal.emit()
+		self.close()
 
 """Run the Main Window"""
 def run():
