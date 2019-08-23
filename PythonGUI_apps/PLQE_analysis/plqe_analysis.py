@@ -192,12 +192,16 @@ class ColSelectionWindow(col_selection_TemplateBaseClass):
 
 		self.table_widget.setData(data)
 
-		self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+		#self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
 		self.show()
 	
 	def done(self):
 		self.col_selection_signal.emit()
-		self.close()
+		self.ui.textBrowser.setText("Data successfully loaded.")
+		#self.close()
+
+	def closeEvent(self, event):
+		self.col_selection_signal.emit()
 
 """Run the Main Window"""
 def run():
