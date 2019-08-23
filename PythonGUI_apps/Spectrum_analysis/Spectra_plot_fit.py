@@ -606,7 +606,7 @@ class MainWindow(TemplateBaseClass):
 			scale = pg.ScaleBar(size=2,suffix='um')
 			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
 			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-			self.ui.intensity_sums_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+			self.ui.intensity_sums_viewBox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
 
 		except Exception as e:
 			self.ui.result_textBrowser2.append(str(e))
