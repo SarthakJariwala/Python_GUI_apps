@@ -21,9 +21,9 @@ from scipy import interpolate
 import customplotting.mscope as cpm
 # local modules
 try:
-	from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
+    from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
 except:
-	from Spectrum_analysis.Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
+    from Spectrum_analysis.Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
 
 
 """Recylce params for plotting"""
@@ -46,714 +46,724 @@ uiFile = file_path
 WindowTemplate, TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 
 def updateDelay(scale, time):
-	""" Hack fix for scalebar inaccuracy"""
-	QtCore.QTimer.singleShot(time, scale.updateBar)
+    """ Hack fix for scalebar inaccuracy"""
+    QtCore.QTimer.singleShot(time, scale.updateBar)
 
 class MainWindow(TemplateBaseClass):  
-	
-	def __init__(self):
-		pg.setConfigOption('imageAxisOrder', 'row-major')
-		super(TemplateBaseClass, self).__init__()
-		
-		# Create the main window
-		self.ui = WindowTemplate()
-		self.ui.setupUi(self)
-		
-		# self.ui.fitFunc_comboBox.addItems(["Single Gaussian","Single Lorentzian", "Double Gaussian", "Multiple Gaussians"])
+    
+    def __init__(self):
+        pg.setConfigOption('imageAxisOrder', 'row-major')
+        super(TemplateBaseClass, self).__init__()
+        
+        # Create the main window
+        self.ui = WindowTemplate()
+        self.ui.setupUi(self)
+        
+        # self.ui.fitFunc_comboBox.addItems(["Single Gaussian","Single Lorentzian", "Double Gaussian", "Multiple Gaussians"])
 #        self.ui.actionExit.triggered.connect(self.close_application)
-		
-		##setup ui signals
-		self.ui.importSpec_pushButton.clicked.connect(self.open_file)
-		self.ui.importBck_pushButton.clicked.connect(self.open_bck_file)
-		self.ui.importWLRef_pushButton.clicked.connect(self.open_wlref_file)
+        
+        ##setup ui signals
+        self.ui.importSpec_pushButton.clicked.connect(self.open_file)
+        self.ui.importBck_pushButton.clicked.connect(self.open_bck_file)
+        self.ui.importWLRef_pushButton.clicked.connect(self.open_wlref_file)
 
-		self.ui.load_spectra_scan_pushButton.clicked.connect(self.open_spectra_scan_file)
-		self.ui.load_bck_file_pushButton.clicked.connect(self.open_spectra_bck_file)
-		self.ui.load_fitted_scan_pushButton.clicked.connect(self.open_fit_scan_file)
-		
-		self.ui.plot_pushButton.clicked.connect(self.plot)
-		self.ui.plot_fit_scan_pushButton.clicked.connect(self.plot_fit_scan)
-		self.ui.plot_raw_scan_pushButton.clicked.connect(self.plot_raw_scan)
-		self.ui.plot_intensity_sums_pushButton.clicked.connect(self.plot_intensity_sums)
-		
-		self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
-		self.ui.fit_scan_pushButton.clicked.connect(self.fit_and_plot_scan)
-		# self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
-		self.ui.clear_pushButton.clicked.connect(self.clear_plot)
-		self.ui.export_single_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
-		self.ui.export_scan_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
+        self.ui.load_spectra_scan_pushButton.clicked.connect(self.open_spectra_scan_file)
+        self.ui.load_bck_file_pushButton.clicked.connect(self.open_spectra_bck_file)
+        self.ui.load_fitted_scan_pushButton.clicked.connect(self.open_fit_scan_file)
+        
+        self.ui.plot_pushButton.clicked.connect(self.plot)
+        self.ui.plot_fit_scan_pushButton.clicked.connect(self.plot_fit_scan)
+        self.ui.plot_raw_scan_pushButton.clicked.connect(self.plot_raw_scan)
+        self.ui.plot_intensity_sums_pushButton.clicked.connect(self.plot_intensity_sums)
+        
+        self.ui.fit_pushButton.clicked.connect(self.fit_and_plot)
+        self.ui.fit_scan_pushButton.clicked.connect(self.fit_and_plot_scan)
+        # self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
+        self.ui.clear_pushButton.clicked.connect(self.clear_plot)
+        self.ui.export_single_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
+        self.ui.export_scan_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
 
-		self.ui.import_pkl_pushButton.clicked.connect(self.open_pkl_file)
-		self.ui.data_txt_pushButton.clicked.connect(self.pkl_data_to_txt)
-		self.ui.scan_params_txt_pushButton.clicked.connect(self.pkl_params_to_txt)
+        self.ui.import_pkl_pushButton.clicked.connect(self.open_pkl_file)
+        self.ui.data_txt_pushButton.clicked.connect(self.pkl_data_to_txt)
+        self.ui.scan_params_txt_pushButton.clicked.connect(self.pkl_params_to_txt)
 
-		self.ui.pkl_to_h5_pushButton.clicked.connect(self.pkl_to_h5)
+        self.ui.pkl_to_h5_pushButton.clicked.connect(self.pkl_to_h5)
 
-		self.ui.tabWidget.currentChanged.connect(self.switch_overall_tab)
-		self.ui.fitFunc_comboBox.currentTextChanged.connect(self.switch_bounds_and_guess_tab)
-		self.ui.adjust_param_checkBox.stateChanged.connect(self.switch_adjust_param)
+        self.ui.tabWidget.currentChanged.connect(self.switch_overall_tab)
+        self.ui.fitFunc_comboBox.currentTextChanged.connect(self.switch_bounds_and_guess_tab)
+        self.ui.adjust_param_checkBox.stateChanged.connect(self.switch_adjust_param)
 
-		self.ui.export_data_pushButton.clicked.connect(self.export_data)
-		self.ui.clear_export_data_pushButton.clicked.connect(self.clear_export_data)
+        self.ui.export_data_pushButton.clicked.connect(self.export_data)
+        self.ui.clear_export_data_pushButton.clicked.connect(self.clear_export_data)
 
-		# for i in reversed(range(self.ui.bounds_groupBox.layout().count())):
-		# 	self.ui.bounds_groupBox.layout().itemAt(i).widget().deleteLater()
-		#self.ui.single_bounds_page.layout().addWidget(QtWidgets.QPushButton("test"))
-		
-		self.file = None
-		self.bck_file = None
-		self.wlref_file = None
-		self.x = None
-		self.y = None
-		self.out = None # output file after fitting
-		
-		# Peak parameters if adjust params is selected
-		self.center_min = None
-		self.center_max = None
+        # for i in reversed(range(self.ui.bounds_groupBox.layout().count())):
+        #     self.ui.bounds_groupBox.layout().itemAt(i).widget().deleteLater()
+        #self.ui.single_bounds_page.layout().addWidget(QtWidgets.QPushButton("test"))
+        
+        self.file = None
+        self.bck_file = None
+        self.wlref_file = None
+        self.x = None
+        self.y = None
+        self.out = None # output file after fitting
+        
+        # Peak parameters if adjust params is selected
+        self.center_min = None
+        self.center_max = None
 
-		#variables accounting for data received from FLIM analysis
-		self.opened_from_flim = False #switched to True in FLIM_plot when "analyze lifetime" clicked
-		self.sum_data_from_flim = []
+        #variables accounting for data received from FLIM analysis
+        self.opened_from_flim = False #switched to True in FLIM_plot when "analyze lifetime" clicked
+        self.sum_data_from_flim = []
 
-		#container for data to append to txt file
-		self.data_list = []
-		
-		self.show()
-	
-	""" Open Single Spectrum files """
-	def open_file(self):
-		try:
-			self.single_spec_filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			try:
-				self.file = np.loadtxt(self.single_spec_filename[0], skiprows = 16, delimiter='\t')
-			except:
-				self.file = np.genfromtxt(self.single_spec_filename[0], skip_header=1, skip_footer=3, delimiter='\t')
-			self.opened_from_flim = False
-		except:
-			pass
-	
-	def open_bck_file(self):
-		try:
-			filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			try:
-				self.bck_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
-			except:
-				self.bck_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')    
-		except Exception as e:
-			self.ui.result_textBrowser.append(str(e))
-			pass
-	
-	def open_wlref_file(self):
-		try:
-			filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			try:
-				self.wlref_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
-			except:
-				self.wlref_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
-		except:
-			pass
-		
-	"""Open Scan Files"""
-	def open_spectra_scan_file(self):
-		try:
-			filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5)")
-			if ".pkl" in filename[0]:
-				self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
-				self.scan_file_type = "pkl"
-			elif ".h5" in filename[0]:
-				self.spec_scan_file = h5py.File(filename[0], 'r')
-				self.scan_file_type = "h5"
-			self.get_data_params()
-			self.ui.result_textBrowser2.append("Done Loading - Spectra Scan File")
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
-			pass
-	
-	def open_spectra_bck_file(self):
-		try:
-			filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			self.bck_file = np.loadtxt(filename[0])#, skiprows=1, delimiter=None)
-			self.ui.result_textBrowser2.append("Done Loading - Background File")
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
-			pass
-	   
-	def open_fit_scan_file(self):
-		try:
-			filename = QtWidgets.QFileDialog.getOpenFileName(self)
-			self.fit_scan_file = pickle.load(open(filename[0], 'rb'))
-			self.ui.result_textBrowser2.append("Done Loading - Scan Fit File")
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
-			pass
+        #container for data to append to txt file
+        self.data_list = []
+        
+        self.show()
+    
+    """ Open Single Spectrum files """
+    def open_file(self):
+        try:
+            self.single_spec_filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            try:
+                try:
+                    self.file = np.loadtxt(self.single_spec_filename[0], skiprows = 1, delimiter=" ")
+                except:        
+                    np.loadtxt(self.single_spec_filename[0], skiprows = 16, delimiter='\t')
+            except:
+                self.file = np.genfromtxt(self.single_spec_filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+            self.opened_from_flim = False
+        except:
+            pass
+    
+    def open_bck_file(self):
+        try:
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            try:
+                try:
+                    self.bck_file = np.loadtxt(filename[0], skiprows=1, delimiter=" ")
+                except:
+                     self.bck_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+            except:
+                self.bck_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')    
+        except Exception as e:
+            self.ui.result_textBrowser.append(str(e))
+            pass
+    
+    def open_wlref_file(self):
+        try:
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            try:
+                try:
+                    self.wlref_file = np.loadtxt(filename[0], skiprows=1, delimiter= " ")
+                except:
+                    self.wlref_file = np.loadtxt(filename[0], skiprows = 16, delimiter='\t')
+            except:
+                self.wlref_file = np.genfromtxt(filename[0], skip_header=1, skip_footer=3, delimiter='\t')
+        except:
+            pass
+        
+    """Open Scan Files"""
+    def open_spectra_scan_file(self):
+        try:
+            filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5)")
+            if ".pkl" in filename[0]:
+                self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
+                self.scan_file_type = "pkl"
+            elif ".h5" in filename[0]:
+                self.spec_scan_file = h5py.File(filename[0], 'r')
+                self.scan_file_type = "h5"
+            self.get_data_params()
+            self.ui.result_textBrowser2.append("Done Loading - Spectra Scan File")
+        except Exception as e:
+            self.ui.result_textBrowser2.append(str(e))
+            pass
+    
+    def open_spectra_bck_file(self):
+        try:
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            self.bck_file = np.loadtxt(filename[0])#, skiprows=1, delimiter=None)
+            self.ui.result_textBrowser2.append("Done Loading - Background File")
+        except Exception as e:
+            self.ui.result_textBrowser2.append(str(e))
+            pass
+       
+    def open_fit_scan_file(self):
+        try:
+            filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            self.fit_scan_file = pickle.load(open(filename[0], 'rb'))
+            self.ui.result_textBrowser2.append("Done Loading - Scan Fit File")
+        except Exception as e:
+            self.ui.result_textBrowser2.append(str(e))
+            pass
 
-	def open_pkl_file(self):
-		""" Open pkl file to convert to txt """
-		try:
-			self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self)
-		except:
-			pass
-	
-	def switch_overall_tab(self):
-		""" Enable/disable fit settings on right depending on current tab """
-		if self.ui.tabWidget.currentIndex() == 0:
-			self.ui.fitting_settings_groupBox.setEnabled(True)
-			self.ui.fit_pushButton.setEnabled(True)
-			self.ui.fit_scan_pushButton.setEnabled(True)
-			self.ui.scan_fit_settings_groupBox.setEnabled(False)
-		elif self.ui.tabWidget.currentIndex() == 1:
-			self.ui.fitting_settings_groupBox.setEnabled(False)
-			self.ui.fit_pushButton.setEnabled(False)
-			self.ui.fit_scan_pushButton.setEnabled(True)
-			self.ui.scan_fit_settings_groupBox.setEnabled(True)
-		elif self.ui.tabWidget.currentIndex() == 2:
-			self.ui.fitting_settings_groupBox.setEnabled(False)
-			self.ui.fit_pushButton.setEnabled(False)
-			self.ui.fit_scan_pushButton.setEnabled(False)
-			self.ui.scan_fit_settings_groupBox.setEnabled(False)
+    def open_pkl_file(self):
+        """ Open pkl file to convert to txt """
+        try:
+            self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self)
+        except:
+            pass
+    
+    def switch_overall_tab(self):
+        """ Enable/disable fit settings on right depending on current tab """
+        if self.ui.tabWidget.currentIndex() == 0:
+            self.ui.fitting_settings_groupBox.setEnabled(True)
+            self.ui.fit_pushButton.setEnabled(True)
+            self.ui.fit_scan_pushButton.setEnabled(True)
+            self.ui.scan_fit_settings_groupBox.setEnabled(False)
+        elif self.ui.tabWidget.currentIndex() == 1:
+            self.ui.fitting_settings_groupBox.setEnabled(False)
+            self.ui.fit_pushButton.setEnabled(False)
+            self.ui.fit_scan_pushButton.setEnabled(True)
+            self.ui.scan_fit_settings_groupBox.setEnabled(True)
+        elif self.ui.tabWidget.currentIndex() == 2:
+            self.ui.fitting_settings_groupBox.setEnabled(False)
+            self.ui.fit_pushButton.setEnabled(False)
+            self.ui.fit_scan_pushButton.setEnabled(False)
+            self.ui.scan_fit_settings_groupBox.setEnabled(False)
 
-	""" Single spectrum functions """
-	def switch_bounds_and_guess_tab(self):
-		""" Show the appropriate bounds and initial guess params based on fit function """
-		fit_func = self.ui.fitFunc_comboBox.currentText()
-		if fit_func == "Single Gaussian" or fit_func == "Single Lorentzian":
-			self.ui.n_label.setEnabled(False)
-			self.ui.n_spinBox.setEnabled(False)
-			self.ui.bounds_stackedWidget.setCurrentIndex(0)
-			self.ui.guess_stackedWidget.setCurrentIndex(0)
-			self.ui.plot_components_checkBox.setEnabled(False)
-			self.ui.n_spinBox.setValue(1)
-		elif fit_func == "Double Gaussian":
-			self.ui.n_label.setEnabled(False)
-			self.ui.n_spinBox.setEnabled(False)
-			self.ui.bounds_stackedWidget.setCurrentIndex(1)
-			self.ui.guess_stackedWidget.setCurrentIndex(1)
-			self.ui.plot_components_checkBox.setEnabled(True)
-			self.ui.n_spinBox.setValue(2)
-		elif fit_func == "Triple Gaussian":
-			self.ui.n_label.setEnabled(False)
-			self.ui.n_spinBox.setEnabled(False)
-			self.ui.bounds_stackedWidget.setCurrentIndex(2)
-			self.ui.guess_stackedWidget.setCurrentIndex(2)
-			self.ui.plot_components_checkBox.setEnabled(True)
-			self.ui.n_spinBox.setValue(3)
+    """ Single spectrum functions """
+    def switch_bounds_and_guess_tab(self):
+        """ Show the appropriate bounds and initial guess params based on fit function """
+        fit_func = self.ui.fitFunc_comboBox.currentText()
+        if fit_func == "Single Gaussian" or fit_func == "Single Lorentzian":
+            self.ui.n_label.setEnabled(False)
+            self.ui.n_spinBox.setEnabled(False)
+            self.ui.bounds_stackedWidget.setCurrentIndex(0)
+            self.ui.guess_stackedWidget.setCurrentIndex(0)
+            self.ui.plot_components_checkBox.setEnabled(False)
+            self.ui.n_spinBox.setValue(1)
+        elif fit_func == "Double Gaussian":
+            self.ui.n_label.setEnabled(False)
+            self.ui.n_spinBox.setEnabled(False)
+            self.ui.bounds_stackedWidget.setCurrentIndex(1)
+            self.ui.guess_stackedWidget.setCurrentIndex(1)
+            self.ui.plot_components_checkBox.setEnabled(True)
+            self.ui.n_spinBox.setValue(2)
+        elif fit_func == "Triple Gaussian":
+            self.ui.n_label.setEnabled(False)
+            self.ui.n_spinBox.setEnabled(False)
+            self.ui.bounds_stackedWidget.setCurrentIndex(2)
+            self.ui.guess_stackedWidget.setCurrentIndex(2)
+            self.ui.plot_components_checkBox.setEnabled(True)
+            self.ui.n_spinBox.setValue(3)
 
-	def switch_adjust_param(self):
-		""" Enable bounds and initial guess only when adjust parameters is checked """
-		checked = self.ui.adjust_param_checkBox.isChecked()
-		self.ui.bounds_groupBox.setEnabled(checked)
-		self.ui.guess_groupBox.setEnabled(checked)
+    def switch_adjust_param(self):
+        """ Enable bounds and initial guess only when adjust parameters is checked """
+        checked = self.ui.adjust_param_checkBox.isChecked()
+        self.ui.bounds_groupBox.setEnabled(checked)
+        self.ui.guess_groupBox.setEnabled(checked)
 
-	def check_loaded_files(self):
-		""" 
-		Check if 'subtract background' or 'white light correction' is checked 
-		and if required files have been loaded. 
-		"""
-		if self.ui.subtract_bck_radioButton.isChecked() and self.bck_file is None:
-			self.ui.result_textBrowser.setText("You need to load a background file.")
-		elif self.wlref_file is not None and self.ui.WLRef_checkBox.isChecked() == False:
-			self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
-		elif self.wlref_file is None and self.ui.WLRef_checkBox.isChecked():
-			self.ui.result_textBrowser.setText("You need to load a White Light Ref file.")
-		else:
-			return True
+    def check_loaded_files(self):
+        """ 
+        Check if 'subtract background' or 'white light correction' is checked 
+        and if required files have been loaded. 
+        """
+        if self.ui.subtract_bck_radioButton.isChecked() and self.bck_file is None:
+            self.ui.result_textBrowser.setText("You need to load a background file.")
+        elif self.wlref_file is not None and self.ui.WLRef_checkBox.isChecked() == False:
+            self.ui.result_textBrowser.setText("You need to check the White Light Correction option!")
+        elif self.wlref_file is None and self.ui.WLRef_checkBox.isChecked():
+            self.ui.result_textBrowser.setText("You need to load a White Light Ref file.")
+        else:
+            return True
 
-	def plot(self):
-		try:
-			if self.opened_from_flim:
-				flim_data = self.sum_data_from_flim.T
-				interp = interpolate.interp1d(flim_data[:,0], flim_data[:,1])
-				x_range = [flim_data[:,0][0], flim_data[:,0][-1]]
-				xnew = np.linspace(x_range[0], x_range[1], 100 )
-				ynew = interp(xnew)
-				self.file = np.zeros((xnew.shape[0], 2))
-				self.file[:,0] = xnew
-				self.file[:,1] = ynew
-				self.x = xnew
-				self.y = ynew
+    def plot(self):
+        try:
+            if self.opened_from_flim:
+                flim_data = self.sum_data_from_flim.T
+                interp = interpolate.interp1d(flim_data[:,0], flim_data[:,1])
+                x_range = [flim_data[:,0][0], flim_data[:,0][-1]]
+                xnew = np.linspace(x_range[0], x_range[1], 100 )
+                ynew = interp(xnew)
+                self.file = np.zeros((xnew.shape[0], 2))
+                self.file[:,0] = xnew
+                self.file[:,1] = ynew
+                self.x = xnew
+                self.y = ynew
 
-			elif self.file is None: #elif
-				self.ui.result_textBrowser.setText("You need to load a data file.")	
-			else:
-				self.x = self.file[:,0]
-				self.y = self.file[:,1]
+            elif self.file is None: #elif
+                self.ui.result_textBrowser.setText("You need to load a data file.")    
+            else:
+                self.x = self.file[:,0]
+                self.y = self.file[:,1]
 
-			if self.check_loaded_files == True: #check the following conditions if all required files have been provided
-				if self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
-					bck_y = self.bck_file[:,1]
-					self.y = self.y - bck_y
-				elif self.ui.subtract_bck_radioButton.isChecked() == False and self.ui.WLRef_checkBox.isChecked() == True:
-					wlref_y = self.wlref_file[:,1]
-					self.y = (self.y)/wlref_y
-				
-				elif self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == True:
-					bck_y = self.bck_file[:,1]
-					wlref_y = self.wlref_file[:,1]
-					self.y = (self.y-bck_y)/wlref_y
-			
-			
-			if self.ui.norm_checkBox.isChecked():
-				self.normalize()
-				
-			self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
-			
-		except Exception as err:
-			pass
-		self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
-		self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
-	
-	def normalize(self):
-		self.y = (self.y) / np.amax(self.y)
-	
-	def clear_plot(self):
-		self.ui.plot.clear()
-		self.ui.result_textBrowser.clear()
-		
-	def clear_check(self):
-		if self.ui.clear_checkBox.isChecked() == True:
-			return True
-		elif self.ui.clear_checkBox.isChecked() == False:
-			return False
+            if self.check_loaded_files == True: #check the following conditions if all required files have been provided
+                if self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
+                    bck_y = self.bck_file[:,1]
+                    self.y = self.y - bck_y
+                elif self.ui.subtract_bck_radioButton.isChecked() == False and self.ui.WLRef_checkBox.isChecked() == True:
+                    wlref_y = self.wlref_file[:,1]
+                    self.y = (self.y)/wlref_y
+                
+                elif self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == True:
+                    bck_y = self.bck_file[:,1]
+                    wlref_y = self.wlref_file[:,1]
+                    self.y = (self.y-bck_y)/wlref_y
+            
+            
+            if self.ui.norm_checkBox.isChecked():
+                self.normalize()
+                
+            self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+            
+        except Exception as e:
+            self.ui.result_textBrowser.append(str(e))
+            pass
+        self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
+        self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
+    
+    def normalize(self):
+        self.y = (self.y) / np.amax(self.y)
+    
+    def clear_plot(self):
+        self.ui.plot.clear()
+        self.ui.result_textBrowser.clear()
+        
+    def clear_check(self):
+        if self.ui.clear_checkBox.isChecked() == True:
+            return True
+        elif self.ui.clear_checkBox.isChecked() == False:
+            return False
 
-	def fit_and_plot(self):
-		fit_func = self.ui.fitFunc_comboBox.currentText()
-		
-		try:
-			self.plot()
-			if self.opened_from_flim:
-				self.file = np.zeros((self.x.shape[0], 2))
-				self.file[:,0] = self.x
-				self.file[:,1] = self.y
+    def fit_and_plot(self):
+        fit_func = self.ui.fitFunc_comboBox.currentText()
+        
+        try:
+            self.plot()
+            if self.opened_from_flim:
+                self.file = np.zeros((self.x.shape[0], 2))
+                self.file[:,0] = self.x
+                self.file[:,1] = self.y
 
-			if self.ui.plot_without_bck_radioButton.isChecked(): #if plot w/o bck, create dummy bck_file
-				self.bck_file = np.zeros(shape=(self.file.shape[0], 2))
-				self.bck_file[:,0] = self.file[:,0]
+            if self.ui.plot_without_bck_radioButton.isChecked(): #if plot w/o bck, create dummy bck_file
+                self.bck_file = np.zeros(shape=(self.file.shape[0], 2))
+                self.bck_file[:,0] = self.file[:,0]
  
-			# if self.ui.subtract_bck_radioButton.isChecked() == False:
-			# 	self.ui.result_textBrowser.setText("You need to check the subtract background option!")
-			if self.check_loaded_files is None:
-				pass
-			else:
+            # if self.ui.subtract_bck_radioButton.isChecked() == False:
+            #     self.ui.result_textBrowser.setText("You need to check the subtract background option!")
+            if self.check_loaded_files is None:
+                pass
+            else:
 
-				if fit_func == "Single Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
-					single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
-					if self.ui.adjust_param_checkBox.isChecked():
-						center1_min = self.ui.single_peakcenter1_min_spinBox.value()
-						center1_max = self.ui.single_peakcenter1_max_spinBox.value()
-						center1_guess = self.ui.single_peakcenter1_guess_spinBox.value()
-						sigma1_guess = self.ui.single_sigma1_guess_spinBox.value()
-						self.result = single_gauss.gaussian_model_w_lims(center1_guess, sigma1_guess,
-							[center1_min, center1_max])
-					else:
-						self.result = single_gauss.gaussian_model()
-					self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
-					self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
-					self.ui.result_textBrowser.setText(self.result.fit_report())
-				
-				elif fit_func == "Single Lorentzian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
-					single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
-					
-					if self.ui.adjust_param_checkBox.isChecked():
-						center1_min = self.ui.single_peakcenter1_min_spinBox.value()
-						center1_max = self.ui.single_peakcenter1_max_spinBox.value()
-						center1_guess = self.ui.single_peakcenter1_guess_spinBox.value()
-						sigma1_guess = self.ui.single_sigma1_guess_spinBox.value()
-						self.result = single_lorentzian.lorentzian_model_w_lims(center1_guess, sigma1_guess,
-								[center1_min, center1_max])
-					else:
-						self.result = single_lorentzian.lorentzian_model()
-					self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
-					self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
-					self.ui.result_textBrowser.setText(self.result.fit_report())
-				
-				elif fit_func == "Double Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
-					double_gauss = Double_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
-					if self.ui.adjust_param_checkBox.isChecked():
-						center1_min = self.ui.double_peakcenter1_min_spinBox.value()
-						center1_max = self.ui.double_peakcenter1_max_spinBox.value()
-						center2_min = self.ui.double_peakcenter2_min_spinBox.value()
-						center2_max = self.ui.double_peakcenter2_max_spinBox.value()
-						center1_guess = self.ui.double_peakcenter1_guess_spinBox.value()
-						sigma1_guess = self.ui.double_sigma1_guess_spinBox.value()
-						center2_guess = self.ui.double_peakcenter2_guess_spinBox.value()
-						sigma2_guess = self.ui.double_sigma2_guess_spinBox.value()
+                if fit_func == "Single Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
+                    single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
+                    if self.ui.adjust_param_checkBox.isChecked():
+                        center1_min = self.ui.single_peakcenter1_min_spinBox.value()
+                        center1_max = self.ui.single_peakcenter1_max_spinBox.value()
+                        center1_guess = self.ui.single_peakcenter1_guess_spinBox.value()
+                        sigma1_guess = self.ui.single_sigma1_guess_spinBox.value()
+                        self.result = single_gauss.gaussian_model_w_lims(center1_guess, sigma1_guess,
+                            [center1_min, center1_max])
+                    else:
+                        self.result = single_gauss.gaussian_model()
+                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+                    self.ui.result_textBrowser.setText(self.result.fit_report())
+                
+                elif fit_func == "Single Lorentzian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
+                    single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
+                    
+                    if self.ui.adjust_param_checkBox.isChecked():
+                        center1_min = self.ui.single_peakcenter1_min_spinBox.value()
+                        center1_max = self.ui.single_peakcenter1_max_spinBox.value()
+                        center1_guess = self.ui.single_peakcenter1_guess_spinBox.value()
+                        sigma1_guess = self.ui.single_sigma1_guess_spinBox.value()
+                        self.result = single_lorentzian.lorentzian_model_w_lims(center1_guess, sigma1_guess,
+                                [center1_min, center1_max])
+                    else:
+                        self.result = single_lorentzian.lorentzian_model()
+                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+                    self.ui.result_textBrowser.setText(self.result.fit_report())
+                
+                elif fit_func == "Double Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
+                    double_gauss = Double_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
+                    if self.ui.adjust_param_checkBox.isChecked():
+                        center1_min = self.ui.double_peakcenter1_min_spinBox.value()
+                        center1_max = self.ui.double_peakcenter1_max_spinBox.value()
+                        center2_min = self.ui.double_peakcenter2_min_spinBox.value()
+                        center2_max = self.ui.double_peakcenter2_max_spinBox.value()
+                        center1_guess = self.ui.double_peakcenter1_guess_spinBox.value()
+                        sigma1_guess = self.ui.double_sigma1_guess_spinBox.value()
+                        center2_guess = self.ui.double_peakcenter2_guess_spinBox.value()
+                        sigma2_guess = self.ui.double_sigma2_guess_spinBox.value()
 
-						peak_pos = [center1_guess, center2_guess]
-						sigma = [sigma1_guess, sigma2_guess]
-						min_max_range = [ [center1_min, center1_max], [center2_min, center2_max] ]
-						self.result = double_gauss.gaussian_model_w_lims(peak_pos, sigma, min_max_range)
+                        peak_pos = [center1_guess, center2_guess]
+                        sigma = [sigma1_guess, sigma2_guess]
+                        min_max_range = [ [center1_min, center1_max], [center2_min, center2_max] ]
+                        self.result = double_gauss.gaussian_model_w_lims(peak_pos, sigma, min_max_range)
 
-					else:
-						self.result = double_gauss.gaussian_model()
+                    else:
+                        self.result = double_gauss.gaussian_model()
 
-					self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
-					self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
-					if self.ui.plot_components_checkBox.isChecked():
-						comps = self.result.eval_components(x=self.x)
-						self.ui.plot.plot(self.x, comps['g1_'], pen='b', clear=False)
-						self.ui.plot.plot(self.x, comps['g2_'], pen='g', clear=False)
+                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+                    if self.ui.plot_components_checkBox.isChecked():
+                        comps = self.result.eval_components(x=self.x)
+                        self.ui.plot.plot(self.x, comps['g1_'], pen='b', clear=False)
+                        self.ui.plot.plot(self.x, comps['g2_'], pen='g', clear=False)
 
-					self.ui.result_textBrowser.setText(self.result.fit_report())
-				
-				elif fit_func == "Triple Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
-					#currently only works for triple gaussian (n=3)
-					multiple_gauss = Multi_Gaussian(self.file, self.bck_file, 3, wlref=self.wlref_file)
-					if self.ui.adjust_param_checkBox.isChecked():
-						center1_min = self.ui.multi_peakcenter1_min_spinBox.value()
-						center1_max = self.ui.multi_peakcenter1_max_spinBox.value()
-						center2_min = self.ui.multi_peakcenter2_min_spinBox.value()
-						center2_max = self.ui.multi_peakcenter2_max_spinBox.value()
-						center3_min = self.ui.multi_peakcenter3_min_spinBox.value()
-						center3_max = self.ui.multi_peakcenter3_max_spinBox.value()
-						center1_guess = self.ui.multi_peakcenter1_guess_spinBox.value()
-						sigma1_guess = self.ui.multi_sigma1_guess_spinBox.value()
-						center2_guess = self.ui.multi_peakcenter2_guess_spinBox.value()
-						sigma2_guess = self.ui.multi_sigma2_guess_spinBox.value()
-						center3_guess = self.ui.multi_peakcenter3_guess_spinBox.value()
-						sigma3_guess = self.ui.multi_sigma3_guess_spinBox.value()
-						num_gaussians = 3
-						peak_pos = [center1_guess, center2_guess, center3_guess]
-						sigma = [sigma1_guess, sigma2_guess, sigma3_guess]
-						min_max_range = [ [center1_min, center1_max], [center2_min, center2_max], [center3_min, center3_max] ]
-						
-						self.result = multiple_gauss.gaussian_model_w_lims(peak_pos, sigma, min_max_range)
-					else:
-						self.result = multiple_gauss.gaussian_model()
+                    self.ui.result_textBrowser.setText(self.result.fit_report())
+                
+                elif fit_func == "Triple Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
+                    #currently only works for triple gaussian (n=3)
+                    multiple_gauss = Multi_Gaussian(self.file, self.bck_file, 3, wlref=self.wlref_file)
+                    if self.ui.adjust_param_checkBox.isChecked():
+                        center1_min = self.ui.multi_peakcenter1_min_spinBox.value()
+                        center1_max = self.ui.multi_peakcenter1_max_spinBox.value()
+                        center2_min = self.ui.multi_peakcenter2_min_spinBox.value()
+                        center2_max = self.ui.multi_peakcenter2_max_spinBox.value()
+                        center3_min = self.ui.multi_peakcenter3_min_spinBox.value()
+                        center3_max = self.ui.multi_peakcenter3_max_spinBox.value()
+                        center1_guess = self.ui.multi_peakcenter1_guess_spinBox.value()
+                        sigma1_guess = self.ui.multi_sigma1_guess_spinBox.value()
+                        center2_guess = self.ui.multi_peakcenter2_guess_spinBox.value()
+                        sigma2_guess = self.ui.multi_sigma2_guess_spinBox.value()
+                        center3_guess = self.ui.multi_peakcenter3_guess_spinBox.value()
+                        sigma3_guess = self.ui.multi_sigma3_guess_spinBox.value()
+                        num_gaussians = 3
+                        peak_pos = [center1_guess, center2_guess, center3_guess]
+                        sigma = [sigma1_guess, sigma2_guess, sigma3_guess]
+                        min_max_range = [ [center1_min, center1_max], [center2_min, center2_max], [center3_min, center3_max] ]
+                        
+                        self.result = multiple_gauss.gaussian_model_w_lims(peak_pos, sigma, min_max_range)
+                    else:
+                        self.result = multiple_gauss.gaussian_model()
 
-					self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
-					self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
-					if self.ui.plot_components_checkBox.isChecked():
-						comps = self.result.eval_components(x=self.x)
-						self.ui.plot.plot(self.x, comps['g1_'], pen='b', clear=False)
-						self.ui.plot.plot(self.x, comps['g2_'], pen='g', clear=False)
-						self.ui.plot.plot(self.x, comps['g3_'], pen='c', clear=False)
-					self.ui.result_textBrowser.setText(self.result.fit_report())
+                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+                    if self.ui.plot_components_checkBox.isChecked():
+                        comps = self.result.eval_components(x=self.x)
+                        self.ui.plot.plot(self.x, comps['g1_'], pen='b', clear=False)
+                        self.ui.plot.plot(self.x, comps['g2_'], pen='g', clear=False)
+                        self.ui.plot.plot(self.x, comps['g3_'], pen='c', clear=False)
+                    self.ui.result_textBrowser.setText(self.result.fit_report())
 
-				self.data_list.append(self.ui.result_textBrowser.toPlainText())
-		
-		except Exception as e:
-			self.ui.result_textBrowser.append(str(e))
+                self.data_list.append(self.ui.result_textBrowser.toPlainText())
+        
+        except Exception as e:
+            self.ui.result_textBrowser.append(str(e))
 
-	def pub_ready_plot_export(self):
-		filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
-		try:
-			try:
-				data = self.spec_scan_file
-				param_selection = str(self.ui.comboBox.currentText())
-				if param_selection == 'pk_pos': label = 'PL Peak Position (n.m.)'
-				elif param_selection == 'fwhm': label = 'PL FWHM (n.m.)'
-				cpm.plot_confocal(self.img, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap="seismic", cbar_label=label)
-				plt.savefig(filename[0],bbox_inches='tight', dpi=300)
-				plt.close()
-			except:
-				plt.figure(figsize=(8,6))
-				plt.tick_params(direction='out', length=8, width=3.5)
-				plt.plot(self.x, self.y)
-				plt.plot(self.x, self.result.best_fit,'k')
-				plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
-				plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
-				plt.tight_layout()
-				
-				plt.savefig(filename[0],bbox_inches='tight', dpi=300)
-				plt.close()
-			
-		except AttributeError:
-			self.ui.result_textBrowser.setText("Need to fit the data first!")
+    def pub_ready_plot_export(self):
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
+        try:
+            try:
+                data = self.spec_scan_file
+                param_selection = str(self.ui.comboBox.currentText())
+                if param_selection == 'pk_pos': label = 'PL Peak Position (n.m.)'
+                elif param_selection == 'fwhm': label = 'PL FWHM (n.m.)'
+                cpm.plot_confocal(self.img, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap="seismic", cbar_label=label)
+                plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+                plt.close()
+            except:
+                plt.figure(figsize=(8,6))
+                plt.tick_params(direction='out', length=8, width=3.5)
+                plt.plot(self.x, self.y)
+                plt.plot(self.x, self.result.best_fit,'k')
+                plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
+                plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
+                plt.tight_layout()
+                
+                plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+                plt.close()
+            
+        except AttributeError:
+            self.ui.result_textBrowser.setText("Need to fit the data first!")
 
-	def export_data(self):
-		""" Save fit params and srv calculations stored in data_list as .txt """
-		folder = os.path.dirname(self.single_spec_filename[0])
-		filename_ext = os.path.basename(self.single_spec_filename[0])
-		filename = os.path.splitext(filename_ext)[0] #get filename without extension
+    def export_data(self):
+        """ Save fit params and srv calculations stored in data_list as .txt """
+        folder = os.path.dirname(self.single_spec_filename[0])
+        filename_ext = os.path.basename(self.single_spec_filename[0])
+        filename = os.path.splitext(filename_ext)[0] #get filename without extension
 
-		path = folder + "/" + filename + "_fit_results.txt"
-		if not os.path.exists(path):
-			file = open(path, "w+")
-		else:
-			file = open(path, "a+")
+        path = folder + "/" + filename + "_fit_results.txt"
+        if not os.path.exists(path):
+            file = open(path, "w+")
+        else:
+            file = open(path, "a+")
 
-		for i in range(len(self.data_list)):
-			file.write(self.data_list[i] + "\n\n")
+        for i in range(len(self.data_list)):
+            file.write(self.data_list[i] + "\n\n")
 
-		self.data_list = []
-		file.close()
+        self.data_list = []
+        file.close()
 
-	def clear_export_data(self):
-		self.data_list = []
+    def clear_export_data(self):
+        self.data_list = []
 
 
-	""" Scan spectra functions """
-	def get_data_params(self):
-		data = self.spec_scan_file
-		if self.scan_file_type == "pkl":
-			self.intensities = data['Intensities']
-			self.wavelengths = data['Wavelengths']
-			# try:
-			self.x_scan_size = data['Scan Parameters']['X scan size (um)']
-			self.y_scan_size = data['Scan Parameters']['Y scan size (um)']
-			self.x_step_size = data['Scan Parameters']['X step size (um)']
-			self.y_step_size = data['Scan Parameters']['Y step size (um)']
-			# except: # TODO test and debug loading pkl file w/o scan parameters
-			# 	self.configure_scan_params()
-			# 	while not hasattr(self, "scan_params_entered"):
-			# 		pass
-			# 	self.x_scan_size = self.param_window.ui.x_scan_size_spinBox.value()
-			# 	self.y_scan_size = self.param_window.ui.y_scan_size_spinBox.value()
-			# 	self.x_step_size = self.param_window.ui.x_step_size_spinBox.value()
-			# 	self.y_step_size = self.param_window.ui.y_step_size_spinBox.value()
+    """ Scan spectra functions """
+    def get_data_params(self):
+        data = self.spec_scan_file
+        if self.scan_file_type == "pkl":
+            self.intensities = data['Intensities']
+            self.wavelengths = data['Wavelengths']
+            # try:
+            self.x_scan_size = data['Scan Parameters']['X scan size (um)']
+            self.y_scan_size = data['Scan Parameters']['Y scan size (um)']
+            self.x_step_size = data['Scan Parameters']['X step size (um)']
+            self.y_step_size = data['Scan Parameters']['Y step size (um)']
+            # except: # TODO test and debug loading pkl file w/o scan parameters
+            #     self.configure_scan_params()
+            #     while not hasattr(self, "scan_params_entered"):
+            #         pass
+            #     self.x_scan_size = self.param_window.ui.x_scan_size_spinBox.value()
+            #     self.y_scan_size = self.param_window.ui.y_scan_size_spinBox.value()
+            #     self.x_step_size = self.param_window.ui.x_step_size_spinBox.value()
+            #     self.y_step_size = self.param_window.ui.y_step_size_spinBox.value()
 
-		else: #run this if scan file is h5
-			self.x_scan_size = data['Scan Parameters'].attrs['X scan size (um)']
-			self.y_scan_size = data['Scan Parameters'].attrs['Y scan size (um)']
-			self.x_step_size = data['Scan Parameters'].attrs['X step size (um)']
-			self.y_step_size = data['Scan Parameters'].attrs['Y step size (um)']
-			self.intensities = data['Intensities'][()] #get dataset values
-			self.wavelengths = data['Wavelengths'][()]
+        else: #run this if scan file is h5
+            self.x_scan_size = data['Scan Parameters'].attrs['X scan size (um)']
+            self.y_scan_size = data['Scan Parameters'].attrs['Y scan size (um)']
+            self.x_step_size = data['Scan Parameters'].attrs['X step size (um)']
+            self.y_step_size = data['Scan Parameters'].attrs['Y step size (um)']
+            self.intensities = data['Intensities'][()] #get dataset values
+            self.wavelengths = data['Wavelengths'][()]
 
-		self.numb_x_pixels = int(self.x_scan_size/self.x_step_size)
-		self.numb_y_pixels = int(self.y_scan_size/self.y_step_size)
+        self.numb_x_pixels = int(self.x_scan_size/self.x_step_size)
+        self.numb_y_pixels = int(self.y_scan_size/self.y_step_size)
 
-		"""Open param window and get peak center range values and assign it to variables to use later"""
-	# def configure_scan_params(self):
-	#  	self.param_window = ParamWindow()
-	# 	self.param_window.peak_range.connect(self.peak_range)
-	
-	# def peak_range(self, peaks):
-	# 	self.center_min = peaks[0]
-	# 	self.center_max = peaks[1]
+        """Open param window and get peak center range values and assign it to variables to use later"""
+    # def configure_scan_params(self):
+    #      self.param_window = ParamWindow()
+    #     self.param_window.peak_range.connect(self.peak_range)
+    
+    # def peak_range(self, peaks):
+    #     self.center_min = peaks[0]
+    #     self.center_max = peaks[1]
 
-	def plot_fit_scan(self):
-		try:
-			if self.ui.use_raw_scan_settings.isChecked():
-				num_x = self.numb_x_pixels
-				num_y  =self.numb_y_pixels
-			else:
-				num_x = self.ui.num_x_spinBox.value()
-				num_y = self.ui.num_y_spinBox.value()
-			
-			numb_of_points = num_x * num_y #75*75
-			
-			fwhm = np.zeros(shape=(numb_of_points,1))
-			pk_pos = np.zeros(shape=(numb_of_points,1))
+    def plot_fit_scan(self):
+        try:
+            if self.ui.use_raw_scan_settings.isChecked():
+                num_x = self.numb_x_pixels
+                num_y  =self.numb_y_pixels
+            else:
+                num_x = self.ui.num_x_spinBox.value()
+                num_y = self.ui.num_y_spinBox.value()
+            
+            numb_of_points = num_x * num_y #75*75
+            
+            fwhm = np.zeros(shape=(numb_of_points,1))
+            pk_pos = np.zeros(shape=(numb_of_points,1))
 #            pk_pos_plus = np.zeros(shape=(numb_of_points,1))
 #            pk_pos_minus = np.zeros(shape=(numb_of_points,1))
-			sigma = np.zeros(shape=(numb_of_points,1))
-			height = np.zeros(shape=(numb_of_points,1))
-			
-			for i in range(numb_of_points):
-				fwhm[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_fwhm']
-				pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_center']
-				sigma[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_sigma']
-				height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
-			
-			newshape = (num_x, num_y)
-			
-			param_selection = str(self.ui.comboBox.currentText())
-			self.img = np.reshape(eval(param_selection), newshape)
+            sigma = np.zeros(shape=(numb_of_points,1))
+            height = np.zeros(shape=(numb_of_points,1))
+            
+            for i in range(numb_of_points):
+                fwhm[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_fwhm']
+                pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_center']
+                sigma[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_sigma']
+                height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
+            
+            newshape = (num_x, num_y)
+            
+            param_selection = str(self.ui.comboBox.currentText())
+            self.img = np.reshape(eval(param_selection), newshape)
 
-			if self.ui.use_raw_scan_settings.isChecked():
-				self.ui.fit_scan_viewbox.setImage(self.img, scale=
-												  (self.x_step_size,
-												   self.y_step_size))
-				scale = pg.ScaleBar(size=2,suffix='um')
-				scale.setParentItem(self.ui.fit_scan_viewbox.view)
-				scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-				self.ui.fit_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
-			else:
-				self.ui.fit_scan_viewbox.setImage(self.img)
-			
-			self.ui.fit_scan_viewbox.view.invertY(False)
+            if self.ui.use_raw_scan_settings.isChecked():
+                self.ui.fit_scan_viewbox.setImage(self.img, scale=
+                                                  (self.x_step_size,
+                                                   self.y_step_size))
+                scale = pg.ScaleBar(size=2,suffix='um')
+                scale.setParentItem(self.ui.fit_scan_viewbox.view)
+                scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+                self.ui.fit_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+            else:
+                self.ui.fit_scan_viewbox.setImage(self.img)
+            
+            self.ui.fit_scan_viewbox.view.invertY(False)
 
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
-			pass
-			
-	def plot_raw_scan(self):
-		try:
-			# TODO test line scan plots
+        except Exception as e:
+            self.ui.result_textBrowser2.append(str(e))
+            pass
+            
+    def plot_raw_scan(self):
+        try:
+            # TODO test line scan plots
 
-			intensities = self.intensities.T #this is only there because of how we are saving the data in the app
-			intensities = np.reshape(intensities, newshape=(2048,self.numb_x_pixels, self.numb_y_pixels)) 
-			self.ui.raw_scan_viewbox.setImage(intensities, scale=
-												  (self.x_step_size,
-												   self.y_step_size), xvals=self.wavelengths)
-			
-			#roi_plot = self.ui.raw_scan_viewBox.getRoiPlot()
-			#roi_plot.plot(data['Wavelengths'], intensities)
-			self.ui.raw_scan_viewbox.view.invertY(False)
-			scale = pg.ScaleBar(size=2,suffix='um')
-			scale.setParentItem(self.ui.raw_scan_viewbox.view)
-			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-			self.ui.raw_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
-			
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
+            intensities = self.intensities.T #this is only there because of how we are saving the data in the app
+            intensities = np.reshape(intensities, newshape=(2048,self.numb_x_pixels, self.numb_y_pixels)) 
+            self.ui.raw_scan_viewbox.setImage(intensities, scale=
+                                                  (self.x_step_size,
+                                                   self.y_step_size), xvals=self.wavelengths)
+            
+            #roi_plot = self.ui.raw_scan_viewBox.getRoiPlot()
+            #roi_plot.plot(data['Wavelengths'], intensities)
+            self.ui.raw_scan_viewbox.view.invertY(False)
+            scale = pg.ScaleBar(size=2,suffix='um')
+            scale.setParentItem(self.ui.raw_scan_viewbox.view)
+            scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+            self.ui.raw_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+            
+        except Exception as e:
+            self.ui.result_textBrowser2.append(str(e))
 
-	def plot_intensity_sums(self):
-		try:
-			# TODO test line scan plots
+    def plot_intensity_sums(self):
+        try:
+            # TODO test line scan plots
 
-			#intensities = np.reshape(intensities, newshape=(2048, numb_pixels_X*numb_pixels_Y))
-			
-			sums = np.sum(self.intensities, axis=-1)
-			sums = np.reshape(sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
-			
-			self.ui.intensity_sums_viewBox.setImage(sums, scale=
-												  (self.x_step_size,
-												   self.y_step_size))
-			self.ui.intensity_sums_viewBox.view.invertY(False)
-			
-			scale = pg.ScaleBar(size=2,suffix='um')
-			scale.setParentItem(self.ui.intensity_sums_viewBox.view)
-			scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-			self.ui.intensity_sums_viewBox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+            #intensities = np.reshape(intensities, newshape=(2048, numb_pixels_X*numb_pixels_Y))
+            
+            sums = np.sum(self.intensities, axis=-1)
+            sums = np.reshape(sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
+            
+            self.ui.intensity_sums_viewBox.setImage(sums, scale=
+                                                  (self.x_step_size,
+                                                   self.y_step_size))
+            self.ui.intensity_sums_viewBox.view.invertY(False)
+            
+            scale = pg.ScaleBar(size=2,suffix='um')
+            scale.setParentItem(self.ui.intensity_sums_viewBox.view)
+            scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+            self.ui.intensity_sums_viewBox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
 
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
+        except Exception as e:
+            self.ui.result_textBrowser2.append(str(e))
 
-	
-	def fit_and_plot_scan(self):
+    
+    def fit_and_plot_scan(self):
 #        self.ui.result_textBrowser.append("Starting Scan Fitting")
-		print("Starting Scan Fitting")
-		
-		try:
-			"""Define starting and stopping wavelength values here"""
-			start_nm = int(self.ui.start_nm_spinBox.value())
-			stop_nm = int(self.ui.stop_nm_spinBox.value())
-			
-			ref = self.bck_file
-			index = (ref[:,0]>start_nm) & (ref[:,0]<stop_nm)
-			
-			x = self.wavelengths
-			x = x[index]
-			
-			data_array = self.intensities
-			
-			result_dict = {}
-			
-			for i in range(data_array.shape[0]):
-				
-				y = data_array[i, index] # intensity
-				yref = ref[index, 1]
-				
-				y = y - yref # background correction
-				y = y - np.mean(y[(x>start_nm) & (x<start_nm + 25)]) # removing any remaining bckgrnd
-				
-				gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
-				pars = gmodel.guess(y, x=x) # parameters - center, width, height
-				result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
-				result_dict["result_"+str(i)] = result
-			
+        print("Starting Scan Fitting")
+        
+        try:
+            """Define starting and stopping wavelength values here"""
+            start_nm = int(self.ui.start_nm_spinBox.value())
+            stop_nm = int(self.ui.stop_nm_spinBox.value())
+            
+            ref = self.bck_file
+            index = (ref[:,0]>start_nm) & (ref[:,0]<stop_nm)
+            
+            x = self.wavelengths
+            x = x[index]
+            
+            data_array = self.intensities
+            
+            result_dict = {}
+            
+            for i in range(data_array.shape[0]):
+                
+                y = data_array[i, index] # intensity
+                yref = ref[index, 1]
+                
+                y = y - yref # background correction
+                y = y - np.mean(y[(x>start_nm) & (x<start_nm + 25)]) # removing any remaining bckgrnd
+                
+                gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
+                pars = gmodel.guess(y, x=x) # parameters - center, width, height
+                result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
+                result_dict["result_"+str(i)] = result
+            
 #            self.ui.result_textBrowser.append("Scan Fitting Complete!")
-			print("Scan Fitting Complete!")
+            print("Scan Fitting Complete!")
 
-			filename = QtWidgets.QFileDialog.getSaveFileName(self)
-			pickle.dump(result_dict, open(filename[0]+"_fit_result_dict.pkl", "wb"))
-			
+            filename = QtWidgets.QFileDialog.getSaveFileName(self)
+            pickle.dump(result_dict, open(filename[0]+"_fit_result_dict.pkl", "wb"))
+            
 #            self.ui.result_textBrowser.append("Data Saved!")
-			print("Data Saved!")
-		
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
-			pass
-		
+            print("Data Saved!")
+        
+        except Exception as e:
+            self.ui.result_textBrowser2.append(str(e))
+            pass
+        
 #        self.ui.result_textBrowser.append("Loading Fit Data and Plotting")
-		print("Loading Fit Data and Plotting")
-		try:
-			self.fit_scan_file = pickle.load(open(filename[0]+"_fit_result_dict.pkl", 'rb'))
-			self.plot_fit_scan()
-			
-		except Exception as e:
-			self.ui.result_textBrowser2.append(str(e))
-			pass
+        print("Loading Fit Data and Plotting")
+        try:
+            self.fit_scan_file = pickle.load(open(filename[0]+"_fit_result_dict.pkl", 'rb'))
+            self.plot_fit_scan()
+            
+        except Exception as e:
+            self.ui.result_textBrowser2.append(str(e))
+            pass
 
 
-	""" Pkl conversion functions """
-	def pkl_data_to_txt(self):
-		""" Get data from ocean optics scan pkl file, convert to txt"""
-		folder = os.path.dirname(self.pkl_to_convert[0])
-		filename_ext = os.path.basename(self.pkl_to_convert[0])
-		filename = os.path.splitext(filename_ext)[0] #get filename without extension
-		pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
+    """ Pkl conversion functions """
+    def pkl_data_to_txt(self):
+        """ Get data from ocean optics scan pkl file, convert to txt"""
+        folder = os.path.dirname(self.pkl_to_convert[0])
+        filename_ext = os.path.basename(self.pkl_to_convert[0])
+        filename = os.path.splitext(filename_ext)[0] #get filename without extension
+        pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
 
-		txt_file = np.zeros(shape=(2048,pkl_file['Intensities'].shape[0] + 1))
+        txt_file = np.zeros(shape=(2048,pkl_file['Intensities'].shape[0] + 1))
 
-		data_array = pkl_file['Intensities']
-		data_array = np.transpose(data_array)
-		wavelength = pkl_file['Wavelengths']
+        data_array = pkl_file['Intensities']
+        data_array = np.transpose(data_array)
+        wavelength = pkl_file['Wavelengths']
 
-		txt_file[:,0] = wavelength
+        txt_file[:,0] = wavelength
 
-		for i in range(pkl_file['Intensities'].shape[0]):
-			txt_file[:,i+1] = data_array[:,i]
+        for i in range(pkl_file['Intensities'].shape[0]):
+            txt_file[:,i+1] = data_array[:,i]
 
-		np.savetxt(folder +"/"+ filename +"_data.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="wavelength(nm), Intensities at different points")
+        np.savetxt(folder +"/"+ filename +"_data.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="wavelength(nm), Intensities at different points")
 
-	def pkl_params_to_txt(self):
-		""" Get scan parameters from ocean optics scan pkl file, convert to txt """
-		folder = os.path.dirname(self.pkl_to_convert[0])
-		filename_ext = os.path.basename(self.pkl_to_convert[0])
-		filename = os.path.splitext(filename_ext)[0] #get filename without extension
-		pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
+    def pkl_params_to_txt(self):
+        """ Get scan parameters from ocean optics scan pkl file, convert to txt """
+        folder = os.path.dirname(self.pkl_to_convert[0])
+        filename_ext = os.path.basename(self.pkl_to_convert[0])
+        filename = os.path.splitext(filename_ext)[0] #get filename without extension
+        pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
 
-		pkl_scan = pkl_file['Scan Parameters']
-		pkl_oo = pkl_file['OceanOptics Parameters']
-		
-		param_list = []
-		param_list.append(['X scan start (um)', 'Y scan start (um)', 'X scan size (um)', 'Y scan size (um)',
-			'X step size (um)', 'Y step size (um)', 'Integration Time (ms)', 'Scans to Average', 'Correct Dark Counts']) #list of param names
-		param_list.append([ pkl_scan['X scan start (um)'], pkl_scan['Y scan start (um)'], pkl_scan['X scan size (um)'],
-			pkl_scan['Y scan size (um)'], pkl_scan['X step size (um)'], pkl_scan['Y step size (um)'],
-			pkl_oo['Integration Time (ms)'], pkl_oo['Scans Averages'], pkl_oo['Correct Dark Counts'] ]) #list of param values
+        pkl_scan = pkl_file['Scan Parameters']
+        pkl_oo = pkl_file['OceanOptics Parameters']
+        
+        param_list = []
+        param_list.append(['X scan start (um)', 'Y scan start (um)', 'X scan size (um)', 'Y scan size (um)',
+            'X step size (um)', 'Y step size (um)', 'Integration Time (ms)', 'Scans to Average', 'Correct Dark Counts']) #list of param names
+        param_list.append([ pkl_scan['X scan start (um)'], pkl_scan['Y scan start (um)'], pkl_scan['X scan size (um)'],
+            pkl_scan['Y scan size (um)'], pkl_scan['X step size (um)'], pkl_scan['Y step size (um)'],
+            pkl_oo['Integration Time (ms)'], pkl_oo['Scans Averages'], pkl_oo['Correct Dark Counts'] ]) #list of param values
 
-		param_list = list(zip(*param_list)) #transpose so names and values are side-by-side
-		save_to = folder +"/"+ filename +"_scan_parameters.txt"
-		
-		with open(save_to, 'w') as f:
-			for item in param_list:
-				f.write("%s\t" % str(item[0])) #write name
-				f.write("%s\n" % str(item[1])) #write value
+        param_list = list(zip(*param_list)) #transpose so names and values are side-by-side
+        save_to = folder +"/"+ filename +"_scan_parameters.txt"
+        
+        with open(save_to, 'w') as f:
+            for item in param_list:
+                f.write("%s\t" % str(item[0])) #write name
+                f.write("%s\n" % str(item[1])) #write value
 
-	def pkl_to_h5(self):
-		""" Convert scan .pkl file to h5 """
-		folder = os.path.dirname(self.pkl_to_convert[0])
-		filename_ext = os.path.basename(self.pkl_to_convert[0])
-		filename = os.path.splitext(filename_ext)[0] #get filename without extension
-		pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
+    def pkl_to_h5(self):
+        """ Convert scan .pkl file to h5 """
+        folder = os.path.dirname(self.pkl_to_convert[0])
+        filename_ext = os.path.basename(self.pkl_to_convert[0])
+        filename = os.path.splitext(filename_ext)[0] #get filename without extension
+        pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
 
-		h5_filename = folder + "/" + filename + ".h5"
-		h5_file = h5py.File(h5_filename, "w")
-		self.traverse_dict_into_h5(pkl_file, h5_file)
+        h5_filename = folder + "/" + filename + ".h5"
+        h5_file = h5py.File(h5_filename, "w")
+        self.traverse_dict_into_h5(pkl_file, h5_file)
 
-	def traverse_dict_into_h5(self, dictionary, h5_output):
-		""" 
-		Create an h5 file using .pkl with scan data and params
+    def traverse_dict_into_h5(self, dictionary, h5_output):
+        """ 
+        Create an h5 file using .pkl with scan data and params
 
-		dictionary -- dictionary to convert
-		h5_output -- h5 file or group to work in
-		"""
-		for key in dictionary:
-			if type(dictionary[key]) == dict:
-				group = h5_output.create_group(key)
-				previous_dict = dictionary[key]
-				self.traverse_dict_into_h5(dictionary[key], group)
-			else:
-				if key == "Wavelengths" or key == "Intensities":
-					h5_output.create_dataset(key, data=dictionary[key])
-				else:
-					h5_output.attrs[key] = dictionary[key]
+        dictionary -- dictionary to convert
+        h5_output -- h5 file or group to work in
+        """
+        for key in dictionary:
+            if type(dictionary[key]) == dict:
+                group = h5_output.create_group(key)
+                previous_dict = dictionary[key]
+                self.traverse_dict_into_h5(dictionary[key], group)
+            else:
+                if key == "Wavelengths" or key == "Intensities":
+                    h5_output.create_dataset(key, data=dictionary[key])
+                else:
+                    h5_output.attrs[key] = dictionary[key]
 
 
-	def close_application(self):
-		choice = QtGui.QMessageBox.question(self, 'EXIT!',
-											"Do you want to exit the app?",
-											QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-		if choice == QtGui.QMessageBox.Yes:
-			sys.exit()
-		else:
-			pass
-		
-		
+    def close_application(self):
+        choice = QtGui.QMessageBox.question(self, 'EXIT!',
+                                            "Do you want to exit the app?",
+                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        if choice == QtGui.QMessageBox.Yes:
+            sys.exit()
+        else:
+            pass
+        
+        
 """Parameter Window GUI and Functions"""
 # param_file_path = (base_path / "scan_params_input.ui").resolve()
 
@@ -762,34 +772,34 @@ class MainWindow(TemplateBaseClass):
 # param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(param_uiFile)
 
 # class ParamWindow(param_TemplateBaseClass):
-	
-# 	#peak_range = QtCore.pyqtSignal(list)
-	
-# 	def __init__(self):
+    
+#     #peak_range = QtCore.pyqtSignal(list)
+    
+#     def __init__(self):
 # #        super(param_TemplateBaseClass, self).__init__()
-# 		param_TemplateBaseClass.__init__(self)
-		
-# 		# Create the param window
-# 		self.pui = param_WindowTemplate()
-# 		self.pui.setupUi(self)
-		
-# 		self.pui.done_pushButton.clicked.connect(self.done)
-		
-# 		self.show()
-	
+#         param_TemplateBaseClass.__init__(self)
+        
+#         # Create the param window
+#         self.pui = param_WindowTemplate()
+#         self.pui.setupUi(self)
+        
+#         self.pui.done_pushButton.clicked.connect(self.done)
+        
+#         self.show()
+    
 
-	
-# 	def done(self):
-# 		#center_min, center_max = self.current_peak_range()
-# 		#self.peak_range.emit([center_min, center_max])
-# 		self.close()
-# 		self.scan_params_entered = True
-	
+    
+#     def done(self):
+#         #center_min, center_max = self.current_peak_range()
+#         #self.peak_range.emit([center_min, center_max])
+#         self.close()
+#         self.scan_params_entered = True
+    
 """Run the Main Window"""    
 def run():
-	win = MainWindow()
-	QtGui.QApplication.instance().exec_()
-	return win
+    win = MainWindow()
+    QtGui.QApplication.instance().exec_()
+    return win
 
 #Uncomment below if you want to run this as standalone
 #run()
