@@ -52,6 +52,8 @@ class MainWindow(TemplateBaseClass):
         self.correction_region.setRegion((self.correction_region_min, self.correction_region_max))
         
         #setup uv vis ui signals
+        self.ui.correct_for_scattering_checkBox.stateChanged.connect(self.scattering_checkBox_state)
+        self.scatter_corrected = False
         self.ui.actionLoad_data.triggered.connect(self.open_data_file)
         self.ui.plot_absorbance_pushButton.clicked.connect(self.plot_absorbance)
         self.ui.clear_uvvis_pushButton.clicked.connect(self.clear_uvvis)
@@ -85,14 +87,28 @@ class MainWindow(TemplateBaseClass):
     def update_correction_region(self):
         """ Update correction region variables from region """
         self.correction_region_min, self.correction_region_max = self.correction_region.getRegion()
+    
+    def scattering_checkBox_state(self):
+        if self.ui.correct_for_scattering_checkBox.isChecked():
+            self.scatter_corrected = True
+            self.ui.mean_radioButton.setEnabled(True)
+            self.ui.fourth_orderpoly_radioButton.setEnabled(True)
+        else:
+            self.scatter_corrected = False
+            self.ui.mean_radioButton.setEnabled(False)
+            self.ui.fourth_orderpoly_radioButton.setEnabled(False)
 
     def plot_absorbance(self):
         try:
-            self.scatter_corrected = False
             self.plotted_absorbance = self.Absorbance #by default set to original absorbance data
-            if self.ui.correct_for_scattering_checkBox.isChecked(): #if checked, correct absorbance data
-                self.scatter_corrected = True
-                self.plotted_absorbance = self.Absorbance - np.mean(self.Absorbance[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)])
+            if self.scatter_corrected == True:
+                if self.ui.fourth_orderpoly_radioButton.isChecked():
+                    p = (np.polyfit(self.Wavelength[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)],
+                                                    self.Absorbance[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)],4))
+                    p_val = np.polyval(p,self.Wavelength)
+                    self.plotted_absorbance = self.Absorbance - p_val
+                elif self.ui.mean_radioButton.isChecked():
+                    self.plotted_absorbance = self.Absorbance - np.mean(self.Absorbance[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)])
             self.absorbance_plot.plot(self.Wavelength, self.plotted_absorbance, pen='r', clear=True)
             self.absorbance_plot.setYRange(0, 4)
             self.absorbance_plot.addItem(self.correction_region, ignoreBounds=True)
@@ -107,7 +123,7 @@ class MainWindow(TemplateBaseClass):
             self.hv_min = self.ui.hv_min_spinBox.value()
             self.hv_max = self.ui.hv_max_spinBox.value()
             self.hv = 1240/self.Wavelength
-            self.Alpha_hv = (self.Absorbance * self.hv)**2.0
+            self.Alpha_hv = (self.plotted_absorbance * self.hv)**2.0
             self.index = (self.hv > self.hv_min) & (self.hv < self.hv_max)
             model = np.polyfit(self.hv[self.index], self.Alpha_hv[self.index], 1) 
             self.Alpha_hv_fit = self.hv * model[0] + model[1] #This is the linear fit
