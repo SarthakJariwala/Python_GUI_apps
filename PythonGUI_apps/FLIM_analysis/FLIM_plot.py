@@ -62,14 +62,20 @@ class MainWindow(TemplateBaseClass):
     def open_file(self):
         """ Open FLIM scan file """
         try:
-            self.filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5)")
+            self.filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5 *.txt)")
             if ".pkl" in self.filename[0]:
                 self.flim_scan_file = pickle.load(open(self.filename[0], 'rb'))
                 self.scan_file_type = "pkl"
+                self.get_data_params()
             elif ".h5" in self.filename[0]:
                 self.flim_scan_file = h5py.File(self.filename[0], 'r')
                 self.scan_file_type = "h5"
-            self.get_data_params()
+                self.get_data_params()
+            elif ".txt" in self.filename[0]:
+                self.intensity_sums = np.loadtxt(self.filename[0]).T
+                self.stepsize_window = StepSizeWindow()
+                self.stepsize_window.stepsize_signal.connect(self.get_stepsize)
+                self.scan_file_type = "txt"
             # self.pkl_file = pickle.load(open(self.filename[0], 'rb'))
         except Exception as err:
             print(format(err))
@@ -81,6 +87,14 @@ class MainWindow(TemplateBaseClass):
             self.ui.result_textBrowser.append("Done Loading - .pkl to convert")
         except:
             pass
+    
+    def get_stepsize(self):
+        """ Get step size from user input -- specfically written for loading 
+        txt files from legacy labview code, but can also be run on txt file 
+        saved using the new FLIM acquistion code """
+        self.stepsize = eval(self.stepsize_window.ui.stepsize_textEdit.toPlainText())
+        self.x_step_size = self.stepsize
+        self.y_step_size = self.stepsize
 
     def get_data_params(self):
 
@@ -106,14 +120,19 @@ class MainWindow(TemplateBaseClass):
 
     def plot_intensity_sums(self):
         try:
-            self.hist_data = np.reshape(self.hist_data, newshape=(self.hist_data.shape[0], self.numb_x_pixels*self.numb_y_pixels))
-            self.intensity_sums = np.sum(self.hist_data, axis=0) #sum intensities for each pixel
-            self.intensity_sums = np.reshape(self.intensity_sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
+            if self.scan_file_type is "pkl" or self.scan_file_type is "h5":
+                pg.setConfigOption('imageAxisOrder', 'row-major')
+                self.hist_data = np.reshape(self.hist_data, newshape=(self.hist_data.shape[0], self.numb_x_pixels*self.numb_y_pixels))
+                self.intensity_sums = np.sum(self.hist_data, axis=0) #sum intensities for each pixel
+                self.intensity_sums = np.reshape(self.intensity_sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
+            else:
+                pg.setConfigOption('imageAxisOrder', 'col-major')
             self.ui.intensity_sums_viewBox.view.invertY(False) # stop y axis invert
             self.ui.intensity_sums_viewBox.setImage(self.intensity_sums, scale=
                                                   (self.x_step_size,
                                                    self.y_step_size))
-            self.ui.intensity_sums_viewBox.roi.setSize([self.x_scan_size, self.y_step_size]) #line roi
+            if self.scan_file_type is "pkl" or self.scan_file_type is "h5":
+                self.ui.intensity_sums_viewBox.roi.setSize([self.x_scan_size, self.y_step_size]) #line roi
             scale = pg.ScaleBar(size=1,suffix='um')
             scale.setParentItem(self.ui.intensity_sums_viewBox.view)
             scale.anchor((1, 1), (1, 1), offset=(-30, -30))
@@ -291,6 +310,28 @@ class MainWindow(TemplateBaseClass):
             sys.exit()
         else:
             pass
+
+"""Skip rows GUI"""
+ui_file_path = (base_path / "step_size_labview_files.ui").resolve()
+stepsize_WindowTemplate, stepsize_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
+
+class StepSizeWindow(stepsize_TemplateBaseClass):
+    
+    stepsize_signal = QtCore.pyqtSignal() #signal to help with pass info back to MainWindow
+    
+    def __init__(self):
+        stepsize_TemplateBaseClass.__init__(self)
+
+        # Create the param window
+        self.ui = stepsize_WindowTemplate()
+        self.ui.setupUi(self)
+        self.ui.done_pushButton.clicked.connect(self.done)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.show()
+    
+    def done(self):
+        self.stepsize_signal.emit()
+        self.close()
 
 """Run the Main Window"""    
 def run():
