@@ -92,7 +92,7 @@ class MainWindow(TemplateBaseClass):
         """ Get step size from user input -- specfically written for loading 
         txt files from legacy labview code, but can also be run on txt file 
         saved using the new FLIM acquistion code """
-        self.stepsize = eval(self.stepsize_window.ui.stepsize_textEdit.toPlainText())
+        self.stepsize = self.stepsize_window.ui.stepsize_doubleSpinBox.value()
         self.x_step_size = self.stepsize
         self.y_step_size = self.stepsize
 
