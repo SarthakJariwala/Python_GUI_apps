@@ -13,8 +13,10 @@ import customplotting.mscope as cpm
 
 sys.path.append(os.path.abspath('../Lifetime_analysis'))
 sys.path.append(os.path.abspath('../Spectrum_analysis'))
+sys.path.append(os.path.abspath('../H5_Pkl'))
 from Lifetime_analysis import Lifetime_plot_fit
 from Spectrum_analysis import Spectra_plot_fit
+from H5_Pkl import h5_pkl_view
 # local modules
  
 pg.mkQApp()
@@ -66,10 +68,12 @@ class MainWindow(TemplateBaseClass):
             if ".pkl" in self.filename[0]:
                 self.flim_scan_file = pickle.load(open(self.filename[0], 'rb'))
                 self.scan_file_type = "pkl"
+                self.launch_h5_pkl_viewer()
                 self.get_data_params()
             elif ".h5" in self.filename[0]:
                 self.flim_scan_file = h5py.File(self.filename[0], 'r')
                 self.scan_file_type = "h5"
+                self.launch_h5_pkl_viewer()
                 self.get_data_params()
             elif ".txt" in self.filename[0]:
                 self.intensity_sums = np.loadtxt(self.filename[0]).T
@@ -79,6 +83,11 @@ class MainWindow(TemplateBaseClass):
             # self.pkl_file = pickle.load(open(self.filename[0], 'rb'))
         except Exception as err:
             print(format(err))
+    
+    def launch_h5_pkl_viewer(self):
+        """ Launches H5/PKL viewer to give an insight into the data and its structure"""
+        viewer_window = h5_pkl_view.H5PklView(sys.argv)
+        viewer_window.settings['data_filename'] = self.filename[0]
 
     def import_pkl_to_convert(self):
         """ Open pkl file to convert to h5 """
