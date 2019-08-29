@@ -625,7 +625,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="save_all_checkBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Save Entire Fit Model (File will be large and will take longer)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="fit_scan_pushButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="font">
          <font>
           <pointsize>10</pointsize>

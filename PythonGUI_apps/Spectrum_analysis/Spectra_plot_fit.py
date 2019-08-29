@@ -223,17 +223,20 @@ class MainWindow(TemplateBaseClass):
         if self.ui.tabWidget.currentIndex() == 0:
             self.ui.fitting_settings_groupBox.setEnabled(True)
             self.ui.fit_pushButton.setEnabled(True)
-            self.ui.fit_scan_pushButton.setEnabled(True)
+            self.ui.fit_scan_pushButton.setEnabled(False)
+            self.ui.save_all_checkBox.setEnabled(False)
             self.ui.scan_fit_settings_groupBox.setEnabled(False)
         elif self.ui.tabWidget.currentIndex() == 1:
             self.ui.fitting_settings_groupBox.setEnabled(False)
             self.ui.fit_pushButton.setEnabled(False)
             self.ui.fit_scan_pushButton.setEnabled(True)
+            self.ui.save_all_checkBox.setEnabled(True)
             self.ui.scan_fit_settings_groupBox.setEnabled(True)
         elif self.ui.tabWidget.currentIndex() == 2:
             self.ui.fitting_settings_groupBox.setEnabled(False)
             self.ui.fit_pushButton.setEnabled(False)
             self.ui.fit_scan_pushButton.setEnabled(False)
+            self.ui.save_all_checkBox.setEnabled(False)
             self.ui.scan_fit_settings_groupBox.setEnabled(False)
 
     """ Single spectrum functions """
@@ -560,16 +563,22 @@ class MainWindow(TemplateBaseClass):
             
             fwhm = np.zeros(shape=(numb_of_points,1))
             pk_pos = np.zeros(shape=(numb_of_points,1))
-#            pk_pos_plus = np.zeros(shape=(numb_of_points,1))
-#            pk_pos_minus = np.zeros(shape=(numb_of_points,1))
             sigma = np.zeros(shape=(numb_of_points,1))
-            height = np.zeros(shape=(numb_of_points,1))
+#            height = np.zeros(shape=(numb_of_points,1))
             
-            for i in range(numb_of_points):
-                fwhm[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_fwhm']
-                pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_center']
-                sigma[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_sigma']
-                height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
+            if type(self.fit_scan_file['result_0']) == dict:
+                for i in range(numb_of_points):
+                    fwhm[i, 0] = 2.3548200*self.fit_scan_file['result_'+str(i)]['g1_sigma']
+                    pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)]['g1_center']
+                    sigma[i, 0] = self.fit_scan_file['result_'+str(i)]['g1_sigma']
+#                    height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
+            
+            elif type(self.fit_scan_file['result_0']) == lmfit.model.ModelResult:
+                for i in range(numb_of_points):
+                    fwhm[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_fwhm']
+                    pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_center']
+                    sigma[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_sigma']
+#                    height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
             
             newshape = (num_x, num_y)
             
@@ -668,7 +677,10 @@ class MainWindow(TemplateBaseClass):
                 gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
                 pars = gmodel.guess(y, x=x) # parameters - center, width, height
                 result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
-                result_dict["result_"+str(i)] = result
+                if self.ui.save_all_checkBox.isChecked():
+                    result_dict["result_"+str(i)] = result
+                else:
+                    result_dict["result_"+str(i)] = result.best_values
             
 #            self.ui.result_textBrowser.append("Scan Fitting Complete!")
             print("Scan Fitting Complete!")
