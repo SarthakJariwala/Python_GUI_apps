@@ -19,6 +19,9 @@ import time
 from lmfit.models import GaussianModel
 from scipy import interpolate
 import customplotting.mscope as cpm
+
+sys.path.append(os.path.abspath('../H5_Pkl'))
+from H5_Pkl import h5_pkl_view
 # local modules
 try:
     from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
@@ -166,11 +169,14 @@ class MainWindow(TemplateBaseClass):
     def open_spectra_scan_file(self):
         try:
             filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5)")
+            self.filename_for_viewer_launch = filename[0]
             if ".pkl" in filename[0]:
                 self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
+                self.launch_h5_pkl_viewer()
                 self.scan_file_type = "pkl"
             elif ".h5" in filename[0]:
                 self.spec_scan_file = h5py.File(filename[0], 'r')
+                self.launch_h5_pkl_viewer()
                 self.scan_file_type = "h5"
             self.get_data_params()
             self.ui.result_textBrowser2.append("Done Loading - Spectra Scan File")
@@ -190,7 +196,9 @@ class MainWindow(TemplateBaseClass):
     def open_fit_scan_file(self):
         try:
             filename = QtWidgets.QFileDialog.getOpenFileName(self)
+            self.filename_for_viewer_launch = filename[0]
             self.fit_scan_file = pickle.load(open(filename[0], 'rb'))
+            self.launch_h5_pkl_viewer() # TODO Needs to implement reading the fit result datatype in PKL Viewer
             self.ui.result_textBrowser2.append("Done Loading - Scan Fit File")
         except Exception as e:
             self.ui.result_textBrowser2.append(str(e))
@@ -200,8 +208,15 @@ class MainWindow(TemplateBaseClass):
         """ Open pkl file to convert to txt """
         try:
             self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self)
+            self.filename_for_viewer_launch = self.pkl_to_convert[0]
+            self.launch_h5_pkl_viewer()
         except:
             pass
+    
+    def launch_h5_pkl_viewer(self):
+        """ Launches H5/PKL viewer to give an insight into the data and its structure"""
+        viewer_window = h5_pkl_view.H5PklView(sys.argv)
+        viewer_window.settings['data_filename'] = self.filename_for_viewer_launch
     
     def switch_overall_tab(self):
         """ Enable/disable fit settings on right depending on current tab """
@@ -625,6 +640,7 @@ class MainWindow(TemplateBaseClass):
     def fit_and_plot_scan(self):
 #        self.ui.result_textBrowser.append("Starting Scan Fitting")
         print("Starting Scan Fitting")
+        print("Using Single Gaussian to Fit\nThis is the only fitting functions implemented")
         
         try:
             """Define starting and stopping wavelength values here"""
