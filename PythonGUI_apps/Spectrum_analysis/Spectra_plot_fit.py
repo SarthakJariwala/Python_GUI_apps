@@ -15,7 +15,7 @@ from pyqtgraph.Qt import QtCore, QtGui, QtWidgets#, QColorDialog
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
-import time
+import lmfit
 from lmfit.models import GaussianModel
 from scipy import interpolate
 import customplotting.mscope as cpm
@@ -439,7 +439,7 @@ class MainWindow(TemplateBaseClass):
                         sigma2_guess = self.ui.multi_sigma2_guess_spinBox.value()
                         center3_guess = self.ui.multi_peakcenter3_guess_spinBox.value()
                         sigma3_guess = self.ui.multi_sigma3_guess_spinBox.value()
-                        num_gaussians = 3
+#                        num_gaussians = 3
                         peak_pos = [center1_guess, center2_guess, center3_guess]
                         sigma = [sigma1_guess, sigma2_guess, sigma3_guess]
                         min_max_range = [ [center1_min, center1_max], [center2_min, center2_max], [center3_min, center3_max] ]
@@ -656,6 +656,8 @@ class MainWindow(TemplateBaseClass):
             start_nm = int(self.ui.start_nm_spinBox.value())
             stop_nm = int(self.ui.stop_nm_spinBox.value())
             
+            if self.bck_file is None:
+                print("Load Background file!")
             ref = self.bck_file
             index = (ref[:,0]>start_nm) & (ref[:,0]<stop_nm)
             
