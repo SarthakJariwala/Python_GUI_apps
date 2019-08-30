@@ -655,63 +655,64 @@ class MainWindow(TemplateBaseClass):
         print("Starting Scan Fitting")
         print("Using Single Gaussian to Fit\nThis is the only fitting functions implemented")
         
-        try:
-            """Define starting and stopping wavelength values here"""
-            start_nm = int(self.ui.start_nm_spinBox.value())
-            stop_nm = int(self.ui.stop_nm_spinBox.value())
-            
-            if self.bck_file is None:
-                print("Load Background file!")
-            ref = self.bck_file
-            index = (ref[:,0]>start_nm) & (ref[:,0]<stop_nm)
-            
-            x = self.wavelengths
-            x = x[index]
-            
-            data_array = self.intensities
-            
-            result_dict = {}
-            result_dict["Scan Parameters"] = self.spec_scan_file['Scan Parameters']
-            result_dict["OceanOptics Parameters"] = self.spec_scan_file["OceanOptics Parameters"]
-            
-            for i in range(data_array.shape[0]):
+        with pg.BusyCursor():
+            try:
+                """Define starting and stopping wavelength values here"""
+                start_nm = int(self.ui.start_nm_spinBox.value())
+                stop_nm = int(self.ui.stop_nm_spinBox.value())
                 
-                y = data_array[i, index] # intensity
-                yref = ref[index, 1]
+                if self.bck_file is None:
+                    print("Load Background file!")
+                ref = self.bck_file
+                index = (ref[:,0]>start_nm) & (ref[:,0]<stop_nm)
                 
-                y = y - yref # background correction
-                y = y - np.mean(y[(x>start_nm) & (x<start_nm + 25)]) # removing any remaining bckgrnd
+                x = self.wavelengths
+                x = x[index]
                 
-                gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
-                pars = gmodel.guess(y, x=x) # parameters - center, width, height
-                result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
-                if self.ui.save_all_checkBox.isChecked():
-                    result_dict["result_"+str(i)] = result
-                else:
-                    result_dict["result_"+str(i)] = result.best_values
-                            
-#            self.ui.result_textBrowser.append("Scan Fitting Complete!")
-            print("Scan Fitting Complete!")
-
-            filename = QtWidgets.QFileDialog.getSaveFileName(self)
-            pickle.dump(result_dict, open(filename[0]+"_fit_result_dict.pkl", "wb"))
+                data_array = self.intensities
+                
+                result_dict = {}
+                result_dict["Scan Parameters"] = self.spec_scan_file['Scan Parameters']
+                result_dict["OceanOptics Parameters"] = self.spec_scan_file["OceanOptics Parameters"]
+                
+                for i in range(data_array.shape[0]):
+                    
+                    y = data_array[i, index] # intensity
+                    yref = ref[index, 1]
+                    
+                    y = y - yref # background correction
+                    y = y - np.mean(y[(x>start_nm) & (x<start_nm + 25)]) # removing any remaining bckgrnd
+                    
+                    gmodel = GaussianModel(prefix = 'g1_') # calling gaussian model
+                    pars = gmodel.guess(y, x=x) # parameters - center, width, height
+                    result = gmodel.fit(y, pars, x=x, nan_policy='propagate')
+                    if self.ui.save_all_checkBox.isChecked():
+                        result_dict["result_"+str(i)] = result
+                    else:
+                        result_dict["result_"+str(i)] = result.best_values
+                                
+    #            self.ui.result_textBrowser.append("Scan Fitting Complete!")
+                print("Scan Fitting Complete!")
+    
+                filename = QtWidgets.QFileDialog.getSaveFileName(self)
+                pickle.dump(result_dict, open(filename[0]+"_fit_result_dict.pkl", "wb"))
+                
+    #            self.ui.result_textBrowser.append("Data Saved!")
+                print("Data Saved!")
             
-#            self.ui.result_textBrowser.append("Data Saved!")
-            print("Data Saved!")
-        
-        except Exception as e:
-            self.ui.result_textBrowser2.append(str(e))
-            pass
-        
-#        self.ui.result_textBrowser.append("Loading Fit Data and Plotting")
-        print("Loading Fit Data and Plotting")
-        try:
-            self.fit_scan_file = pickle.load(open(filename[0]+"_fit_result_dict.pkl", 'rb'))
-            self.plot_fit_scan()
+            except Exception as e:
+                self.ui.result_textBrowser2.append(str(e))
+                pass
             
-        except Exception as e:
-            self.ui.result_textBrowser2.append(str(e))
-            pass
+    #        self.ui.result_textBrowser.append("Loading Fit Data and Plotting")
+            print("Loading Fit Data and Plotting")
+            try:
+                self.fit_scan_file = pickle.load(open(filename[0]+"_fit_result_dict.pkl", 'rb'))
+                self.plot_fit_scan()
+                
+            except Exception as e:
+                self.ui.result_textBrowser2.append(str(e))
+                pass
 
 
     """ Pkl conversion functions """
