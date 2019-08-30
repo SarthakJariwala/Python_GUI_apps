@@ -1042,16 +1042,6 @@ Ready Figure</string>
               <string>fwhm</string>
              </property>
             </item>
-            <item>
-             <property name="text">
-              <string>sigma</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>height</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item row="4" column="0" rowspan="4" colspan="2">

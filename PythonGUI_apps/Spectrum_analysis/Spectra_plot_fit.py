@@ -196,10 +196,11 @@ class MainWindow(TemplateBaseClass):
     def open_fit_scan_file(self):
         try:
             filename = QtWidgets.QFileDialog.getOpenFileName(self)
-            self.filename_for_viewer_launch = filename[0]
-            self.fit_scan_file = pickle.load(open(filename[0], 'rb'))
-            self.launch_h5_pkl_viewer() # TODO Needs to implement reading the fit result datatype in PKL Viewer
-            self.ui.result_textBrowser2.append("Done Loading - Scan Fit File")
+            with pg.BusyCursor():
+                self.filename_for_viewer_launch = filename[0]
+                self.fit_scan_file = pickle.load(open(filename[0], 'rb'))
+                self.launch_h5_pkl_viewer() # TODO Needs to implement reading the fit result datatype in PKL Viewer
+                self.ui.result_textBrowser2.append("Done Loading - Scan Fit File")
         except Exception as e:
             self.ui.result_textBrowser2.append(str(e))
             pass
@@ -466,7 +467,10 @@ class MainWindow(TemplateBaseClass):
         filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
         try:
             try:
-                data = self.spec_scan_file
+                try:
+                    data = self.spec_scan_file
+                except:
+                    data = self.fit_scan_file
                 param_selection = str(self.ui.comboBox.currentText())
                 if param_selection == 'pk_pos': label = 'PL Peak Position (n.m.)'
                 elif param_selection == 'fwhm': label = 'PL FWHM (n.m.)'
@@ -563,21 +567,21 @@ class MainWindow(TemplateBaseClass):
             
             fwhm = np.zeros(shape=(numb_of_points,1))
             pk_pos = np.zeros(shape=(numb_of_points,1))
-            sigma = np.zeros(shape=(numb_of_points,1))
+#            sigma = np.zeros(shape=(numb_of_points,1))
 #            height = np.zeros(shape=(numb_of_points,1))
             
             if type(self.fit_scan_file['result_0']) == dict:
                 for i in range(numb_of_points):
                     fwhm[i, 0] = 2.3548200*self.fit_scan_file['result_'+str(i)]['g1_sigma']
                     pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)]['g1_center']
-                    sigma[i, 0] = self.fit_scan_file['result_'+str(i)]['g1_sigma']
+#                    sigma[i, 0] = self.fit_scan_file['result_'+str(i)]['g1_sigma']
 #                    height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
             
             elif type(self.fit_scan_file['result_0']) == lmfit.model.ModelResult:
                 for i in range(numb_of_points):
                     fwhm[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_fwhm']
                     pk_pos[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_center']
-                    sigma[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_sigma']
+#                    sigma[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_sigma']
 #                    height[i, 0] = self.fit_scan_file['result_'+str(i)].values['g1_height']
             
             newshape = (num_x, num_y)
@@ -667,6 +671,8 @@ class MainWindow(TemplateBaseClass):
             data_array = self.intensities
             
             result_dict = {}
+            result_dict["Scan Parameters"] = self.spec_scan_file['Scan Parameters']
+            result_dict["OceanOptics Parameters"] = self.spec_scan_file["OceanOptics Parameters"]
             
             for i in range(data_array.shape[0]):
                 
@@ -683,7 +689,7 @@ class MainWindow(TemplateBaseClass):
                     result_dict["result_"+str(i)] = result
                 else:
                     result_dict["result_"+str(i)] = result.best_values
-            
+                            
 #            self.ui.result_textBrowser.append("Scan Fitting Complete!")
             print("Scan Fitting Complete!")
 
@@ -755,7 +761,7 @@ class MainWindow(TemplateBaseClass):
                 f.write("%s\n" % str(item[1])) #write value
 
     def pkl_to_h5(self):
-        """ Convert scan .pkl file to h5 """
+        """ Convert raw scan .pkl file to h5 """
         folder = os.path.dirname(self.pkl_to_convert[0])
         filename_ext = os.path.basename(self.pkl_to_convert[0])
         filename = os.path.splitext(filename_ext)[0] #get filename without extension
