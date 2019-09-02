@@ -1128,6 +1128,18 @@ Ready Figure</string>
             </property>
            </widget>
           </item>
+          <item row="7" column="3">
+           <widget class="QPushButton" name="analyze_spectra_fits_pushButton">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Analyze Spectra Fits</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item row="0" column="2">
@@ -1211,6 +1223,18 @@ Ready Figure</string>
              </property>
              <property name="text">
               <string>For Scan Data</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="launch_data_viewer_checkBox">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Launch Data Viewer</string>
              </property>
             </widget>
            </item>

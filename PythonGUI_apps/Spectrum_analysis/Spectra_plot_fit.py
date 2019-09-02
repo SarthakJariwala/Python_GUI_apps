@@ -14,6 +14,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets#, QColorDialog
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import pickle
 import lmfit
 from lmfit.models import GaussianModel
@@ -25,17 +26,20 @@ from H5_Pkl import h5_pkl_view
 # local modules
 try:
     from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
+    from pyqtgraph_MATPLOTLIBWIDGET import MatplotlibWidget
 except:
     from Spectrum_analysis.Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
+    from Spectrum_analysis.pyqtgraph_MATPLOTLIBWIDGET import MatplotlibWidget
 
+matplotlib.use('Qt5Agg')
 
 """Recylce params for plotting"""
-plt.rc('xtick', labelsize = 20)
-plt.rc('xtick.major', pad = 3)
-plt.rc('ytick', labelsize = 20)
-plt.rc('lines', lw = 1.5, markersize = 7.5)
-plt.rc('legend', fontsize = 20)
-plt.rc('axes', linewidth=3.5)
+plt.rc('xtick', labelsize = 10)
+plt.rc('xtick.major', pad = 1)
+plt.rc('ytick', labelsize = 10)
+plt.rc('lines', lw = 1.5, markersize = 3.5)
+plt.rc('legend', fontsize = 10)
+plt.rc('axes', linewidth=1.5)
 
 pg.mkQApp()
 pg.setConfigOption('background', 'w')
@@ -85,6 +89,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         self.ui.export_single_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
         self.ui.export_scan_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
+        self.ui.analyze_spectra_fits_pushButton.clicked.connect(self.analyze_spectra_fits)
 
         self.ui.import_pkl_pushButton.clicked.connect(self.open_pkl_file)
         self.ui.data_txt_pushButton.clicked.connect(self.pkl_data_to_txt)
@@ -117,6 +122,9 @@ class MainWindow(TemplateBaseClass):
         #variables accounting for data received from FLIM analysis
         self.opened_from_flim = False #switched to True in FLIM_plot when "analyze lifetime" clicked
         self.sum_data_from_flim = []
+        
+        # fit scan file variable set to None for analyze_spectra_fits
+        self.fit_scan_file = None
 
         #container for data to append to txt file
         self.data_list = []
@@ -172,11 +180,13 @@ class MainWindow(TemplateBaseClass):
             self.filename_for_viewer_launch = filename[0]
             if ".pkl" in filename[0]:
                 self.spec_scan_file = pickle.load(open(filename[0], 'rb'))
-                self.launch_h5_pkl_viewer()
+                if self.ui.launch_data_viewer_checkBox.isChecked():
+                    self.launch_h5_pkl_viewer()
                 self.scan_file_type = "pkl"
             elif ".h5" in filename[0]:
                 self.spec_scan_file = h5py.File(filename[0], 'r')
-                self.launch_h5_pkl_viewer()
+                if self.ui.launch_data_viewer_checkBox.isChecked():
+                    self.launch_h5_pkl_viewer()
                 self.scan_file_type = "h5"
             self.get_data_params()
             self.ui.result_textBrowser2.append("Done Loading - Spectra Scan File")
@@ -199,7 +209,8 @@ class MainWindow(TemplateBaseClass):
             with pg.BusyCursor():
                 self.filename_for_viewer_launch = filename[0]
                 self.fit_scan_file = pickle.load(open(filename[0], 'rb'))
-                self.launch_h5_pkl_viewer() # TODO Needs to implement reading the fit result datatype in PKL Viewer
+                if self.ui.launch_data_viewer_checkBox.isChecked():
+                    self.launch_h5_pkl_viewer() # TODO Needs to implement reading the fit result datatype in PKL Viewer
                 self.ui.result_textBrowser2.append("Done Loading - Scan Fit File")
         except Exception as e:
             self.ui.result_textBrowser2.append(str(e))
@@ -219,6 +230,14 @@ class MainWindow(TemplateBaseClass):
         viewer_window = h5_pkl_view.H5PklView(sys.argv)
         viewer_window.settings['data_filename'] = self.filename_for_viewer_launch
     
+    def analyze_spectra_fits(self):
+        """Analyze fits to the individual spectrum within a spectra scan fit file"""
+        if self.fit_scan_file is None:
+            self.open_fit_scan_file()
+        
+        analyze_window = Analyze(scan_fit_file=self.fit_scan_file)
+        analyze_window.run()
+        
     def switch_overall_tab(self):
         """ Enable/disable fit settings on right depending on current tab """
         if self.ui.tabWidget.currentIndex() == 0:
@@ -465,6 +484,13 @@ class MainWindow(TemplateBaseClass):
 
     def pub_ready_plot_export(self):
         filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
+        """Recylce params for plotting"""
+        plt.rc('xtick', labelsize = 20)
+        plt.rc('xtick.major', pad = 3)
+        plt.rc('ytick', labelsize = 20)
+        plt.rc('lines', lw = 1.5, markersize = 7.5)
+        plt.rc('legend', fontsize = 20)
+        plt.rc('axes', linewidth=3.5)
         try:
             try:
                 try:
@@ -801,36 +827,49 @@ class MainWindow(TemplateBaseClass):
             pass
         
         
-"""Parameter Window GUI and Functions"""
-# param_file_path = (base_path / "scan_params_input.ui").resolve()
+"""Analyze Window GUI and Functions"""
+base_path = Path(__file__).parent
+file_path = (base_path / "analyze_fit_results.ui").resolve()
 
-# param_uiFile = param_file_path
+uiFile = file_path
 
-# param_WindowTemplate, param_TemplateBaseClass = pg.Qt.loadUiType(param_uiFile)
+Analyze_WindowTemplate, Analyze_TemplateBaseClass = pg.Qt.loadUiType(uiFile)
 
-# class ParamWindow(param_TemplateBaseClass):
+class Analyze(Analyze_TemplateBaseClass):  
     
-#     #peak_range = QtCore.pyqtSignal(list)
-    
-#     def __init__(self):
-# #        super(param_TemplateBaseClass, self).__init__()
-#         param_TemplateBaseClass.__init__(self)
+    def __init__(self, scan_fit_file):
+        pg.setConfigOption('imageAxisOrder', 'row-major')
+        super(Analyze_TemplateBaseClass, self).__init__()
         
-#         # Create the param window
-#         self.pui = param_WindowTemplate()
-#         self.pui.setupUi(self)
+        # Create the main window
+        self.ui = Analyze_WindowTemplate()
+        self.ui.setupUi(self)
         
-#         self.pui.done_pushButton.clicked.connect(self.done)
+        self.ui.plot_pushButton.clicked.connect(self.plot)
         
-#         self.show()
+        self.fit_scan_file = scan_fit_file
+        self.show()
+        
+    def plot(self):
+        matplotlib.use('Qt5Agg')
+        try:
+            result_no = int(self.ui.result_spinBox.value())
+            if type(self.fit_scan_file['result_0']) == lmfit.model.ModelResult:
+                self.ui.graphicsView = MatplotlibWidget(dpi=300)
+                self.fit_scan_file['result_'+str(result_no)].plot(fig=MatplotlibWidget(size=(12,8)).getFigure().add_subplot(111))
+                plt.tick_params(length=8, width=3)
+                plt.xlabel("Wavelength (nm)", fontsize=25, fontweight='bold')
+                plt.ylabel("Intensity (a.u.)", fontsize=25, fontweight='bold')
+                plt.show()
+                plt.tight_layout()
+        except Exception as e:
+            print(str(e))
+            pass
     
-
-    
-#     def done(self):
-#         #center_min, center_max = self.current_peak_range()
-#         #self.peak_range.emit([center_min, center_max])
-#         self.close()
-#         self.scan_params_entered = True
+    def run(self):
+        win = Analyze()
+        QtGui.QApplication.instance().exec_()
+        return win
     
 """Run the Main Window"""    
 def run():
