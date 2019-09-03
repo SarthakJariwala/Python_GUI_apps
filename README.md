@@ -1,5 +1,5 @@
 # GLabViz
-Graphical User Interface (GUI) Python apps written in python using qt amd [pyqtgrpah](http://www.pyqtgraph.org/) for quick analysis of scientific data. It also includes the ability to convert data to *H5* if needed.
+Graphical User Interface (GUI) Python apps written in python using qt and [pyqtgrpah](http://www.pyqtgraph.org/) for quick analysis of scientific data. It also includes the ability to convert data to *H5* if needed.
 
 _**Python is not required to use GLabViz**_ (see **How to use?**)
 
