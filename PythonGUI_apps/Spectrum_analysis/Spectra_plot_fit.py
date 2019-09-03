@@ -855,8 +855,8 @@ class Analyze(Analyze_TemplateBaseClass):
         try:
             result_no = int(self.ui.result_spinBox.value())
             if type(self.fit_scan_file['result_0']) == lmfit.model.ModelResult:
-                self.ui.graphicsView = MatplotlibWidget(dpi=300)
-                self.fit_scan_file['result_'+str(result_no)].plot(fig=MatplotlibWidget(size=(12,8)).getFigure().add_subplot(111))
+                self.matplotlibwidget = MatplotlibWidget(size=(12,8), dpi=300)
+                self.fit_scan_file['result_'+str(result_no)].plot(fig=self.matplotlibwidget.getFigure().add_subplot(111))
                 plt.tick_params(length=8, width=3)
                 plt.xlabel("Wavelength (nm)", fontsize=25, fontweight='bold')
                 plt.ylabel("Intensity (a.u.)", fontsize=25, fontweight='bold')
