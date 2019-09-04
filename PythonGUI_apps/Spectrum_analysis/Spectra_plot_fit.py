@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import pickle
 import lmfit
-from lmfit.models import GaussianModel
+from lmfit.models import GaussianModel, LinearModel
 from scipy import interpolate
 import customplotting.mscope as cpm
 
@@ -372,6 +372,16 @@ class MainWindow(TemplateBaseClass):
                 self.file = np.zeros((self.x.shape[0], 2))
                 self.file[:,0] = self.x
                 self.file[:,1] = self.y
+                bck = lmfit.models.LinearModel(prefix='line_')
+                gmodel = GaussianModel(prefix='g1_')
+                pars = bck.make_params(intercept=self.y.min(), slope=0)
+                pars += gmodel.guess(self.y, x=self.x)
+                comp_model = gmodel + bck
+                self.result = comp_model.fit(self.y, pars, x=self.x, nan_policy='propagate')
+                self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
+                self.ui.result_textBrowser.setText(self.result.fit_report())
+                
 
             if self.ui.plot_without_bck_radioButton.isChecked(): #if plot w/o bck, create dummy bck_file
                 self.bck_file = np.zeros(shape=(self.file.shape[0], 2))
@@ -380,6 +390,8 @@ class MainWindow(TemplateBaseClass):
             # if self.ui.subtract_bck_radioButton.isChecked() == False:
             #     self.ui.result_textBrowser.setText("You need to check the subtract background option!")
             if self.check_loaded_files is None:
+                pass
+            elif self.opened_from_flim:
                 pass
             else:
 
