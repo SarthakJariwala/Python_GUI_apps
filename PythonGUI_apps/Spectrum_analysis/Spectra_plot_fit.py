@@ -139,7 +139,7 @@ class MainWindow(TemplateBaseClass):
                 try:
                     self.file = np.loadtxt(self.single_spec_filename[0], skiprows = 1, delimiter=" ")
                 except:        
-                    np.loadtxt(self.single_spec_filename[0], skiprows = 16, delimiter='\t')
+                    self.file = np.loadtxt(self.single_spec_filename[0], skiprows = 16, delimiter='\t')
             except:
                 self.file = np.genfromtxt(self.single_spec_filename[0], skip_header=1, skip_footer=3, delimiter='\t')
             self.opened_from_flim = False
@@ -324,8 +324,10 @@ class MainWindow(TemplateBaseClass):
             else:
                 self.x = self.file[:,0]
                 self.y = self.file[:,1]
+                
+            self.check_loaded_files()
 
-            if self.check_loaded_files == True: #check the following conditions if all required files have been provided
+            if self.check_loaded_files() == True: #check the following conditions if all required files have been provided
                 if self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
                     bck_y = self.bck_file[:,1]
                     self.y = self.y - bck_y
