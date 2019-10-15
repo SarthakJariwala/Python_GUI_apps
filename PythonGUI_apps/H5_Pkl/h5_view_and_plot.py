@@ -73,7 +73,7 @@ class H5ViewPlot(BaseApp):
         try:
             fname = self.settings.data_filename.val 
             if os.path.isfile(fname):
-                self.h5treeview.on_change_data_filename(fname)
+                self.f = self.h5treeview.on_change_data_filename(fname)
                 self.ui.dataview_placeholder.hide()
                 self.h5treeview.ui.show()
         except:
@@ -96,8 +96,12 @@ class H5ViewPlot(BaseApp):
         elif self.dataset_shape == 2 and self.ui.image_radioButton.isChecked():
             self.data_img.setImage(data)
         elif self.dataset_shape == 3:
-            x_start = self.ui.imageView_x_start_spinBox.value()
-            x_end = self.ui.imageView_x_end_spinBox.value()
+            if self.f['Cube/Info/Cube'].attrs['AcqMode'] == b'Hyperspectral Acquisition': # This works for our PhotonEtc. Hyperspectral Camera output
+                x_start = int(self.f['Cube/Info/Cube'].attrs['LowerWavelength'])
+                x_end = int(self.f['Cube/Info/Cube'].attrs['UpperWavelength'])
+            else:
+                x_start = self.ui.imageView_x_start_spinBox.value()
+                x_end = self.ui.imageView_x_end_spinBox.value()
             num_points = self.dataset.shape[0]
             x_values = np.linspace(x_start, x_end, num_points) #scale x axis
             self.ui.data_imageView.setImage(data, xvals=x_values)
