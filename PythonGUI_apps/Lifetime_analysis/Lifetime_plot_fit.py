@@ -77,6 +77,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.separate_irf_checkBox.stateChanged.connect(self.switch_open_irf)
         self.ui.export_data_pushButton.clicked.connect(self.export_data)
         self.ui.clear_export_data_pushButton.clicked.connect(self.clear_export_data)
+        self.ui.smoothData_checkBox.stateChanged.connect(self.smooth_trace_enabled)
 
         #set up plot color button
         self.plot_color_button = pg.ColorButton(color=(255,0,0))
@@ -187,6 +188,13 @@ class MainWindow(TemplateBaseClass):
         """ Grab new plot_color when color button value is changed """
         self.plot_color = self.plot_color_button.color()
     
+    def smooth_trace_enabled(self):
+        """Enable smooth spin box when smooth data is checked"""
+        if self.ui.smoothData_checkBox.isChecked():
+            self.ui.smoothData_spinBox.setEnabled(True)
+        else:
+            self.ui.smoothData_spinBox.setEnabled(False)
+    
     def acquire_settings(self, mode="data"):
         """
         Acquire data or irf from channel specified in spinbox.
@@ -215,6 +223,9 @@ class MainWindow(TemplateBaseClass):
             
             length = np.shape(y)[0]
             x = np.arange(0, length, 1) * self.resolution
+            
+            if self.ui.smoothData_checkBox.isChecked() and mode=="data":
+                y = np.convolve(y, np.ones(self.ui.smoothData_spinBox.value())/self.ui.smoothData_spinBox.value(), mode="same")
             return x,y
         
         except Exception as e:
