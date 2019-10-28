@@ -67,7 +67,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.plot_pushButton.clicked.connect(self.plot)
         self.ui.fit_pushButton.clicked.connect(self.call_fit_and_plot)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
-        self.ui.export_plot_pushButton.clicked.connect(self.pub_ready_plot_export)
+        self.ui.export_plot_pushButton.clicked.connect(self.export_window)#pub_ready_plot_export
         self.ui.calculate_srv_pushButton.clicked.connect(self.calculate_srv)
 
         self.ui.log_checkBox.stateChanged.connect(self.make_semilog)
@@ -518,6 +518,10 @@ class MainWindow(TemplateBaseClass):
 
     def clear_export_data(self):
         self.data_list = []
+    
+    def export_window(self):
+        self.exportplotwindow = ExportPlotWindow()
+        self.exportplotwindow.export_fig_signal.connect(self.pub_ready_plot_export)
 
     def pub_ready_plot_export(self):
         try:
@@ -526,19 +530,27 @@ class MainWindow(TemplateBaseClass):
             plt.figure(figsize=(8,6))
             plt.tick_params(direction='out', length=8, width=3.5)
             if self.ui.save_w_fit_checkBox.isChecked():
-                plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]))
-                plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),'k')
+                plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]),self.exportplotwindow.ui.traceColor_comboBox.currentText())
+                plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),self.exportplotwindow.ui.fitColor_comboBox.currentText())
+                if self.exportplotwindow.ui.legend_checkBox.isChecked():
+                    plt.legend([self.exportplotwindow.ui.legend1_lineEdit.text(),self.exportplotwindow.ui.legend2_lineEdit.text()])
             else:
-                plt.plot(self.acquire_settings()[0],self.acquire_settings()[1]/np.max(self.acquire_settings()[1]))
+                plt.plot(self.acquire_settings()[0],self.acquire_settings()[1]/np.max(self.acquire_settings()[1]),
+                         self.exportplotwindow.ui.traceColor_comboBox.currentText())
+                if self.exportplotwindow.ui.legend_checkBox.isChecked():
+                    plt.legend([self.exportplotwindow.ui.legend1_lineEdit.text()])
             plt.yscale('log')
             plt.xlabel("Time (ns)", fontsize=20, fontweight='bold')
             plt.ylabel("Intensity (norm.)", fontsize=20, fontweight='bold')
             plt.tight_layout()
+            plt.xlim([self.exportplotwindow.ui.lowerX_spinBox.value(),self.exportplotwindow.ui.upperX_spinBox.value()])
+            plt.ylim([10**(self.exportplotwindow.ui.lowerY_spinBox.value()),self.exportplotwindow.ui.upperY_doubleSpinBox.value()])
             
             plt.savefig(filename[0],bbox_inches='tight', dpi=300)
             plt.close()
         
-        except:
+        except Exception as e:
+            self.ui.Result_textBrowser.append(format(e))
             pass
             
     def close_application(self):
@@ -571,6 +583,38 @@ class SkipRowsWindow(skiprows_TemplateBaseClass):
     def done(self):
         self.skip_rows_signal.emit()
         self.close()
+
+"""Export plot GUI"""
+ui_file_path = (base_path / "export_plot.ui").resolve()
+export_WindowTemplate, export_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
+
+class ExportPlotWindow(export_TemplateBaseClass):
+    
+    export_fig_signal = QtCore.pyqtSignal()
+    
+    def __init__(self):
+        export_TemplateBaseClass.__init__(self)
+        
+        self.ui = export_WindowTemplate()
+        self.ui.setupUi(self)
+        self.ui.traceColor_comboBox.addItems(["C0","C1","C2","C3","C4","C5","C6","C7", "r", "g", "b", "y", "k"])
+        self.ui.fitColor_comboBox.addItems(["k", "r", "b", "y", "g","C0","C1","C2","C3","C4","C5","C6","C7"])
+        self.ui.export_pushButton.clicked.connect(self.export)
+        self.ui.legend_checkBox.stateChanged.connect(self.legend_title)
+        self.show()
+    
+    def legend_title(self):
+        if self.ui.legend_checkBox.isChecked():
+            self.ui.legend1_lineEdit.setEnabled(True)
+            self.ui.legend2_lineEdit.setEnabled(True)
+        else:
+            self.ui.legend1_lineEdit.setEnabled(False)
+            self.ui.legend2_lineEdit.setEnabled(False)
+    
+    def export(self):
+        self.export_fig_signal.emit()
+        self.close()
+
 
 def run():
     win = MainWindow()
