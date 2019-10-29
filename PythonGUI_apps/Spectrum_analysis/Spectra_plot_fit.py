@@ -88,7 +88,7 @@ class MainWindow(TemplateBaseClass):
         # self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         self.ui.export_single_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
-        self.ui.export_scan_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
+        self.ui.export_scan_figure_pushButton.clicked.connect(self.export_window)
         self.ui.analyze_spectra_fits_pushButton.clicked.connect(self.analyze_spectra_fits)
 
         self.ui.import_pkl_pushButton.clicked.connect(self.open_pkl_file)
@@ -495,6 +495,10 @@ class MainWindow(TemplateBaseClass):
         
         except Exception as e:
             self.ui.result_textBrowser.append(str(e))
+    
+    def export_window(self):
+        self.export_window = ExportFigureWindow()
+        self.export_window.export_fig_signal.connect(self.pub_ready_plot_export)
 
     def pub_ready_plot_export(self):
         filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
@@ -511,10 +515,21 @@ class MainWindow(TemplateBaseClass):
                     data = self.spec_scan_file
                 except:
                     data = self.fit_scan_file
-                param_selection = str(self.ui.comboBox.currentText())
-                if param_selection == 'pk_pos': label = 'PL Peak Position (n.m.)'
-                elif param_selection == 'fwhm': label = 'PL FWHM (n.m.)'
-                cpm.plot_confocal(self.img, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap="seismic", cbar_label=label)
+                if self.export_window.ui.reverse_checkBox.isChecked():
+                    colormap = str(self.export_window.ui.cmap_comboBox.currentText())+"_r"
+                else:
+                    colormap = str(self.export_window.ui.cmap_comboBox.currentText())
+                if str(self.export_window.ui.dataChannel_comboBox.currentText()) == "Fitted":
+                    param_selection = str(self.ui.comboBox.currentText())
+                    if param_selection == 'pk_pos': label = 'PL Peak Position (n.m.)'
+                    elif param_selection == 'fwhm': label = 'PL FWHM (n.m.)'
+                    cpm.plot_confocal(self.img, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap=colormap, cbar_label=label,
+                                      vmin=self.export_window.ui.vmin_spinBox.value(), vmax=self.export_window.ui.vmax_spinBox.value())
+                elif str(self.export_window.ui.dataChannel_comboBox.currentText()) == "Raw":
+                    cpm.plot_confocal(self.sums, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap=colormap, 
+                                      vmin=self.export_window.ui.vmin_spinBox.value(), vmax=self.export_window.ui.vmax_spinBox.value())
+                plt.tick_params(direction='out', length=8, width=3.5)
+                plt.tight_layout()
                 plt.savefig(filename[0],bbox_inches='tight', dpi=300)
                 plt.close()
             except:
@@ -674,9 +689,9 @@ class MainWindow(TemplateBaseClass):
             #intensities = np.reshape(intensities, newshape=(2048, numb_pixels_X*numb_pixels_Y))
             
             sums = np.sum(self.intensities, axis=-1)
-            sums = np.reshape(sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
+            self.sums = np.reshape(sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
             
-            self.ui.intensity_sums_viewBox.setImage(sums, scale=
+            self.ui.intensity_sums_viewBox.setImage(self.sums, scale=
                                                   (self.x_step_size,
                                                    self.y_step_size))
             self.ui.intensity_sums_viewBox.view.invertY(False)
@@ -884,6 +899,45 @@ class Analyze(Analyze_TemplateBaseClass):
         win = Analyze()
         QtGui.QApplication.instance().exec_()
         return win
+
+"""Export Images GUI"""
+ui_file_path = (base_path / "export_fig_gui.ui").resolve()
+export_WindowTemplate, export_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
+
+class ExportFigureWindow(export_TemplateBaseClass):
+    
+    export_fig_signal = QtCore.pyqtSignal()
+    
+    def __init__(self):
+        export_TemplateBaseClass.__init__(self)
+        
+        self.ui = export_WindowTemplate()
+        self.ui.setupUi(self)
+        self.ui.cmap_comboBox.addItems(['viridis', 'plasma', 'inferno', 'magma', 
+                                        'cividis','Greys', 'Purples', 'Blues', 
+                                        'Greens', 'Oranges', 'Reds', 'YlOrBr', 
+                                        'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu', 
+                                        'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 
+                                        'YlGn', 'binary', 'gist_yarg', 'gist_gray', 
+                                        'gray', 'bone', 'pink', 'spring', 'summer', 
+                                        'autumn', 'winter', 'cool', 'Wistia', 'hot', 
+                                        'afmhot', 'gist_heat', 'copper', 'rainbow', 'jet'])
+        self.ui.dataChannel_comboBox.addItems(['Raw', 'Fitted'])
+        self.ui.exportFig_pushButton.clicked.connect(self.export)
+#        self.ui.legend_checkBox.stateChanged.connect(self.legend_title)
+        self.show()
+    
+#    def legend_title(self):
+#        if self.ui.legend_checkBox.isChecked():
+#            self.ui.legend1_lineEdit.setEnabled(True)
+#            self.ui.legend2_lineEdit.setEnabled(True)
+#        else:
+#            self.ui.legend1_lineEdit.setEnabled(False)
+#            self.ui.legend2_lineEdit.setEnabled(False)
+    
+    def export(self):
+        self.export_fig_signal.emit()
+        self.close()
     
 """Run the Main Window"""    
 def run():
