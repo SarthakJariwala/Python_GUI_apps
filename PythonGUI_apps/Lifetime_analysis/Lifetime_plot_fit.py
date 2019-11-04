@@ -16,6 +16,12 @@ from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 import numpy as np
 import matplotlib.pyplot as plt
 
+sys.path.append(os.path.abspath('../Export_Windows'))
+try:
+    from Export_window import ExportPlotWindow
+except:
+    from Export_Windows.Export_window import ExportPlotWindow
+    
 # local module imports
 try:
     from Lifetime_analysis.Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
@@ -530,10 +536,8 @@ class MainWindow(TemplateBaseClass):
             plt.figure(figsize=(8,6))
             plt.tick_params(direction='out', length=8, width=3.5)
             if self.ui.save_w_fit_checkBox.isChecked():
-                print("inside if")
                 plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]),self.exportplotwindow.ui.traceColor_comboBox.currentText())
                 plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),self.exportplotwindow.ui.fitColor_comboBox.currentText())
-                print("finished plotting")
                 if self.exportplotwindow.ui.legend_checkBox.isChecked():
                     plt.legend([self.exportplotwindow.ui.legend1_lineEdit.text(),self.exportplotwindow.ui.legend2_lineEdit.text()])
             else:
@@ -584,37 +588,6 @@ class SkipRowsWindow(skiprows_TemplateBaseClass):
     
     def done(self):
         self.skip_rows_signal.emit()
-        self.close()
-
-"""Export plot GUI"""
-ui_file_path = (base_path / "export_plot.ui").resolve()
-export_WindowTemplate, export_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
-
-class ExportPlotWindow(export_TemplateBaseClass):
-    
-    export_fig_signal = QtCore.pyqtSignal()
-    
-    def __init__(self):
-        export_TemplateBaseClass.__init__(self)
-        
-        self.ui = export_WindowTemplate()
-        self.ui.setupUi(self)
-        self.ui.traceColor_comboBox.addItems(["C0","C1","C2","C3","C4","C5","C6","C7", "r", "g", "b", "y", "k"])
-        self.ui.fitColor_comboBox.addItems(["k", "r", "b", "y", "g","C0","C1","C2","C3","C4","C5","C6","C7"])
-        self.ui.export_pushButton.clicked.connect(self.export)
-        self.ui.legend_checkBox.stateChanged.connect(self.legend_title)
-        self.show()
-    
-    def legend_title(self):
-        if self.ui.legend_checkBox.isChecked():
-            self.ui.legend1_lineEdit.setEnabled(True)
-            self.ui.legend2_lineEdit.setEnabled(True)
-        else:
-            self.ui.legend1_lineEdit.setEnabled(False)
-            self.ui.legend2_lineEdit.setEnabled(False)
-    
-    def export(self):
-        self.export_fig_signal.emit()
         self.close()
 
 

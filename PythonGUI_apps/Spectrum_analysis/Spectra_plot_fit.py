@@ -23,6 +23,11 @@ import customplotting.mscope as cpm
 
 sys.path.append(os.path.abspath('../H5_Pkl'))
 from H5_Pkl import h5_pkl_view
+sys.path.append(os.path.abspath('../Export_Windows'))
+try:
+    from Export_window import ExportFigureWindow
+except:
+    from Export_Windows.Export_window import ExportFigureWindow
 # local modules
 try:
     from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
@@ -497,7 +502,7 @@ class MainWindow(TemplateBaseClass):
             self.ui.result_textBrowser.append(str(e))
     
     def export_window(self):
-        self.export_window = ExportFigureWindow()
+        self.export_window = ExportImages()
         self.export_window.export_fig_signal.connect(self.pub_ready_plot_export)
 
     def pub_ready_plot_export(self):
@@ -901,43 +906,18 @@ class Analyze(Analyze_TemplateBaseClass):
         return win
 
 """Export Images GUI"""
-ui_file_path = (base_path / "export_fig_gui.ui").resolve()
-export_WindowTemplate, export_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
+#ui_file_path = (base_path / "export_fig_gui.ui").resolve()
+#export_WindowTemplate, export_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
 
-class ExportFigureWindow(export_TemplateBaseClass):
+class ExportImages(ExportFigureWindow):
     
     export_fig_signal = QtCore.pyqtSignal()
     
     def __init__(self):
-        export_TemplateBaseClass.__init__(self)
+        ExportFigureWindow.__init__(self)
         
-        self.ui = export_WindowTemplate()
-        self.ui.setupUi(self)
-        self.ui.cmap_comboBox.addItems(['viridis', 'plasma', 'inferno', 'magma', 
-                                        'cividis','Greys', 'Purples', 'Blues', 
-                                        'Greens', 'Oranges', 'Reds', 'YlOrBr', 
-                                        'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu', 
-                                        'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 
-                                        'YlGn', 'binary', 'gist_yarg', 'gist_gray', 
-                                        'gray', 'bone', 'pink', 'spring', 'summer', 
-                                        'autumn', 'winter', 'cool', 'Wistia', 'hot', 
-                                        'afmhot', 'gist_heat', 'copper', 'rainbow', 'jet'])
         self.ui.dataChannel_comboBox.addItems(['Raw', 'Fitted'])
-        self.ui.exportFig_pushButton.clicked.connect(self.export)
-#        self.ui.legend_checkBox.stateChanged.connect(self.legend_title)
-        self.show()
-    
-#    def legend_title(self):
-#        if self.ui.legend_checkBox.isChecked():
-#            self.ui.legend1_lineEdit.setEnabled(True)
-#            self.ui.legend2_lineEdit.setEnabled(True)
-#        else:
-#            self.ui.legend1_lineEdit.setEnabled(False)
-#            self.ui.legend2_lineEdit.setEnabled(False)
-    
-    def export(self):
-        self.export_fig_signal.emit()
-        self.close()
+
     
 """Run the Main Window"""    
 def run():
