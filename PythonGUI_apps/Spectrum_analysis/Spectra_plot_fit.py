@@ -911,8 +911,6 @@ class Analyze(Analyze_TemplateBaseClass):
 
 class ExportImages(ExportFigureWindow):
     
-    export_fig_signal = QtCore.pyqtSignal()
-    
     def __init__(self):
         ExportFigureWindow.__init__(self)
         
