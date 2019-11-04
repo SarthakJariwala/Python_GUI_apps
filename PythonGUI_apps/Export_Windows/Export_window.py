@@ -32,8 +32,15 @@ class ExportFigureWindow(export_TemplateBaseClass):
                                         'autumn', 'winter', 'cool', 'Wistia', 'hot', 
                                         'afmhot', 'gist_heat', 'copper', 'rainbow', 'jet'])
 #        self.ui.dataChannel_comboBox.addItems(['Raw', 'Fitted'])
+        self.ui.cbar_checkBox.stateChanged.connect(self.cbar_title_state)
         self.ui.exportFig_pushButton.clicked.connect(self.export)
         self.show()
+    
+    def cbar_title_state(self):
+        if self.ui.cbar_checkBox.isChecked():
+            self.ui.cbar_label.setEnabled(True)
+        else:
+            self.ui.cbar_label.setEnabled(False)
     
     def export(self):
         self.export_fig_signal.emit()

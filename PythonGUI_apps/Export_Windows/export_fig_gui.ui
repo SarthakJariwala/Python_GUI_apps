@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
-    <height>317</height>
+    <width>572</width>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -118,6 +118,9 @@
    </item>
    <item row="8" column="0" colspan="2">
     <widget class="QLineEdit" name="cbar_label">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="font">
       <font>
        <pointsize>15</pointsize>
@@ -146,6 +149,18 @@
      </property>
      <property name="text">
       <string>Reversed</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QCheckBox" name="cbar_checkBox">
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </item>
