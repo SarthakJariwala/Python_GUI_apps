@@ -269,7 +269,7 @@ class MainWindow(TemplateBaseClass):
         self.lifetime_window.ui.Result_textBrowser.setText("Data successfully loaded from FLIM analysis.")
     
     def export_window(self):
-        self.export_window = ExportFigurewindow()
+        self.export_window = ExportFigureWindow()
         self.export_window.export_fig_signal.connect(self.save_intensities_image)
 
     def save_intensities_image(self):

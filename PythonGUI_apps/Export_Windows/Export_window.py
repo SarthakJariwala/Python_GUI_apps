@@ -11,18 +11,18 @@ from pyqtgraph.Qt import QtCore, QtGui
 """Export Images GUI"""
 base_path = Path(__file__).parent
 ui_file_path = (base_path / "export_fig_gui.ui").resolve()
-export_WindowTemplate, export_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
+exportFig_WindowTemplate, exportFig_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
 
-class ExportFigureWindow(export_TemplateBaseClass):
+class ExportFigureWindow(exportFig_TemplateBaseClass):
     
     export_fig_signal = QtCore.pyqtSignal()
     
     def __init__(self):
-        export_TemplateBaseClass.__init__(self)
+        exportFig_TemplateBaseClass.__init__(self)
         
-        self.ui = export_WindowTemplate()
+        self.ui = exportFig_WindowTemplate()
         self.ui.setupUi(self)
-        self.ui.cmap_comboBox.addItems(['viridis', 'plasma', 'inferno', 'magma', 
+        self.ui.cmap_comboBox.addItems(['viridis', 'plasma', 'inferno', 'magma',
                                         'cividis','Greys', 'Purples', 'Blues', 
                                         'Greens', 'Oranges', 'Reds', 'YlOrBr', 
                                         'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu', 
@@ -31,7 +31,6 @@ class ExportFigureWindow(export_TemplateBaseClass):
                                         'gray', 'bone', 'pink', 'spring', 'summer', 
                                         'autumn', 'winter', 'cool', 'Wistia', 'hot', 
                                         'afmhot', 'gist_heat', 'copper', 'rainbow', 'jet'])
-#        self.ui.dataChannel_comboBox.addItems(['Raw', 'Fitted'])
         self.ui.cbar_checkBox.stateChanged.connect(self.cbar_title_state)
         self.ui.exportFig_pushButton.clicked.connect(self.export)
         self.show()
