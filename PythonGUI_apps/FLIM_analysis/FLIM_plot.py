@@ -14,9 +14,14 @@ import customplotting.mscope as cpm
 sys.path.append(os.path.abspath('../Lifetime_analysis'))
 sys.path.append(os.path.abspath('../Spectrum_analysis'))
 sys.path.append(os.path.abspath('../H5_Pkl'))
+sys.path.append(os.path.abspath('../Export_Windows'))
 from Lifetime_analysis import Lifetime_plot_fit
 from Spectrum_analysis import Spectra_plot_fit
 from H5_Pkl import h5_pkl_view
+try:
+    from Export_window import ExportFigureWindow
+except:
+    from Export_Windows.Export_window import ExportFigureWindow
 # local modules
  
 pg.mkQApp()
@@ -50,7 +55,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.load_scan_pushButton.clicked.connect(self.open_file)
         self.ui.plot_intensity_sums_pushButton.clicked.connect(self.plot_intensity_sums)
         self.ui.plot_raw_hist_data_pushButton.clicked.connect(self.plot_raw_scan)
-        self.ui.save_intensities_image_pushButton.clicked.connect(self.save_intensities_image)
+        self.ui.save_intensities_image_pushButton.clicked.connect(self.export_window)
         self.ui.save_intensities_array_pushButton.clicked.connect(self.save_intensities_array)
         self.ui.compare_checkBox.stateChanged.connect(self.switch_compare)
         self.ui.intensity_sums_viewBox.roi.sigRegionChanged.connect(self.line_profile_update_plot)
@@ -262,6 +267,10 @@ class MainWindow(TemplateBaseClass):
         self.lifetime_window.opened_from_flim = True
         self.lifetime_window.hist_data_from_flim = np.asarray(self.get_raw_hist_curve(0))
         self.lifetime_window.ui.Result_textBrowser.setText("Data successfully loaded from FLIM analysis.")
+    
+    def export_window(self):
+        self.export_window = ExportFigurewindow()
+        self.export_window.export_fig_signal.connect(self.save_intensities_image)
 
     def save_intensities_image(self):
         try:
@@ -269,7 +278,15 @@ class MainWindow(TemplateBaseClass):
             filename_ext = os.path.basename(self.filename[0])
             filename = os.path.splitext(filename_ext)[0] #get filename without extension
             save_to = folder + "\\" + filename + "_intensity_sums.png"
-            cpm.plot_confocal(self.intensity_sums, FLIM_adjust=False, stepsize=np.abs(self.x_step_size))
+            if self.export_window.ui.reverse_checkBox.isChecked():
+                colormap = str(self.export_window.ui.cmap_comboBox.currentText())+"_r"
+            else:
+                colormap = str(self.export_window.ui.cmap_comboBox.currentText())
+            if self.export_window.ui.cbar_checkBox.isChecked():
+                label = str(self.export_window.ui.cbar_label.text())
+            else:
+                label = "PL Intensity (a.u.)"
+            cpm.plot_confocal(self.intensity_sums, FLIM_adjust=False, stepsize=np.abs(self.x_step_size),cmap=colormap, cbar_label=label,vmin=self.export_window.ui.vmin_spinBox.value(), vmax=self.export_window.ui.vmax_spinBox.value())
             plt.savefig(save_to, bbox_inches='tight', dpi=300)
         except Exception as e:
             print(format(e))
