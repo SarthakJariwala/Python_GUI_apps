@@ -476,12 +476,11 @@ class MainWindow(TemplateBaseClass):
         self.thickness = self.ui.thickness_spinBox.value()*1e-7 # convert to cm
         self.diffusion_coeffecient = self.ui.diffusion_coefficient_spinBox.value() # in cm2/s
         
-        if self.ui.srv1_srv2_checkBox.isChecked():
-            self.srv = self.thickness / (2*((1e-9*self.surface_lifetime) - ((1/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) ))
-        else:
-            self.srv = self.thickness / ((1e-9*self.surface_lifetime) - ((4/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) )
+        self.srv1_srv2_equal = self.thickness / (2*((1e-9*self.surface_lifetime) - ((1/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) ))
+        self.srv1_zero = self.thickness / ((1e-9*self.surface_lifetime) - ((4/self.diffusion_coeffecient)*((self.thickness/np.pi)**2)) )
         
-        self.ui.srv_label.setText(str(self.srv))
+        self.ui.srv1_srv2_equal_label.setText(str(self.srv1_srv2_equal))
+        self.ui.srv1_zero_label.setText(str(self.srv1_zero))
 
     def get_srv_string(self):
         """ Get info from SRV Calculation groupbox as string """
@@ -490,12 +489,13 @@ class MainWindow(TemplateBaseClass):
                 + "\nBulk Lifetime (ns): " + str(self.ui.bulk_lifetime_spinBox.value()) \
                 + "\nThickness (nm): " + str(self.ui.thickness_spinBox.value()) \
                 + "\nDiffusion Coefficient (cm2/s): " + str(self.ui.diffusion_coefficient_spinBox.value())
-        if self.ui.srv1_srv2_checkBox.isChecked():
-            srv_string += "\nSRV1 = SRV2"
-        else:
-            srv_string += "\nSRV1 = 0"
-        srv_string += "\nSurface Lifetime (ns): " + self.ui.surface_lifetime_label.text() \
-                + "\nSRV (cm/s): " + self.ui.srv_label.text()
+        srv_string += "\nSurface Lifetime (ns): " + self.ui.surface_lifetime_label.text()
+        
+        srv_string += "\nSRV1 = SRV2"\
+                + "\nSRV (cm/s): " + self.ui.srv1_srv2_equal_label.text()
+        
+        srv_string += "\nSRV1 = 0"\
+                + "\nSRV (cm/s): " + self.ui.srv1_zero_label.text()
         return srv_string
     
     def export_data(self):
@@ -530,8 +530,10 @@ class MainWindow(TemplateBaseClass):
             plt.figure(figsize=(8,6))
             plt.tick_params(direction='out', length=8, width=3.5)
             if self.ui.save_w_fit_checkBox.isChecked():
+                print("inside if")
                 plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]),self.exportplotwindow.ui.traceColor_comboBox.currentText())
                 plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),self.exportplotwindow.ui.fitColor_comboBox.currentText())
+                print("finished plotting")
                 if self.exportplotwindow.ui.legend_checkBox.isChecked():
                     plt.legend([self.exportplotwindow.ui.legend1_lineEdit.text(),self.exportplotwindow.ui.legend2_lineEdit.text()])
             else:
@@ -544,7 +546,7 @@ class MainWindow(TemplateBaseClass):
             plt.ylabel("Intensity (norm.)", fontsize=20, fontweight='bold')
             plt.tight_layout()
             plt.xlim([self.exportplotwindow.ui.lowerX_spinBox.value(),self.exportplotwindow.ui.upperX_spinBox.value()])
-            plt.ylim([10**(self.exportplotwindow.ui.lowerY_spinBox.value()),self.exportplotwindow.ui.upperY_doubleSpinBox.value()])
+            plt.ylim([self.exportplotwindow.ui.lowerY_spinBox.value(),self.exportplotwindow.ui.upperY_doubleSpinBox.value()])
             
             plt.savefig(filename[0],bbox_inches='tight', dpi=300)
             plt.close()
