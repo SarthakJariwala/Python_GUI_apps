@@ -270,6 +270,8 @@ class MainWindow(TemplateBaseClass):
     
     def export_window(self):
         self.export_window = ExportFigureWindow()
+        self.export_window.ui.vmin_spinBox.setValue(np.min(self.intensity_sums))
+        self.export_window.ui.vmax_spinBox.setValue(np.max(self.intensity_sums))
         self.export_window.export_fig_signal.connect(self.save_intensities_image)
 
     def save_intensities_image(self):
@@ -286,7 +288,10 @@ class MainWindow(TemplateBaseClass):
                 label = str(self.export_window.ui.cbar_label.text())
             else:
                 label = "PL Intensity (a.u.)"
-            cpm.plot_confocal(self.intensity_sums, FLIM_adjust=False, stepsize=np.abs(self.x_step_size),cmap=colormap, cbar_label=label,vmin=self.export_window.ui.vmin_spinBox.value(), vmax=self.export_window.ui.vmax_spinBox.value())
+            cpm.plot_confocal(self.intensity_sums, FLIM_adjust=False, 
+                              stepsize=np.abs(self.x_step_size),cmap=colormap, 
+                              cbar_label=label, vmin=self.export_window.ui.vmin_spinBox.value(), 
+                              vmax=self.export_window.ui.vmax_spinBox.value())
             plt.savefig(save_to, bbox_inches='tight', dpi=300)
         except Exception as e:
             print(format(e))
