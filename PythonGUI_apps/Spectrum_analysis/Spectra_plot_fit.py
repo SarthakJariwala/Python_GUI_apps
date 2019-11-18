@@ -602,8 +602,8 @@ class MainWindow(TemplateBaseClass):
             self.intensities = data['Intensities'][()] #get dataset values
             self.wavelengths = data['Wavelengths'][()]
 
-        self.numb_x_pixels = int(self.x_scan_size/self.x_step_size)
-        self.numb_y_pixels = int(self.y_scan_size/self.y_step_size)
+        self.numb_x_pixels = int(np.ceil(self.x_scan_size/self.x_step_size))
+        self.numb_y_pixels = int(np.ceil(self.y_scan_size/self.y_step_size))
 
         """Open param window and get peak center range values and assign it to variables to use later"""
     # def configure_scan_params(self):
