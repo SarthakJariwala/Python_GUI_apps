@@ -78,7 +78,7 @@ class MainWindow(TemplateBaseClass):
     def open_data_file(self):
         try:
             self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
-            self.data = np.loadtxt(self.filename[0], delimiter = ',', skiprows = 1)
+            self.data = np.loadtxt(self.filename[0], delimiter = ',', skiprows = 2)
             self.Wavelength = self.data[:,0] # in nm
             self.Absorbance = self.data[:,1]
         except Exception as err:
