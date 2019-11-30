@@ -105,8 +105,8 @@ class MainWindow(TemplateBaseClass):
                 if self.ui.fourth_orderpoly_radioButton.isChecked():
                     p = (np.polyfit(self.Wavelength[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)],
                                                     self.Absorbance[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)],4))
-                    p_val = np.polyval(p,self.Wavelength)
-                    self.plotted_absorbance = self.Absorbance - p_val
+                    p_val = np.polyval(p,self.Wavelength[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)])
+                    self.plotted_absorbance[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)] = self.Absorbance[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)] - p_val
                 elif self.ui.mean_radioButton.isChecked():
                     self.plotted_absorbance = self.Absorbance - np.mean(self.Absorbance[(self.Wavelength>self.correction_region_min) & (self.Wavelength<self.correction_region_max)])
             self.absorbance_plot.plot(self.Wavelength, self.plotted_absorbance, pen='r', clear=True)
