@@ -528,10 +528,10 @@ class MainWindow(TemplateBaseClass):
                     param_selection = str(self.ui.comboBox.currentText())
                     if param_selection == 'pk_pos': label = 'PL Peak Position (n.m.)'
                     elif param_selection == 'fwhm': label = 'PL FWHM (n.m.)'
-                    cpm.plot_confocal(self.img, stepsize = data['Scan Parameters']['X step size (um)'], cmap=colormap, cbar_label=label,
+                    cpm.plot_confocal(self.img, FLIM_adjust = False, stepsize = data['Scan Parameters']['X step size (um)'], cmap=colormap, cbar_label=label,
                                       vmin=self.export_window.ui.vmin_spinBox.value(), vmax=self.export_window.ui.vmax_spinBox.value())
                 elif str(self.export_window.ui.dataChannel_comboBox.currentText()) == "Raw":
-                    cpm.plot_confocal(self.sums, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap=colormap, 
+                    cpm.plot_confocal(self.sums, FLIM_adjust = False, figsize=(10,10), stepsize = data['Scan Parameters']['X step size (um)'], cmap=colormap, 
                                       vmin=self.export_window.ui.vmin_spinBox.value(), vmax=self.export_window.ui.vmax_spinBox.value())
                 plt.tick_params(direction='out', length=8, width=3.5)
                 plt.tight_layout()
