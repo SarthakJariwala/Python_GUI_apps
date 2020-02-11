@@ -432,6 +432,10 @@ class MainWindow(TemplateBaseClass):
                         "\ntau2 = %.5f ns"
                         "\nnoise = %.5f counts" %(bestfit_params[0], bestfit_params[1], bestfit_params[2], bestfit_params[3], bestfit_params[4]))
                     #TODO - once tau_avg implemented, set average lifetime spinbox to tau_avg value
+                    if bestfit_params[3] > bestfit_params[1]:
+                        self.ui.average_lifetime_spinBox.setValue(bestfit_params[3])
+                    elif bestfit_params[1] > bestfit_params[3]:
+                        self.ui.average_lifetime_spinBox.setValue(bestfit_params[1])
 
                 elif fit_func == "Single Exponential": #single exponential tab
                     a_bounds = (self.ui.se_a_min_spinBox.value(), self.ui.se_a_max_spinBox.value())
