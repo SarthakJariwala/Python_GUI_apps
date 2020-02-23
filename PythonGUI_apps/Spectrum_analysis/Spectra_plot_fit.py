@@ -649,18 +649,32 @@ class MainWindow(TemplateBaseClass):
             param_selection = str(self.ui.comboBox.currentText())
             self.img = np.reshape(eval(param_selection), newshape)
 
-            if self.ui.use_raw_scan_settings.isChecked():
-                self.ui.fit_scan_viewbox.setImage(self.img, scale=
-                                                  (self.x_step_size,
-                                                   self.y_step_size))
-                scale = pg.ScaleBar(size=2,suffix='um')
-                scale.setParentItem(self.ui.fit_scan_viewbox.view)
-                scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-                self.ui.fit_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
-            else:
-                self.ui.fit_scan_viewbox.setImage(self.img)
+            if num_y == 1:
+                x = np.linspace(0, self.x_scan_size, num_x)
+                self.graph_layout=pg.GraphicsLayoutWidget()
+                self.plot = self.graph_layout.addPlot(title="Line Scan")
+                self.plot.plot(x, self.img[:,0], pen="r")
+                self.graph_layout.show()
+            elif num_x == 1:
+                y = np.linspace(0, self.y_scan_size, num_y)
+                self.graph_layout=pg.GraphicsLayoutWidget()
+                self.plot = self.graph_layout.addPlot(title="Line Scan")
+                self.ui.plot.plot(y, self.img[0,:], pen="r")
+                self.graph_layout.show()
             
-            self.ui.fit_scan_viewbox.view.invertY(False)
+            else:
+                if self.ui.use_raw_scan_settings.isChecked():
+                    self.ui.fit_scan_viewbox.setImage(self.img, scale=
+                                                    (self.x_step_size,
+                                                    self.y_step_size))
+                    scale = pg.ScaleBar(size=2,suffix='um')
+                    scale.setParentItem(self.ui.fit_scan_viewbox.view)
+                    scale.anchor((1, 1), (1, 1), offset=(-30, -30))
+                    self.ui.fit_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+                else:
+                    self.ui.fit_scan_viewbox.setImage(self.img)
+                
+                self.ui.fit_scan_viewbox.view.invertY(False)
 
         except Exception as e:
             self.ui.result_textBrowser2.append(str(e))
