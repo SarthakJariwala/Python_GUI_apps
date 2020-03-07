@@ -69,11 +69,11 @@ class MainWindow(TemplateBaseClass):
             self.filename = QtWidgets.QFileDialog.getOpenFileName(self)
             #self.data = np.loadtxt(self.filename[0], delimiter = '\t', skiprows = 1)
             if ".txt" in self.filename[0]:
-                self.data = np.loadtxt(self.filename[0], delimiter = '\t', skiprows = 1, usecols = (0,1,2,3))
+                self.data = np.loadtxt(self.filename[0], delimiter = '\t', skiprows = 1)
             elif ".csv" in self.filename[0]:
                 self.data = np.loadtxt(self.filename[0], delimiter = ',', skiprows = 1)
             elif ".qua" in self.filename[0]:
-                self.data = np.genfromtxt(self.filename[0], delimiter = '\t', skip_header = 12, usecols = (0,1,2,3))
+                self.data = np.genfromtxt(self.filename[0], delimiter = '\t', skip_header = 28)
             self.cs_window = ColSelectionWindow(self.data)
             self.cs_window.col_selection_signal.connect(self.open_with_col_selection)
             self.nm = np.copy(self.data[:,0])
@@ -118,7 +118,7 @@ class MainWindow(TemplateBaseClass):
 
     def plot_intensity(self):
         try:
-            self.plot.plot(self.nm, self.inpath_data)
+            self.plot.plot(self.nm, self.inpath_data, pen='r')
             self.plot.addItem(self.laser_region, ignoreBounds=True)
             self.plot.addItem(self.emission_region, ignoreBounds=True)
         except Exception as err:
