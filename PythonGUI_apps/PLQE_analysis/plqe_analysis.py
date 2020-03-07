@@ -72,7 +72,7 @@ class MainWindow(TemplateBaseClass):
                 self.data = np.loadtxt(self.filename[0], delimiter = '\t', skiprows = 1)
             elif ".csv" in self.filename[0]:
                 self.data = np.loadtxt(self.filename[0], delimiter = ',', skiprows = 1)
-            elif ".qua" in self.filename[0]:
+            elif ".qua" in self.filename[0]:#TODO: Include a Pop-up window for input for skipping header
                 self.data = np.genfromtxt(self.filename[0], delimiter = '\t', skip_header = 28)
             self.cs_window = ColSelectionWindow(self.data)
             self.cs_window.col_selection_signal.connect(self.open_with_col_selection)
