@@ -224,9 +224,11 @@ class MainWindow(TemplateBaseClass):
     def open_pkl_file(self):
         """ Open pkl file to convert to txt """
         try:
-            self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileName(self)
-            self.filename_for_viewer_launch = self.pkl_to_convert[0]
-            self.launch_h5_pkl_viewer()
+            self.pkl_to_convert = QtWidgets.QFileDialog.getOpenFileNames(self)
+            files = self.pkl_to_convert[0]
+            for i in range(len(files)):
+                self.filename_for_viewer_launch = files[i]
+                self.launch_h5_pkl_viewer()
         except:
             pass
     
@@ -792,59 +794,62 @@ class MainWindow(TemplateBaseClass):
     """ Pkl conversion functions """
     def pkl_data_to_txt(self):
         """ Get data from ocean optics scan pkl file, convert to txt"""
-        folder = os.path.dirname(self.pkl_to_convert[0])
-        filename_ext = os.path.basename(self.pkl_to_convert[0])
-        filename = os.path.splitext(filename_ext)[0] #get filename without extension
-        pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
-
-        txt_file = np.zeros(shape=(2048,pkl_file['Intensities'].shape[0] + 1))
-
-        data_array = pkl_file['Intensities']
-        data_array = np.transpose(data_array)
-        wavelength = pkl_file['Wavelengths']
-
-        txt_file[:,0] = wavelength
-
-        for i in range(pkl_file['Intensities'].shape[0]):
-            txt_file[:,i+1] = data_array[:,i]
-
-        np.savetxt(folder +"/"+ filename +"_data.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="wavelength(nm), Intensities at different points")
+        for i in range(len(self.pkl_to_convert[0])):
+            folder = os.path.dirname(self.pkl_to_convert[0][i])
+            filename_ext = os.path.basename(self.pkl_to_convert[0][i])
+            filename = os.path.splitext(filename_ext)[0] #get filename without extension
+            pkl_file = pickle.load(open(self.pkl_to_convert[0][i], 'rb'))
+    
+            txt_file = np.zeros(shape=(2048,pkl_file['Intensities'].shape[0] + 1))
+    
+            data_array = pkl_file['Intensities']
+            data_array = np.transpose(data_array)
+            wavelength = pkl_file['Wavelengths']
+    
+            txt_file[:,0] = wavelength
+    
+            for i in range(pkl_file['Intensities'].shape[0]):
+                txt_file[:,i+1] = data_array[:,i]
+    
+            np.savetxt(folder +"/"+ filename +"_data.txt", txt_file, fmt = '%.2f', delimiter= "\t", header="wavelength(nm), Intensities at different points")
 
     def pkl_params_to_txt(self):
         """ Get scan parameters from ocean optics scan pkl file, convert to txt """
-        folder = os.path.dirname(self.pkl_to_convert[0])
-        filename_ext = os.path.basename(self.pkl_to_convert[0])
-        filename = os.path.splitext(filename_ext)[0] #get filename without extension
-        pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
-
-        pkl_scan = pkl_file['Scan Parameters']
-        pkl_oo = pkl_file['OceanOptics Parameters']
-        
-        param_list = []
-        param_list.append(['X scan start (um)', 'Y scan start (um)', 'X scan size (um)', 'Y scan size (um)',
-            'X step size (um)', 'Y step size (um)', 'Integration Time (ms)', 'Scans to Average', 'Correct Dark Counts']) #list of param names
-        param_list.append([ pkl_scan['X scan start (um)'], pkl_scan['Y scan start (um)'], pkl_scan['X scan size (um)'],
-            pkl_scan['Y scan size (um)'], pkl_scan['X step size (um)'], pkl_scan['Y step size (um)'],
-            pkl_oo['Integration Time (ms)'], pkl_oo['Scans Averages'], pkl_oo['Correct Dark Counts'] ]) #list of param values
-
-        param_list = list(zip(*param_list)) #transpose so names and values are side-by-side
-        save_to = folder +"/"+ filename +"_scan_parameters.txt"
-        
-        with open(save_to, 'w') as f:
-            for item in param_list:
-                f.write("%s\t" % str(item[0])) #write name
-                f.write("%s\n" % str(item[1])) #write value
+        for i in range(len(self.pkl_to_convert[0])):
+            folder = os.path.dirname(self.pkl_to_convert[0][i])
+            filename_ext = os.path.basename(self.pkl_to_convert[0][i])
+            filename = os.path.splitext(filename_ext)[0] #get filename without extension
+            pkl_file = pickle.load(open(self.pkl_to_convert[0][i], 'rb'))
+    
+            pkl_scan = pkl_file['Scan Parameters']
+            pkl_oo = pkl_file['OceanOptics Parameters']
+            
+            param_list = []
+            param_list.append(['X scan start (um)', 'Y scan start (um)', 'X scan size (um)', 'Y scan size (um)',
+                'X step size (um)', 'Y step size (um)', 'Integration Time (ms)', 'Scans to Average', 'Correct Dark Counts']) #list of param names
+            param_list.append([ pkl_scan['X scan start (um)'], pkl_scan['Y scan start (um)'], pkl_scan['X scan size (um)'],
+                pkl_scan['Y scan size (um)'], pkl_scan['X step size (um)'], pkl_scan['Y step size (um)'],
+                pkl_oo['Integration Time (ms)'], pkl_oo['Scans Averages'], pkl_oo['Correct Dark Counts'] ]) #list of param values
+    
+            param_list = list(zip(*param_list)) #transpose so names and values are side-by-side
+            save_to = folder +"/"+ filename +"_scan_parameters.txt"
+            
+            with open(save_to, 'w') as f:
+                for item in param_list:
+                    f.write("%s\t" % str(item[0])) #write name
+                    f.write("%s\n" % str(item[1])) #write value
 
     def pkl_to_h5(self):
         """ Convert raw scan .pkl file to h5 """
-        folder = os.path.dirname(self.pkl_to_convert[0])
-        filename_ext = os.path.basename(self.pkl_to_convert[0])
-        filename = os.path.splitext(filename_ext)[0] #get filename without extension
-        pkl_file = pickle.load(open(self.pkl_to_convert[0], 'rb'))
-
-        h5_filename = folder + "/" + filename + ".h5"
-        h5_file = h5py.File(h5_filename, "w")
-        self.traverse_dict_into_h5(pkl_file, h5_file)
+        for i in range(len(self.pkl_to_convert[0])):                
+            folder = os.path.dirname(self.pkl_to_convert[0][i])
+            filename_ext = os.path.basename(self.pkl_to_convert[0][i])
+            filename = os.path.splitext(filename_ext)[0] #get filename without extension
+            pkl_file = pickle.load(open(self.pkl_to_convert[0][i], 'rb'))
+    
+            h5_filename = folder + "/" + filename + ".h5"
+            h5_file = h5py.File(h5_filename, "w")
+            self.traverse_dict_into_h5(pkl_file, h5_file)
 
     def traverse_dict_into_h5(self, dictionary, h5_output):
         """ 
