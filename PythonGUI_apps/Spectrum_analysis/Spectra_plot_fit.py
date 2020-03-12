@@ -228,7 +228,8 @@ class MainWindow(TemplateBaseClass):
             files = self.pkl_to_convert[0]
             for i in range(len(files)):
                 self.filename_for_viewer_launch = files[i]
-                self.launch_h5_pkl_viewer()
+                if self.ui.launch_data_viewer_checkBox_2.isChecked():
+                    self.launch_h5_pkl_viewer()
         except:
             pass
     
@@ -661,22 +662,24 @@ class MainWindow(TemplateBaseClass):
                 y = np.linspace(0, self.y_scan_size, num_y)
                 self.graph_layout=pg.GraphicsLayoutWidget()
                 self.plot = self.graph_layout.addPlot(title="Line Scan")
-                self.ui.plot.plot(y, self.img[0,:], pen="r")
+                self.plot.plot(y, self.img[0,:], pen="r")
                 self.graph_layout.show()
             
             else:
+                self.fit_scan_viewbox = pg.ImageView()
                 if self.ui.use_raw_scan_settings.isChecked():
-                    self.ui.fit_scan_viewbox.setImage(self.img, scale=
+                    self.fit_scan_viewbox.setImage(self.img, scale=
                                                     (self.x_step_size,
                                                     self.y_step_size))
                     scale = pg.ScaleBar(size=2,suffix='um')
-                    scale.setParentItem(self.ui.fit_scan_viewbox.view)
+                    scale.setParentItem(self.fit_scan_viewbox.view)
                     scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-                    self.ui.fit_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+                    self.fit_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
                 else:
-                    self.ui.fit_scan_viewbox.setImage(self.img)
+                    self.fit_scan_viewbox.setImage(self.img)
                 
-                self.ui.fit_scan_viewbox.view.invertY(False)
+                self.fit_scan_viewbox.view.invertY(False)
+                self.fit_scan_viewbox.show()
 
         except Exception as e:
             self.ui.result_textBrowser2.append(str(e))
@@ -687,18 +690,20 @@ class MainWindow(TemplateBaseClass):
             # TODO test line scan plots
 
             intensities = self.intensities.T #this is only there because of how we are saving the data in the app
-            intensities = np.reshape(intensities, newshape=(2048,self.numb_x_pixels, self.numb_y_pixels)) 
-            self.ui.raw_scan_viewbox.setImage(intensities, scale=
+            intensities = np.reshape(intensities, newshape=(2048,self.numb_x_pixels, self.numb_y_pixels))
+            self.raw_scan_viewbox = pg.ImageView() 
+            self.raw_scan_viewbox.setImage(intensities, scale=
                                                   (self.x_step_size,
                                                    self.y_step_size), xvals=self.wavelengths)
             
             #roi_plot = self.ui.raw_scan_viewBox.getRoiPlot()
             #roi_plot.plot(data['Wavelengths'], intensities)
-            self.ui.raw_scan_viewbox.view.invertY(False)
+            self.raw_scan_viewbox.view.invertY(False)
             scale = pg.ScaleBar(size=2,suffix='um')
-            scale.setParentItem(self.ui.raw_scan_viewbox.view)
+            scale.setParentItem(self.raw_scan_viewbox.view)
             scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-            self.ui.raw_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+            self.raw_scan_viewbox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+            self.raw_scan_viewbox.show()
             
         except Exception as e:
             self.ui.result_textBrowser2.append(str(e))
@@ -711,16 +716,18 @@ class MainWindow(TemplateBaseClass):
             
             sums = np.sum(self.intensities, axis=-1)
             self.sums = np.reshape(sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
+            self.intensity_sums_viewBox = pg.ImageView()
             
-            self.ui.intensity_sums_viewBox.setImage(self.sums, scale=
+            self.intensity_sums_viewBox.setImage(self.sums, scale=
                                                   (self.x_step_size,
                                                    self.y_step_size))
-            self.ui.intensity_sums_viewBox.view.invertY(False)
+            self.intensity_sums_viewBox.view.invertY(False)
             
             scale = pg.ScaleBar(size=2,suffix='um')
-            scale.setParentItem(self.ui.intensity_sums_viewBox.view)
+            scale.setParentItem(self.intensity_sums_viewBox.view)
             scale.anchor((1, 1), (1, 1), offset=(-30, -30))
-            self.ui.intensity_sums_viewBox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+            self.intensity_sums_viewBox.view.sigRangeChanged.connect(lambda: updateDelay(scale, 10))
+            self.intensity_sums_viewBox.show()
 
         except Exception as e:
             self.ui.result_textBrowser2.append(str(e))
