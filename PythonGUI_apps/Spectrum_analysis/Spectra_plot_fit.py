@@ -243,6 +243,11 @@ class MainWindow(TemplateBaseClass):
         if self.fit_scan_file is None:
             self.open_fit_scan_file()
         
+        #result_no = int(self.ui.result_spinBox.value())
+        #self.matplotlibwidget = MatplotlibWidget(size=(12,8), dpi=300)
+        #self.fit_scan_file['result_'+str(0)].plot(fig=self.matplotlibwidget.getFigure().add_subplot(111))
+        #self.matplotlibwidget.draw()
+        #self.matplotlibwidget.show()
         analyze_window = Analyze(scan_fit_file=self.fit_scan_file)
         analyze_window.run()
         
