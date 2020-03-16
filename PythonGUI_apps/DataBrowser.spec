@@ -1,10 +1,10 @@
-# -*- mode: python -*-
+# -*- mode: python ; coding: utf-8 -*-
 
 block_cipher = None
 
 
-a = Analysis(['C:\\Users\\lindat18\\Dropbox\\Ginger_Lab\\Data_Analysis\\PythonGUI_apps\\DataBrowser.py'],
-             pathex=['C:\\Users\\lindat18\\Dropbox\\Ginger_Lab\\Data_Analysis\\PythonGUI_apps'],
+a = Analysis(['DataBrowser.py'],
+             pathex=['E:\\QT_projects\\Python_GUI_apps\\PythonGUI_apps'],
              binaries=[],
              datas=[],
              hiddenimports=['ipykernel.datapub'],
@@ -33,4 +33,5 @@ coll = COLLECT(exe,
                a.datas,
                strip=False,
                upx=True,
+               upx_exclude=[],
                name='DataBrowser')
