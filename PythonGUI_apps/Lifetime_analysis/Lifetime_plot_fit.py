@@ -534,6 +534,9 @@ class MainWindow(TemplateBaseClass):
         self.exportplotwindow.export_fig_signal.connect(self.pub_ready_plot_export)
 
     def pub_ready_plot_export(self):
+        #TODO - get all curves from the plotwidget
+        #item = self.ui.plot.listDataItems()[0]
+        #print(self.ui.plot.getData(self))
         try:
             filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
             
