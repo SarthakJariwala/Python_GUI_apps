@@ -6,7 +6,7 @@ Created on Fri Apr  5 15:52:05 2019
 """
 
 import picoharp_phd
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 #import sys
 
@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 
 def read_picoharp_phd(datafile):
-    parser = picoharp.PicoharpParser(datafile)
+    parser = picoharp_phd.PicoharpParser(datafile)
     return parser
 
 #def phd_to_csv(datafile, return_df = False):
@@ -40,7 +40,7 @@ def smooth(curve, boxwidth):
 
 def get_x_y(curve_no, parser, smooth_trace = False, boxwidth = 3):
     
-    assert type(parser) == picoharp.PicoharpParser, 'must be picoharp parser'
+    assert type(parser) == picoharp_phd.PicoharpParser, 'must be picoharp parser'
     res, curve = parser.get_curve(curve_no)
     time_window = int(np.floor(parser.get_time_window_in_ns(curve_no)))
     curve = curve[0:time_window]
