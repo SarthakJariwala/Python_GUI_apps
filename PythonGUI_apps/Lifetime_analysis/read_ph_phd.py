@@ -5,7 +5,10 @@ Created on Fri Apr  5 15:52:05 2019
 @author: Sarthak
 """
 
-import picoharp_phd
+try:
+    from Lifetime_analysis import picoharp_phd
+except:
+    import picoharp_phd
 import numpy as np
 import matplotlib.pyplot as plt
 #import sys
