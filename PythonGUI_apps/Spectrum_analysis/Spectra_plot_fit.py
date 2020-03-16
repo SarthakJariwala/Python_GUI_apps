@@ -92,6 +92,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.fit_scan_pushButton.clicked.connect(self.fit_and_plot_scan)
         # self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
+        self.ui.add_to_mem_pushButton.clicked.connect(self.add_trace_to_mem)
         self.ui.export_single_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
         self.ui.export_scan_figure_pushButton.clicked.connect(self.export_window)
         self.ui.analyze_spectra_fits_pushButton.clicked.connect(self.analyze_spectra_fits)
@@ -133,6 +134,13 @@ class MainWindow(TemplateBaseClass):
 
         #container for data to append to txt file
         self.data_list = []
+
+        #for adding traces to memory for plotting/exporting all at once
+        self.x_mem = []
+        self.y_mem = []
+        self.best_fit_mem = []
+        self.legend = []
+        self.single_spec_fit_called = False
         
         self.show()
     
@@ -364,6 +372,8 @@ class MainWindow(TemplateBaseClass):
             pass
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
         self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
+
+        self.single_spec_fit_called = False
     
     def normalize(self):
         self.y = (self.y) / np.amax(self.y)
@@ -505,6 +515,7 @@ class MainWindow(TemplateBaseClass):
                     self.ui.result_textBrowser.setText(self.result.fit_report())
 
                 self.data_list.append(self.ui.result_textBrowser.toPlainText())
+                self.single_spec_fit_called = True
         
         except Exception as e:
             self.ui.result_textBrowser.append(str(e))
@@ -546,16 +557,24 @@ class MainWindow(TemplateBaseClass):
                 plt.savefig(filename[0],bbox_inches='tight', dpi=300)
                 plt.close()
             except:
-                plt.figure(figsize=(8,6))
-                plt.tick_params(direction='out', length=8, width=3.5)
-                plt.plot(self.x, self.y)
-                plt.plot(self.x, self.result.best_fit,'k')
-                plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
-                plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
-                plt.tight_layout()
-                
-                plt.savefig(filename[0],bbox_inches='tight', dpi=300)
-                plt.close()
+                if self.x_mem == []:
+                    self.ui.result_textBrowser.setText("Add traces to memory first!")
+                else:
+                    plt.figure(figsize=(8,6))
+                    plt.tick_params(direction='out', length=8, width=3.5)
+                    for i in range(len(self.x_mem)):
+                        plt.plot(self.x_mem[i], self.y_mem[i], label=str(self.legend[i]))
+                        if self.single_spec_fit_called == True:
+                            plt.plot(self.x_mem[i], self.best_fit_mem[i],'k')
+                    #plt.plot(self.x, self.y)
+                    #plt.plot(self.x, self.result.best_fit,'k')
+                    plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
+                    plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
+                    plt.legend()
+                    plt.tight_layout()
+                    
+                    plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+                    plt.close()
             
         except AttributeError:
             self.ui.result_textBrowser.setText("Need to fit the data first!")
@@ -580,6 +599,20 @@ class MainWindow(TemplateBaseClass):
 
     def clear_export_data(self):
         self.data_list = []
+        self.x_mem = []
+        self.y_mem = []
+        self.legend = []
+        self.best_fit_mem = []
+
+    def add_trace_to_mem(self):
+        try:
+            self.x_mem.append(self.x)
+            self.y_mem.append(self.y)
+            if self.single_spec_fit_called == True:
+                self.best_fit_mem.append(self.result.best_fit)
+            self.legend.append(self.ui.lineEdit.text())
+        except Exception as e:
+            print(e)
 
 
     """ Scan spectra functions """
