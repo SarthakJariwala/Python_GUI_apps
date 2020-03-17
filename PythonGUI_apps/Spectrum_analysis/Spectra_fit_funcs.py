@@ -23,10 +23,11 @@ class Spectra_Fit(object):
         ref: reference spectrum (both x and y-axis) for background correction
     """
     
-    def __init__(self, data, ref, wlref = None):
+    def __init__(self, data, ref, wlref = None, fit_in_eV = True):
         self.data = data
         self.ref = ref
         self.wlref = wlref
+        self.fit_in_eV = fit_in_eV
         
     def background_correction(self):
         """Return the background corrected spectrum"""
@@ -37,8 +38,10 @@ class Spectra_Fit(object):
         if self.wlref is not None:
             wlref = self.wlref[:,1]
             y = y/wlref
-            
-        # y = y - np.mean(y[(x>600) & (x<700)]) # removing any remaining bckgrnd
+        
+        if self.fit_in_eV is True:
+            x = 1240/x
+
         return [x,y]
 
 class Single_Gaussian(Spectra_Fit):
@@ -87,14 +90,6 @@ class Single_Lorentzian(Spectra_Fit):
         pars = lmodel.guess(y, x=x) # parameters - center, width, height
         result = lmodel.fit(y, pars, x=x, nan_policy='propagate')
         return result
-    
-    # def lorentzian_model_w_lims(self, center_min = None, center_max = None):
-    #     x,y = self.background_correction()
-    #     lmodel = LorentzianModel(prefix = 'l1_') # calling lorentzian model
-    #     pars = lmodel.guess(y, x=x) # parameters - center, width, height
-    #     pars['l1_center'].set(min = center_min, max = center_max)
-    #     result = lmodel.fit(y, pars, x=x, nan_policy='propagate')
-    #     return result
 
     def lorentzian_model_w_lims(self, peak_pos, sigma, min_max_range):
         x,y = self.background_correction()
@@ -155,8 +150,8 @@ class Multi_Gaussian(Spectra_Fit):
     #     self.num_of_gaussians = num_of_gaussians
     #     self.peak_pos = peak_pos
     #     self.min_max_range = min_max_range
-    def __init__(self, data, ref, num_of_gaussians, wlref=None):
-        Spectra_Fit.__init__(self, data, ref, wlref)
+    def __init__(self, data, ref, num_of_gaussians, wlref=None, fit_in_eV = True):
+        Spectra_Fit.__init__(self, data, ref, wlref, fit_in_eV=True)
         self.num_of_gaussians = num_of_gaussians
 
     def gaussian_model(self):
