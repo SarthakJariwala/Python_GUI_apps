@@ -3,6 +3,7 @@ from qtpy import QtWidgets
 import h5py
 import pickle
 import numpy as np
+import lmfit
             
 class PklTreeSearchView(DataBrowserView):
     
@@ -85,11 +86,13 @@ class PklTreeSearchView(DataBrowserView):
                     self.tree_str += indent + "|> <b>{}/</b><br/>".format(print_string)
                 level += 1
                 previous_dict = dictionary[key]
-                self.traverse_dict(dictionary[key], previous_dict, level)
+                self.traverse_dict(dictionary[key], previous_dict, level)                
             else:
                 value = dictionary[key]
                 if type(value) == np.ndarray or type(value)==np.memmap:
                     value = str(value.shape) + " " + str(value.dtype)
+                elif type(value) == lmfit.model.ModelResult:
+                    value = "lmfit.model.ModelResult"
                 # if type(value) == list and len(value) > 5: ##account for data stored in lists
                 #     value = str(np.asarray(value).shape) + " " + str(type(value[0]))
 

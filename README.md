@@ -8,12 +8,14 @@ _**Python is not required to use GLabViz**_ (see **How to use?**)
 The primary users for this Python package application are Ginger Lab members at the University of Washington, Seattle but is licensed under MIT License and open for everyone to use.
 
 ## Includes
+
 * **Fluorescence Lifetime Analysis**
     * Analyze lifetime
     * Fit data with or without IRF
     * Fit with stretched, single, or double exponential functions by diff_ev or fmin_tnc
     * Calculate surface recombination velocity
     * Export graph and fit results
+
 * **Spectra Analysis**
     * Analyze single spectrum
         * Fit with or without background and white light
@@ -26,26 +28,32 @@ The primary users for this Python package application are Ginger Lab members at 
         * Plot fitted scan by pk_pos, fwhm, sigma, or height
         * Export fitted scan
     * .pkl to .txt, .pkl to .h5 converters
+
 * **Fluorescence Lifetime Imaging Microscopy (FLIM) Data Analysis**
     * Load lifetime scans in .h5 or .pkl files
     * Plot histogram intensity sums and analyze PSF
     * Export intensities array and intensities image
     * Plot raw histogram data and analyze lifetime
     * Compare lifetime in two different regions
+
 * **Photluminescence Quantum Efficiency (PLQE) Analysis**
     * Plot PLQE data
     * Calculate PLQE
+    
 * **UV-Vis Data Analysis**
     * Plot UV-Vis data
     * Correct UV-Vis data for scattering
     * Plot Tauc data
     * Calculate bandgap
     * Export UV-Vis and Tauc plots
+
 * **General *H5* View and Plot**
     * Load .h5 file to view file structure
     * Plot datasets as a graph or an image
+    
 * **H5 and PKL File Viewer**
     * Load .h5 or .pkl file to view file structure
+    
 * **Image Analysis**
     * Load image on SPOT or Pixera settings, or specify pixel size
     * Handle RGB and greyscale images 

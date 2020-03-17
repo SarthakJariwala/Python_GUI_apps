@@ -23,24 +23,54 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <layout class="QGridLayout" name="gridLayout_5">
-         <item row="0" column="1" alignment="Qt::AlignRight">
+         <item row="0" column="1">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Scattering Correction</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
           <widget class="QPushButton" name="plot_absorbance_pushButton">
            <property name="text">
             <string>Plot</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="0" alignment="Qt::AlignLeft">
+         <item row="5" column="1">
+          <widget class="QRadioButton" name="fourth_orderpoly_radioButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>4th Order Polynomial</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QPushButton" name="clear_uvvis_pushButton">
+           <property name="text">
+            <string>Clear</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
           <widget class="QCheckBox" name="correct_for_scattering_checkBox">
            <property name="text">
             <string>Correct for scattering</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1" alignment="Qt::AlignRight">
-          <widget class="QPushButton" name="clear_uvvis_pushButton">
+         <item row="3" column="1">
+          <widget class="QRadioButton" name="mean_radioButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
-            <string>Clear</string>
+            <string>Simple Mean</string>
            </property>
           </widget>
          </item>

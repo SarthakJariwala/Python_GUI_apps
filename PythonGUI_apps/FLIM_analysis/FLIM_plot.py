@@ -13,8 +13,15 @@ import customplotting.mscope as cpm
 
 sys.path.append(os.path.abspath('../Lifetime_analysis'))
 sys.path.append(os.path.abspath('../Spectrum_analysis'))
+sys.path.append(os.path.abspath('../H5_Pkl'))
+sys.path.append(os.path.abspath('../Export_Windows'))
 from Lifetime_analysis import Lifetime_plot_fit
 from Spectrum_analysis import Spectra_plot_fit
+from H5_Pkl import h5_pkl_view
+try:
+    from Export_window import ExportFigureWindow
+except:
+    from Export_Windows.Export_window import ExportFigureWindow
 # local modules
  
 pg.mkQApp()
@@ -48,7 +55,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.load_scan_pushButton.clicked.connect(self.open_file)
         self.ui.plot_intensity_sums_pushButton.clicked.connect(self.plot_intensity_sums)
         self.ui.plot_raw_hist_data_pushButton.clicked.connect(self.plot_raw_scan)
-        self.ui.save_intensities_image_pushButton.clicked.connect(self.save_intensities_image)
+        self.ui.save_intensities_image_pushButton.clicked.connect(self.export_window)
         self.ui.save_intensities_array_pushButton.clicked.connect(self.save_intensities_array)
         self.ui.compare_checkBox.stateChanged.connect(self.switch_compare)
         self.ui.intensity_sums_viewBox.roi.sigRegionChanged.connect(self.line_profile_update_plot)
@@ -62,17 +69,30 @@ class MainWindow(TemplateBaseClass):
     def open_file(self):
         """ Open FLIM scan file """
         try:
-            self.filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5)")
+            self.filename = QtWidgets.QFileDialog.getOpenFileName(self, filter="Scan files (*.pkl *.h5 *.txt)")
             if ".pkl" in self.filename[0]:
                 self.flim_scan_file = pickle.load(open(self.filename[0], 'rb'))
                 self.scan_file_type = "pkl"
+                self.launch_h5_pkl_viewer()
+                self.get_data_params()
             elif ".h5" in self.filename[0]:
                 self.flim_scan_file = h5py.File(self.filename[0], 'r')
                 self.scan_file_type = "h5"
-            self.get_data_params()
+                self.launch_h5_pkl_viewer()
+                self.get_data_params()
+            elif ".txt" in self.filename[0]:
+                self.intensity_sums = np.loadtxt(self.filename[0]).T
+                self.stepsize_window = StepSizeWindow()
+                self.stepsize_window.stepsize_signal.connect(self.get_stepsize)
+                self.scan_file_type = "txt"
             # self.pkl_file = pickle.load(open(self.filename[0], 'rb'))
         except Exception as err:
             print(format(err))
+    
+    def launch_h5_pkl_viewer(self):
+        """ Launches H5/PKL viewer to give an insight into the data and its structure"""
+        viewer_window = h5_pkl_view.H5PklView(sys.argv)
+        viewer_window.settings['data_filename'] = self.filename[0]
 
     def import_pkl_to_convert(self):
         """ Open pkl file to convert to h5 """
@@ -81,6 +101,14 @@ class MainWindow(TemplateBaseClass):
             self.ui.result_textBrowser.append("Done Loading - .pkl to convert")
         except:
             pass
+    
+    def get_stepsize(self):
+        """ Get step size from user input -- specfically written for loading 
+        txt files from legacy labview code, but can also be run on txt file 
+        saved using the new FLIM acquistion code """
+        self.stepsize = self.stepsize_window.ui.stepsize_doubleSpinBox.value()
+        self.x_step_size = self.stepsize
+        self.y_step_size = self.stepsize
 
     def get_data_params(self):
 
@@ -106,14 +134,19 @@ class MainWindow(TemplateBaseClass):
 
     def plot_intensity_sums(self):
         try:
-            self.hist_data = np.reshape(self.hist_data, newshape=(self.hist_data.shape[0], self.numb_x_pixels*self.numb_y_pixels))
-            self.intensity_sums = np.sum(self.hist_data, axis=0) #sum intensities for each pixel
-            self.intensity_sums = np.reshape(self.intensity_sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
+            if self.scan_file_type is "pkl" or self.scan_file_type is "h5":
+                pg.setConfigOption('imageAxisOrder', 'row-major')
+                self.hist_data = np.reshape(self.hist_data, newshape=(self.hist_data.shape[0], self.numb_x_pixels*self.numb_y_pixels))
+                self.intensity_sums = np.sum(self.hist_data, axis=0) #sum intensities for each pixel
+                self.intensity_sums = np.reshape(self.intensity_sums, newshape=(self.numb_x_pixels, self.numb_y_pixels))
+            else:
+                pg.setConfigOption('imageAxisOrder', 'col-major')
             self.ui.intensity_sums_viewBox.view.invertY(False) # stop y axis invert
             self.ui.intensity_sums_viewBox.setImage(self.intensity_sums, scale=
                                                   (self.x_step_size,
                                                    self.y_step_size))
-            self.ui.intensity_sums_viewBox.roi.setSize([self.x_scan_size, self.y_step_size]) #line roi
+            if self.scan_file_type is "pkl" or self.scan_file_type is "h5":
+                self.ui.intensity_sums_viewBox.roi.setSize([self.x_scan_size, self.y_step_size]) #line roi
             scale = pg.ScaleBar(size=1,suffix='um')
             scale.setParentItem(self.ui.intensity_sums_viewBox.view)
             scale.anchor((1, 1), (1, 1), offset=(-30, -30))
@@ -234,6 +267,12 @@ class MainWindow(TemplateBaseClass):
         self.lifetime_window.opened_from_flim = True
         self.lifetime_window.hist_data_from_flim = np.asarray(self.get_raw_hist_curve(0))
         self.lifetime_window.ui.Result_textBrowser.setText("Data successfully loaded from FLIM analysis.")
+    
+    def export_window(self):
+        self.export_window = ExportFigureWindow()
+        self.export_window.ui.vmin_spinBox.setValue(np.min(self.intensity_sums))
+        self.export_window.ui.vmax_spinBox.setValue(np.max(self.intensity_sums))
+        self.export_window.export_fig_signal.connect(self.save_intensities_image)
 
     def save_intensities_image(self):
         try:
@@ -241,7 +280,18 @@ class MainWindow(TemplateBaseClass):
             filename_ext = os.path.basename(self.filename[0])
             filename = os.path.splitext(filename_ext)[0] #get filename without extension
             save_to = folder + "\\" + filename + "_intensity_sums.png"
-            cpm.plot_confocal(self.intensity_sums, FLIM_adjust=False, stepsize=np.abs(self.x_step_size))
+            if self.export_window.ui.reverse_checkBox.isChecked():
+                colormap = str(self.export_window.ui.cmap_comboBox.currentText())+"_r"
+            else:
+                colormap = str(self.export_window.ui.cmap_comboBox.currentText())
+            if self.export_window.ui.cbar_checkBox.isChecked():
+                label = str(self.export_window.ui.cbar_label.text())
+            else:
+                label = "PL Intensity (a.u.)"
+            cpm.plot_confocal(self.intensity_sums, FLIM_adjust=False, 
+                              stepsize=np.abs(self.x_step_size),cmap=colormap, 
+                              cbar_label=label, vmin=self.export_window.ui.vmin_spinBox.value(), 
+                              vmax=self.export_window.ui.vmax_spinBox.value())
             plt.savefig(save_to, bbox_inches='tight', dpi=300)
         except Exception as e:
             print(format(e))
@@ -291,6 +341,28 @@ class MainWindow(TemplateBaseClass):
             sys.exit()
         else:
             pass
+
+"""Skip rows GUI"""
+ui_file_path = (base_path / "step_size_labview_files.ui").resolve()
+stepsize_WindowTemplate, stepsize_TemplateBaseClass = pg.Qt.loadUiType(ui_file_path)
+
+class StepSizeWindow(stepsize_TemplateBaseClass):
+    
+    stepsize_signal = QtCore.pyqtSignal() #signal to help with pass info back to MainWindow
+    
+    def __init__(self):
+        stepsize_TemplateBaseClass.__init__(self)
+
+        # Create the param window
+        self.ui = stepsize_WindowTemplate()
+        self.ui.setupUi(self)
+        self.ui.done_pushButton.clicked.connect(self.done)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.show()
+    
+    def done(self):
+        self.stepsize_signal.emit()
+        self.close()
 
 """Run the Main Window"""    
 def run():

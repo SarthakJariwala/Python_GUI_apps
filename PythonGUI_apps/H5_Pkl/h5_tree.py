@@ -40,6 +40,7 @@ class H5TreeSearchView(DataBrowserView):
             self.f = h5py.File(fname, 'r')
             self.on_new_search_text()
             self.databrowser.ui.statusbar.showMessage("")
+            return self.f
 
         except Exception as err:
             msg = "Failed to load %s:\n%s" %(fname, err)

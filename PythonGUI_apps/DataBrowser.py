@@ -19,6 +19,9 @@ from UV_Vis_analysis import uv_vis_analysis
 from PLQE_analysis import plqe_analysis
 from H5_Pkl import h5_pkl_view, h5_view_and_plot
 from Image_analysis import Image_analysis
+from Table import Table_widget
+from Export_Windows import Multi_Trace_Exporter
+
 pg.mkQApp()
 #pg.setConfigOption('background', 'w')
 
@@ -38,7 +41,8 @@ class MainWindow(TemplateBaseClass):
         self.ui = WindowTemplate()
         self.ui.setupUi(self)
         self.ui.select_comboBox.addItems(["Lifetime Analysis", "Spectrum Analysis", "FLIM Analysis", 
-            "UV-Vis Analysis", "PLQE Analysis", "H5 View/Plot", "H5/PKL Viewer", "Image Analysis"])
+            "UV-Vis Analysis", "PLQE Analysis", "H5 View/Plot", "H5/PKL Viewer", "Image Analysis", "Table View",
+            "Mulit-Trace Exporter"])
         self.ui.load_pushButton.clicked.connect(self.load_app)
         
         self.show()
@@ -72,7 +76,12 @@ class MainWindow(TemplateBaseClass):
         elif analysis_software == "Image Analysis":
             self.image_window = Image_analysis.MainWindow()
             self.image_window.show()
-        
+        elif analysis_software == "Table View":
+            self.table_widget = Table_widget.MainWindow()
+            self.table_widget.show()
+        elif analysis_software == "Mulit-Trace Exporter":
+            self.trace_exporter = Multi_Trace_Exporter.MainWindow()
+            self.trace_exporter.show()
         
 
 def run():
