@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2284</width>
-    <height>1476</height>
+    <width>2115</width>
+    <height>1483</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -787,30 +787,6 @@
            <string>Load Settings</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_13">
-           <item row="17" column="0">
-            <widget class="QTextBrowser" name="result_textBrowser">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QRadioButton" name="subtract_bck_radioButton">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Subtract Background</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
            <item row="1" column="0">
             <widget class="QPushButton" name="importSpec_pushButton">
              <property name="font">
@@ -823,7 +799,7 @@
              </property>
             </widget>
            </item>
-           <item row="14" column="0">
+           <item row="16" column="0">
             <widget class="QPushButton" name="export_single_figure_pushButton">
              <property name="font">
               <font>
@@ -835,7 +811,7 @@
              </property>
             </widget>
            </item>
-           <item row="16" column="0">
+           <item row="19" column="0">
             <widget class="QPushButton" name="clear_export_data_pushButton">
              <property name="font">
               <font>
@@ -871,7 +847,7 @@
              </property>
             </widget>
            </item>
-           <item row="12" column="0">
+           <item row="14" column="0">
             <widget class="QLineEdit" name="lineEdit">
              <property name="font">
               <font>
@@ -895,26 +871,22 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QPushButton" name="importBck_pushButton">
+           <item row="4" column="0">
+            <widget class="QRadioButton" name="subtract_bck_radioButton">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
               </font>
              </property>
              <property name="text">
-              <string>Background File</string>
+              <string>Subtract Background</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item row="11" column="0">
-            <widget class="QLabel" name="label_38">
-             <property name="text">
-              <string>Export Settings</string>
-             </property>
-            </widget>
-           </item>
-           <item row="15" column="0">
+           <item row="18" column="0">
             <widget class="QPushButton" name="export_data_pushButton">
              <property name="font">
               <font>
@@ -926,43 +898,15 @@
              </property>
             </widget>
            </item>
-           <item row="10" column="0">
-            <widget class="QPushButton" name="clear_pushButton">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-               <strikeout>false</strikeout>
-              </font>
-             </property>
-             <property name="text">
-              <string>Clear Plot</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0">
-            <widget class="QCheckBox" name="norm_checkBox">
+           <item row="15" column="0">
+            <widget class="QPushButton" name="add_to_mem_pushButton">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
               </font>
              </property>
              <property name="text">
-              <string>Normalize</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0">
-            <widget class="QCheckBox" name="clear_checkBox">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Clear Plots Everytime</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
+              <string>Add Trace to Memory</string>
              </property>
             </widget>
            </item>
@@ -978,7 +922,7 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="0">
+           <item row="9" column="0">
             <widget class="QPushButton" name="plot_pushButton">
              <property name="font">
               <font>
@@ -992,15 +936,83 @@
              </property>
             </widget>
            </item>
-           <item row="13" column="0">
-            <widget class="QPushButton" name="add_to_mem_pushButton">
+           <item row="2" column="0">
+            <widget class="QPushButton" name="importBck_pushButton">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
               </font>
              </property>
              <property name="text">
-              <string>Add Trace to Memory</string>
+              <string>Background File</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0">
+            <widget class="QCheckBox" name="clear_checkBox">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Clear Plots Everytime</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QCheckBox" name="norm_checkBox">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Normalize</string>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="0">
+            <widget class="QPushButton" name="clear_pushButton">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+               <strikeout>false</strikeout>
+              </font>
+             </property>
+             <property name="text">
+              <string>Clear Plot</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="0">
+            <widget class="QLabel" name="label_38">
+             <property name="text">
+              <string>Export Settings</string>
+             </property>
+            </widget>
+           </item>
+           <item row="17" column="0">
+            <widget class="QLabel" name="label_40">
+             <property name="text">
+              <string>For Data</string>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="0">
+            <widget class="QLabel" name="label_39">
+             <property name="text">
+              <string>For Figure</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QLabel" name="label_41">
+             <property name="text">
+              <string>Plot Control</string>
              </property>
             </widget>
            </item>
@@ -1008,7 +1020,13 @@
          </widget>
         </item>
         <item>
-         <widget class="PlotWidget" name="plot"/>
+         <widget class="QTextBrowser" name="result_textBrowser">
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -1019,7 +1037,7 @@
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0" rowspan="14">
+          <item row="0" column="0" rowspan="16">
            <widget class="QGroupBox" name="groupBox_3">
             <property name="maximumSize">
              <size>
@@ -1090,75 +1108,41 @@ File</string>
             </layout>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="label_10">
+          <item row="1" column="1" rowspan="15">
+           <widget class="QTextBrowser" name="result_textBrowser2">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="4">
+           <widget class="QPushButton" name="export_scan_figure_pushButton">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Intensity Sums</string>
+             <string>Export Fitted
+Scan</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_5">
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="launch_data_viewer_checkBox">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>For Raw Scan Data</string>
+             <string>Launch Data Viewer</string>
             </property>
            </widget>
           </item>
-          <item row="13" column="4">
-           <widget class="QLabel" name="label_7">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string># Y points</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="5">
-           <widget class="QSpinBox" name="num_x_spinBox">
-            <property name="maximum">
-             <number>2000</number>
-            </property>
-            <property name="value">
-             <number>100</number>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="5">
-           <widget class="QSpinBox" name="num_y_spinBox">
-            <property name="maximum">
-             <number>2000</number>
-            </property>
-            <property name="value">
-             <number>100</number>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="4">
-           <widget class="QLabel" name="label_6">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string># X points</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
+          <item row="5" column="4">
            <widget class="QLabel" name="label">
             <property name="font">
              <font>
@@ -1170,20 +1154,32 @@ File</string>
             </property>
            </widget>
           </item>
-          <item row="10" column="4">
-           <widget class="QLabel" name="label_37">
+          <item row="3" column="4">
+           <widget class="QLabel" name="label_10">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>For Fit Scale</string>
+             <string>Intensity Sums</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="4">
-           <widget class="QPushButton" name="plot_fit_scan_pushButton">
+          <item row="1" column="4">
+           <widget class="QLabel" name="label_5">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>For Raw Scan Data</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QPushButton" name="plot_raw_scan_pushButton">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
@@ -1194,22 +1190,19 @@ File</string>
             </property>
            </widget>
           </item>
-          <item row="11" column="4">
-           <widget class="QCheckBox" name="use_raw_scan_settings">
+          <item row="4" column="4">
+           <widget class="QPushButton" name="plot_intensity_sums_pushButton">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Use Raw Scan Settings</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
+             <string>Plot</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="4">
+          <item row="6" column="4">
            <widget class="QComboBox" name="comboBox">
             <property name="font">
              <font>
@@ -1228,7 +1221,31 @@ File</string>
             </item>
            </widget>
           </item>
-          <item row="9" column="4">
+          <item row="7" column="4">
+           <widget class="QPushButton" name="plot_fit_scan_pushButton">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Plot</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="4">
+           <widget class="QLabel" name="label_42">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Export Settings</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="4">
            <widget class="QPushButton" name="analyze_spectra_fits_pushButton">
             <property name="font">
              <font>
@@ -1240,61 +1257,74 @@ File</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" rowspan="13">
-           <widget class="QTextBrowser" name="result_textBrowser2">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="launch_data_viewer_checkBox">
+          <item row="11" column="4">
+           <widget class="QLabel" name="label_37">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Launch Data Viewer</string>
+             <string>For Fit Scale</string>
             </property>
            </widget>
           </item>
-          <item row="8" column="4">
-           <widget class="QPushButton" name="export_scan_figure_pushButton">
+          <item row="12" column="4">
+           <widget class="QCheckBox" name="use_raw_scan_settings">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Export Fitted
-Scan</string>
+             <string>Use Raw Scan Settings</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="3" column="4">
-           <widget class="QPushButton" name="plot_intensity_sums_pushButton">
+          <item row="13" column="4">
+           <widget class="QLabel" name="label_6">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Plot</string>
+             <string># X points</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
-           <widget class="QPushButton" name="plot_raw_scan_pushButton">
+          <item row="14" column="4">
+           <widget class="QLabel" name="label_7">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Plot</string>
+             <string># Y points</string>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="5">
+           <widget class="QSpinBox" name="num_x_spinBox">
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="value">
+             <number>100</number>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="5">
+           <widget class="QSpinBox" name="num_y_spinBox">
+            <property name="maximum">
+             <number>2000</number>
+            </property>
+            <property name="value">
+             <number>100</number>
             </property>
            </widget>
           </item>
@@ -1422,20 +1452,13 @@ Scan</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>2284</width>
+     <width>2115</width>
      <height>38</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>PlotWidget</class>
-   <extends>QGraphicsView</extends>
-   <header>pyqtgraph</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

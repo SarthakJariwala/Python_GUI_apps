@@ -113,6 +113,10 @@ class MainWindow(TemplateBaseClass):
         # for i in reversed(range(self.ui.bounds_groupBox.layout().count())):
         #     self.ui.bounds_groupBox.layout().itemAt(i).widget().deleteLater()
         #self.ui.single_bounds_page.layout().addWidget(QtWidgets.QPushButton("test"))
+
+        self.ui.plot = pg.PlotWidget()
+        self.ui.plot.setTitle(title="Spectrum Plot")
+        #self.ui.plot.show()
         
         self.file = None
         self.bck_file = None
@@ -366,7 +370,7 @@ class MainWindow(TemplateBaseClass):
                 self.normalize()
             
             self.check_eV_state()
-
+            self.ui.plot.show()
             self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
             
         except Exception as e:
