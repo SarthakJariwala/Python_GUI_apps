@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1490</width>
-    <height>1583</height>
+    <width>2620</width>
+    <height>1676</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1071,32 +1071,24 @@
           <string>Export Settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="2" column="0">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_47">
+            <property name="text">
+             <string>For Figure:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
            <widget class="QPushButton" name="export_data_pushButton">
             <property name="text">
-             <string>Export data</string>
+             <string>Export Fit Data</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="save_w_fit_checkBox">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Save with Fit</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
+          <item row="6" column="1">
            <widget class="QPushButton" name="clear_export_data_pushButton">
             <property name="text">
-             <string>Clear export data</string>
+             <string>Clear Export Memory</string>
             </property>
            </widget>
           </item>
@@ -1111,6 +1103,27 @@
             </property>
             <property name="text">
              <string>Export figure</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_50">
+            <property name="text">
+             <string>For Data:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLineEdit" name="lineEdit">
+            <property name="text">
+             <string>Enter Legend Here...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="add_to_mem_pushButton">
+            <property name="text">
+             <string>Add trace to memory</string>
             </property>
            </widget>
           </item>
@@ -1214,6 +1227,9 @@
        </item>
        <item row="0" column="1">
         <widget class="QComboBox" name="Res_comboBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -1324,7 +1340,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1490</width>
+     <width>2620</width>
      <height>38</height>
     </rect>
    </property>

@@ -81,6 +81,7 @@ class MainWindow(TemplateBaseClass):
         self.ui.FittingFunc_comboBox.currentTextChanged.connect(self.switch_function_tab)
         self.ui.FittingMethod_comboBox.currentTextChanged.connect(self.switch_init_params_groupBox)
         self.ui.separate_irf_checkBox.stateChanged.connect(self.switch_open_irf)
+        self.ui.add_to_mem_pushButton.clicked.connect(self.add_trace_to_mem)
         self.ui.export_data_pushButton.clicked.connect(self.export_data)
         self.ui.clear_export_data_pushButton.clicked.connect(self.clear_export_data)
         self.ui.smoothData_checkBox.stateChanged.connect(self.smooth_trace_enabled)
@@ -94,6 +95,11 @@ class MainWindow(TemplateBaseClass):
         self.file = None
         self.out = None # output file after fitting
         self.data_list = []
+        self.fit_lifetime_called = False
+        self.x_mem = [] # containers for adding x data to memory
+        self.y_mem = [] # containers for adding y data to memory
+        self.best_fit_mem = [] # containers for adding best fit data to memory
+        self.legend = [] # containers for adding legend to memory
 
         #variables accounting for data received from FLIM analysis
         self.opened_from_flim = False #switched to True in FLIM_plot when "analyze lifetime" clicked
@@ -109,6 +115,7 @@ class MainWindow(TemplateBaseClass):
             if ".csv" in self.filename[0] or ".txt" in self.filename[0]: #if txt or csv, prompt user to enter # of rows to skip
                 self.skip_rows_window = SkipRowsWindow()
                 self.skip_rows_window.skip_rows_signal.connect(self.open_with_skip_rows_window)
+                self.ui.Res_comboBox.setEnabled(True)
             else:
                 self.file = read_picoharp_phd(self.filename[0])
             self.opened_from_flim = False
@@ -130,6 +137,7 @@ class MainWindow(TemplateBaseClass):
             if ".txt" in self.irf_filename[0] or ".csv" in self.irf_filename[0]:
                 self.irf_skip_rows_window = SkipRowsWindow()
                 self.irf_skip_rows_window.skip_rows_signal.connect(self.open_irf_with_skip_rows_window)
+                self.ui.Res_comboBox.setEnabled(True)
             else:
                 self.irf_file = read_picoharp_phd(self.irf_filename[0])
         except:
@@ -207,7 +215,6 @@ class MainWindow(TemplateBaseClass):
 
         mode -- string specifying whether to use data or irf channel (default "data")
         """
-        self.resolution = float(self.ui.Res_comboBox.currentText())
         if mode == "data":
             channel = int(self.ui.Data_channel_spinBox.value())
         elif mode == "irf":
@@ -221,17 +228,23 @@ class MainWindow(TemplateBaseClass):
                         y = self.irf_file.get_curve(channel)[1]
                 else: #otherwise, get data/irf from data file
                     y = self.file[:,channel]
+
+                self.resolution = float(self.ui.Res_comboBox.currentText())
             except:
                 res, y = self.file.get_curve(channel)
-                # TO DO - check if res read in is the same as selected
                 time_window = int(np.floor(self.file.get_time_window_in_ns(channel)))
                 y = y[0:time_window]
+                self.resolution = res
             
             length = np.shape(y)[0]
-            x = np.arange(0, length, 1) * self.resolution
+            x = np.arange(0, length*self.resolution, self.resolution, np.float)
             
             if self.ui.smoothData_checkBox.isChecked() and mode=="data":
                 y = np.convolve(y, np.ones(self.ui.smoothData_spinBox.value())/self.ui.smoothData_spinBox.value(), mode="same")
+            
+            if self.ui.normalize_checkBox.isChecked():
+                y = y / np.amax(y)
+
             return x,y
         
         except Exception as e:
@@ -243,10 +256,9 @@ class MainWindow(TemplateBaseClass):
                 x, y = self.hist_data_from_flim
             else:
                 x,y = self.acquire_settings() #get data
-            if self.ui.normalize_checkBox.isChecked():
-                y = y / np.amax(y)
                 
             self.ui.plot.plot(x, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
+            self.fit_lifetime_called = False
 
             try:
                 self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
@@ -335,7 +347,8 @@ class MainWindow(TemplateBaseClass):
                 
                 #add fit params to data_list
                 self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-                
+                self.fit_lifetime_called = True
+
                 self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
                 self.ui.plot.setLabel('bottom', 'Time (ns)')
                 return self.out
@@ -462,7 +475,7 @@ class MainWindow(TemplateBaseClass):
 
                 #add fit params to data_list
                 self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-            
+                self.fit_lifetime_called = True
         except Exception as e:
             self.ui.Result_textBrowser.append(format(e))
 
@@ -528,39 +541,57 @@ class MainWindow(TemplateBaseClass):
 
     def clear_export_data(self):
         self.data_list = []
+        self.clean_up_after_fig_export()
+    
+    def clean_up_after_fig_export(self):
+        self.x_mem = []
+        self.y_mem = []
+        self.legend = []
+        self.best_fit_mem = []
+    
+    def add_trace_to_mem(self):
+        try:
+            if self.fit_lifetime_called == True:
+                self.x_mem.append(self.out[:,0])
+                self.y_mem.append(self.out[:,1])
+                self.best_fit_mem.append(self.out[:,2])
+            else:
+                self.x_mem.append(self.acquire_settings()[0])
+                self.y_mem.append(self.acquire_settings()[1])
+            self.legend.append(self.ui.lineEdit.text())
+        except Exception as e:
+            print(e)
     
     def export_window(self):
         self.exportplotwindow = ExportPlotWindow()
         self.exportplotwindow.export_fig_signal.connect(self.pub_ready_plot_export)
 
     def pub_ready_plot_export(self):
-        #TODO - get all curves from the plotwidget
-        #item = self.ui.plot.listDataItems()[0]
-        #print(self.ui.plot.getData(self))
         try:
-            filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
+            if self.x_mem == []:
+                self.ui.result_textBrowser.setText("Add traces to memory first!")
             
-            plt.figure(figsize=(8,6))
-            plt.tick_params(direction='out', length=8, width=3.5)
-            if self.ui.save_w_fit_checkBox.isChecked():
-                plt.plot(self.out[:,0],self.out[:,1]/np.max(self.out[:,1]),self.exportplotwindow.ui.traceColor_comboBox.currentText())
-                plt.plot(self.out[:,0],self.out[:,2]/np.max(self.out[:,1]),self.exportplotwindow.ui.fitColor_comboBox.currentText())
-                if self.exportplotwindow.ui.legend_checkBox.isChecked():
-                    plt.legend([self.exportplotwindow.ui.legend1_lineEdit.text(),self.exportplotwindow.ui.legend2_lineEdit.text()])
             else:
-                plt.plot(self.acquire_settings()[0],self.acquire_settings()[1]/np.max(self.acquire_settings()[1]),
-                         self.exportplotwindow.ui.traceColor_comboBox.currentText())
-                if self.exportplotwindow.ui.legend_checkBox.isChecked():
-                    plt.legend([self.exportplotwindow.ui.legend1_lineEdit.text()])
-            plt.yscale('log')
-            plt.xlabel("Time (ns)", fontsize=20, fontweight='bold')
-            plt.ylabel("Intensity (norm.)", fontsize=20, fontweight='bold')
-            plt.tight_layout()
-            plt.xlim([self.exportplotwindow.ui.lowerX_spinBox.value(),self.exportplotwindow.ui.upperX_spinBox.value()])
-            plt.ylim([self.exportplotwindow.ui.lowerY_spinBox.value(),self.exportplotwindow.ui.upperY_doubleSpinBox.value()])
-            
-            plt.savefig(filename[0],bbox_inches='tight', dpi=300)
-            plt.close()
+                filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
+                
+                plt.figure(figsize=(8,6))
+                plt.tick_params(direction='out', length=8, width=3.5)
+                for i in range(len(self.x_mem)):
+                    plt.plot(self.x_mem[i], self.y_mem[i], label=str(self.legend[i]))
+                    if self.fit_lifetime_called == True:
+                        plt.plot(self.x_mem[i], self.best_fit_mem[i],'k--')
+
+                plt.yscale('log')
+                plt.xlabel("Time (ns)", fontsize=20, fontweight='bold')
+                plt.ylabel("Intensity (norm.)", fontsize=20, fontweight='bold')
+                plt.legend()
+                plt.tight_layout()
+                plt.xlim([self.exportplotwindow.ui.lowerX_spinBox.value(),self.exportplotwindow.ui.upperX_spinBox.value()])
+                plt.ylim([self.exportplotwindow.ui.lowerY_spinBox.value(),self.exportplotwindow.ui.upperY_doubleSpinBox.value()])
+                
+                plt.savefig(filename[0],bbox_inches='tight', dpi=300)
+                plt.close()
+                self.clean_up_after_fig_export()
         
         except Exception as e:
             self.ui.Result_textBrowser.append(format(e))
