@@ -58,19 +58,19 @@ class ExportPlotWindow(export_TemplateBaseClass):
         
         self.ui = export_WindowTemplate()
         self.ui.setupUi(self)
-        self.ui.traceColor_comboBox.addItems(["C0","C1","C2","C3","C4","C5","C6","C7", "r", "g", "b", "y", "k"])
-        self.ui.fitColor_comboBox.addItems(["k", "r", "b", "y", "g","C0","C1","C2","C3","C4","C5","C6","C7"])
+        #self.ui.traceColor_comboBox.addItems(["C0","C1","C2","C3","C4","C5","C6","C7", "r", "g", "b", "y", "k"])
+        #self.ui.fitColor_comboBox.addItems(["k", "r", "b", "y", "g","C0","C1","C2","C3","C4","C5","C6","C7"])
         self.ui.export_pushButton.clicked.connect(self.export)
-        self.ui.legend_checkBox.stateChanged.connect(self.legend_title)
+        #self.ui.legend_checkBox.stateChanged.connect(self.legend_title)
         self.show()
     
-    def legend_title(self):
-        if self.ui.legend_checkBox.isChecked():
-            self.ui.legend1_lineEdit.setEnabled(True)
-            self.ui.legend2_lineEdit.setEnabled(True)
-        else:
-            self.ui.legend1_lineEdit.setEnabled(False)
-            self.ui.legend2_lineEdit.setEnabled(False)
+    #def legend_title(self):
+    #    if self.ui.legend_checkBox.isChecked():
+    #        self.ui.legend1_lineEdit.setEnabled(True)
+    #        self.ui.legend2_lineEdit.setEnabled(True)
+    #    else:
+    #        self.ui.legend1_lineEdit.setEnabled(False)
+    #        self.ui.legend2_lineEdit.setEnabled(False)
     
     def export(self):
         self.export_fig_signal.emit()

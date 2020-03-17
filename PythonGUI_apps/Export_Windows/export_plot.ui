@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>980</width>
+    <width>930</width>
     <height>435</height>
    </rect>
   </property>
@@ -14,35 +14,11 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <pointsize>15</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>X limits</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="3">
-    <widget class="QLabel" name="label_6">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Upper</string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="4">
     <widget class="QSpinBox" name="upperX_spinBox">
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="maximum">
@@ -53,23 +29,11 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QLabel" name="label_3">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Lower</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="4">
     <widget class="QDoubleSpinBox" name="upperY_doubleSpinBox">
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="decimals">
@@ -78,40 +42,19 @@
      <property name="minimum">
       <double>-100.000000000000000</double>
      </property>
+     <property name="maximum">
+      <double>10000000000000000000000.000000000000000</double>
+     </property>
      <property name="value">
       <double>1.500000000000000</double>
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_9">
+   <item row="1" column="1">
+    <widget class="QLabel" name="label_3">
      <property name="font">
       <font>
-       <pointsize>15</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Color</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="label_7">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Trace</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QLabel" name="label_5">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="text">
@@ -123,7 +66,7 @@
     <widget class="QSpinBox" name="lowerX_spinBox">
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="minimum">
@@ -134,15 +77,15 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_2">
+   <item row="0" column="1">
+    <widget class="QLabel" name="label_5">
      <property name="font">
       <font>
-       <pointsize>15</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Y limits</string>
+      <string>Lower</string>
      </property>
     </widget>
    </item>
@@ -150,7 +93,7 @@
     <widget class="QLabel" name="label_4">
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="text">
@@ -158,11 +101,11 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="5">
+   <item row="2" column="0" colspan="5">
     <widget class="QPushButton" name="export_pushButton">
      <property name="font">
       <font>
-       <pointsize>17</pointsize>
+       <pointsize>15</pointsize>
       </font>
      </property>
      <property name="text">
@@ -170,105 +113,39 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="3">
-    <widget class="QLabel" name="label_11">
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
      <property name="font">
       <font>
        <pointsize>12</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Legend 2</string>
+      <string>Y limits</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="2">
-    <widget class="QLineEdit" name="legend1_lineEdit">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
+   <item row="0" column="3">
+    <widget class="QLabel" name="label_6">
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
       </font>
+     </property>
+     <property name="text">
+      <string>Upper</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="4">
-    <widget class="QComboBox" name="fitColor_comboBox">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2">
-    <widget class="QComboBox" name="traceColor_comboBox">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="3">
-    <widget class="QLabel" name="label_8">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
      <property name="font">
       <font>
        <pointsize>12</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Fit</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="4">
-    <widget class="QLineEdit" name="legend2_lineEdit">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="label_12">
-     <property name="font">
-      <font>
-       <pointsize>15</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Legends</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <widget class="QLabel" name="label_10">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Legend 1</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QCheckBox" name="legend_checkBox">
-     <property name="font">
-      <font>
-       <pointsize>15</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Add Legends to the Plot</string>
+      <string>X limits</string>
      </property>
     </widget>
    </item>
@@ -276,14 +153,17 @@
     <widget class="QDoubleSpinBox" name="lowerY_spinBox">
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="decimals">
       <number>4</number>
      </property>
      <property name="minimum">
-      <double>0.000000000000000</double>
+      <double>-10000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000000000000000.000000000000000</double>
      </property>
      <property name="value">
       <double>0.010000000000000</double>
