@@ -25,9 +25,9 @@ sys.path.append(os.path.abspath('../H5_Pkl'))
 from H5_Pkl import h5_pkl_view
 sys.path.append(os.path.abspath('../Export_Windows'))
 try:
-    from Export_window import ExportFigureWindow
+    from Export_window import ExportFigureWindow, ExportPlotWindow
 except:
-    from Export_Windows.Export_window import ExportFigureWindow
+    from Export_Windows.Export_window import ExportFigureWindow, ExportPlotWindow
 # local modules
 try:
     from Spectra_fit_funcs import Spectra_Fit, Single_Gaussian, Single_Lorentzian, Double_Gaussian, Multi_Gaussian
@@ -93,7 +93,7 @@ class MainWindow(TemplateBaseClass):
         # self.ui.config_fit_params_pushButton.clicked.connect(self.configure_fit_params)
         self.ui.clear_pushButton.clicked.connect(self.clear_plot)
         self.ui.add_to_mem_pushButton.clicked.connect(self.add_trace_to_mem)
-        self.ui.export_single_figure_pushButton.clicked.connect(self.pub_ready_plot_export)
+        self.ui.export_single_figure_pushButton.clicked.connect(self.export_plot_window)
         self.ui.export_scan_figure_pushButton.clicked.connect(self.export_window)
         self.ui.analyze_spectra_fits_pushButton.clicked.connect(self.analyze_spectra_fits)
 
@@ -347,6 +347,7 @@ class MainWindow(TemplateBaseClass):
                 self.y = self.file[:,1]
                 
             self.check_loaded_files()
+            self.check_eV_state()
 
             if self.check_loaded_files() == True: #check the following conditions if all required files have been provided
                 if self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
@@ -364,19 +365,28 @@ class MainWindow(TemplateBaseClass):
             
             if self.ui.norm_checkBox.isChecked():
                 self.normalize()
-                
+
             self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
             
         except Exception as e:
             self.ui.result_textBrowser.append(str(e))
             pass
         self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
-        self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
+        if self.ui.fit_in_eV.isChecked():
+            self.ui.plot.setLabel('bottom', 'Energy (eV)')
+        else:    
+            self.ui.plot.setLabel('bottom', 'Wavelength (nm)')
 
         self.single_spec_fit_called = False
     
     def normalize(self):
         self.y = (self.y) / np.amax(self.y)
+    
+    def check_eV_state(self):
+        if self.ui.fit_in_eV.isChecked():
+            self.x = 1240/self.file[:,0]
+        else:
+            self.x = self.file[:,0]
     
     def clear_plot(self):
         self.ui.plot.clear()
@@ -419,9 +429,9 @@ class MainWindow(TemplateBaseClass):
             elif self.opened_from_flim:
                 pass
             else:
-
+                self.check_eV_state()
                 if fit_func == "Single Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
-                    single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
+                    single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file, fit_in_eV=self.ui.fit_in_eV.isChecked())
                     if self.ui.adjust_param_checkBox.isChecked():
                         center1_min = self.ui.single_peakcenter1_min_spinBox.value()
                         center1_max = self.ui.single_peakcenter1_max_spinBox.value()
@@ -436,7 +446,7 @@ class MainWindow(TemplateBaseClass):
                     self.ui.result_textBrowser.setText(self.result.fit_report())
                 
                 elif fit_func == "Single Lorentzian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
-                    single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file)
+                    single_lorentzian = Single_Lorentzian(self.file, self.bck_file, wlref=self.wlref_file, fit_in_eV=self.ui.fit_in_eV.isChecked())
                     
                     if self.ui.adjust_param_checkBox.isChecked():
                         center1_min = self.ui.single_peakcenter1_min_spinBox.value()
@@ -452,7 +462,7 @@ class MainWindow(TemplateBaseClass):
                     self.ui.result_textBrowser.setText(self.result.fit_report())
                 
                 elif fit_func == "Double Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
-                    double_gauss = Double_Gaussian(self.file, self.bck_file, wlref=self.wlref_file)
+                    double_gauss = Double_Gaussian(self.file, self.bck_file, wlref=self.wlref_file, fit_in_eV=self.ui.fit_in_eV.isChecked())
                     if self.ui.adjust_param_checkBox.isChecked():
                         center1_min = self.ui.double_peakcenter1_min_spinBox.value()
                         center1_max = self.ui.double_peakcenter1_max_spinBox.value()
@@ -482,7 +492,7 @@ class MainWindow(TemplateBaseClass):
                 
                 elif fit_func == "Triple Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
                     #currently only works for triple gaussian (n=3)
-                    multiple_gauss = Multi_Gaussian(self.file, self.bck_file, 3, wlref=self.wlref_file)
+                    multiple_gauss = Multi_Gaussian(self.file, self.bck_file, 3, wlref=self.wlref_file, fit_in_eV=self.ui.fit_in_eV.isChecked())
                     if self.ui.adjust_param_checkBox.isChecked():
                         center1_min = self.ui.multi_peakcenter1_min_spinBox.value()
                         center1_max = self.ui.multi_peakcenter1_max_spinBox.value()
@@ -523,6 +533,10 @@ class MainWindow(TemplateBaseClass):
     def export_window(self):
         self.export_window = ExportImages()
         self.export_window.export_fig_signal.connect(self.pub_ready_plot_export)
+    
+    def export_plot_window(self):
+        self.exportplotwindow = ExportPlotWindow()
+        self.exportplotwindow.export_fig_signal.connect(self.pub_ready_plot_export)
 
     def pub_ready_plot_export(self):
         filename = QtWidgets.QFileDialog.getSaveFileName(self,caption="Filename with EXTENSION")
@@ -566,10 +580,14 @@ class MainWindow(TemplateBaseClass):
                         plt.plot(self.x_mem[i], self.y_mem[i], label=str(self.legend[i]))
                         if self.single_spec_fit_called == True:
                             plt.plot(self.x_mem[i], self.best_fit_mem[i],'k')
-                    #plt.plot(self.x, self.y)
-                    #plt.plot(self.x, self.result.best_fit,'k')
-                    plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
+                    
+                    if self.ui.fit_in_eV.isChecked():
+                        plt.xlabel("Energy (eV)", fontsize=20, fontweight='bold')
+                    else:
+                        plt.xlabel("Wavelength (nm)", fontsize=20, fontweight='bold')
                     plt.ylabel("Intensity (a.u.)", fontsize=20, fontweight='bold')
+                    plt.xlim([self.exportplotwindow.ui.lowerX_spinBox.value(),self.exportplotwindow.ui.upperX_spinBox.value()])
+                    plt.ylim([self.exportplotwindow.ui.lowerY_spinBox.value(),self.exportplotwindow.ui.upperY_doubleSpinBox.value()])
                     plt.legend()
                     plt.tight_layout()
                     
