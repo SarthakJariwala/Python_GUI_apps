@@ -347,7 +347,6 @@ class MainWindow(TemplateBaseClass):
                 self.y = self.file[:,1]
                 
             self.check_loaded_files()
-            self.check_eV_state()
 
             if self.check_loaded_files() == True: #check the following conditions if all required files have been provided
                 if self.ui.subtract_bck_radioButton.isChecked() == True and self.ui.WLRef_checkBox.isChecked() == False:
@@ -365,6 +364,8 @@ class MainWindow(TemplateBaseClass):
             
             if self.ui.norm_checkBox.isChecked():
                 self.normalize()
+            
+            self.check_eV_state()
 
             self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
             
@@ -384,9 +385,11 @@ class MainWindow(TemplateBaseClass):
     
     def check_eV_state(self):
         if self.ui.fit_in_eV.isChecked():
-            self.x = 1240/self.file[:,0]
+            self.x = np.sort(1240/self.file[:,0])
+            self.y = [self.y[i] for i in np.argsort(1240/self.file[:,0])]
         else:
             self.x = self.file[:,0]
+            self.y = self.file[:,1]
     
     def clear_plot(self):
         self.ui.plot.clear()
@@ -430,7 +433,7 @@ class MainWindow(TemplateBaseClass):
                 pass
             else:
                 self.check_eV_state()
-                if fit_func == "Single Gaussian": #and self.ui.subtract_bck_radioButton.isChecked() == True:
+                if fit_func == "Single Gaussian":
                     single_gauss = Single_Gaussian(self.file, self.bck_file, wlref=self.wlref_file, fit_in_eV=self.ui.fit_in_eV.isChecked())
                     if self.ui.adjust_param_checkBox.isChecked():
                         center1_min = self.ui.single_peakcenter1_min_spinBox.value()
@@ -441,7 +444,8 @@ class MainWindow(TemplateBaseClass):
                             [center1_min, center1_max])
                     else:
                         self.result = single_gauss.gaussian_model()
-                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    #self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.plot()
                     self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
                     self.ui.result_textBrowser.setText(self.result.fit_report())
                 
@@ -457,7 +461,8 @@ class MainWindow(TemplateBaseClass):
                                 [center1_min, center1_max])
                     else:
                         self.result = single_lorentzian.lorentzian_model()
-                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    #self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.plot()
                     self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
                     self.ui.result_textBrowser.setText(self.result.fit_report())
                 
@@ -481,7 +486,8 @@ class MainWindow(TemplateBaseClass):
                     else:
                         self.result = double_gauss.gaussian_model()
 
-                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    #self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.plot()
                     self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
                     if self.ui.plot_components_checkBox.isChecked():
                         comps = self.result.eval_components(x=self.x)
@@ -515,7 +521,8 @@ class MainWindow(TemplateBaseClass):
                     else:
                         self.result = multiple_gauss.gaussian_model()
 
-                    self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    #self.ui.plot.plot(self.x, self.y, clear=self.clear_check(), pen='r')
+                    self.plot()
                     self.ui.plot.plot(self.x, self.result.best_fit, clear=False, pen='k')
                     if self.ui.plot_components_checkBox.isChecked():
                         comps = self.result.eval_components(x=self.x)
