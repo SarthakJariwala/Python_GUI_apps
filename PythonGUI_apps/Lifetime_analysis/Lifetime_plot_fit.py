@@ -95,10 +95,12 @@ class MainWindow(TemplateBaseClass):
         self.file = None
         self.out = None # output file after fitting
         self.data_list = []
-        self.fit_lifetime_called = False
+        self.fit_lifetime_called_w_irf = False
+        self.fit_lifetime_called_wo_irf = False
         self.x_mem = [] # containers for adding x data to memory
         self.y_mem = [] # containers for adding y data to memory
         self.best_fit_mem = [] # containers for adding best fit data to memory
+        self.best_fit_mem_x = [] # containers for adding best fit data to memory
         self.legend = [] # containers for adding legend to memory
 
         #variables accounting for data received from FLIM analysis
@@ -258,7 +260,8 @@ class MainWindow(TemplateBaseClass):
                 x,y = self.acquire_settings() #get data
                 
             self.ui.plot.plot(x, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
-            self.fit_lifetime_called = False
+            self.fit_lifetime_called_w_irf = False
+            self.fit_lifetime_called_wo_irf = False
 
             try:
                 self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
@@ -347,7 +350,8 @@ class MainWindow(TemplateBaseClass):
                 
                 #add fit params to data_list
                 self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-                self.fit_lifetime_called = True
+                self.fit_lifetime_called_wo_irf = True
+                self.fit_lifetime_called_w_irf = False
 
                 self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
                 self.ui.plot.setLabel('bottom', 'Time (ns)')
@@ -475,7 +479,8 @@ class MainWindow(TemplateBaseClass):
 
                 #add fit params to data_list
                 self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-                self.fit_lifetime_called = True
+                self.fit_lifetime_called_w_irf = True
+                self.fit_lifetime_called_wo_irf = False
         except Exception as e:
             self.ui.Result_textBrowser.append(format(e))
 
@@ -548,12 +553,19 @@ class MainWindow(TemplateBaseClass):
         self.y_mem = []
         self.legend = []
         self.best_fit_mem = []
+        self.best_fit_mem_x = []
     
     def add_trace_to_mem(self):
         try:
-            if self.fit_lifetime_called == True:
+            if self.fit_lifetime_called_w_irf == True:
                 self.x_mem.append(self.out[:,0])
                 self.y_mem.append(self.out[:,1])
+                self.best_fit_mem_x.append(self.out[:,0])
+                self.best_fit_mem.append(self.out[:,2])
+            elif self.fit_lifetime_called_wo_irf == True:
+                self.x_mem.append(self.acquire_settings()[0])
+                self.y_mem.append(self.acquire_settings()[1])
+                self.best_fit_mem_x.append(self.out[:,0])
                 self.best_fit_mem.append(self.out[:,2])
             else:
                 self.x_mem.append(self.acquire_settings()[0])
@@ -578,8 +590,8 @@ class MainWindow(TemplateBaseClass):
                 plt.tick_params(direction='out', length=8, width=3.5)
                 for i in range(len(self.x_mem)):
                     plt.plot(self.x_mem[i], self.y_mem[i], label=str(self.legend[i]))
-                    if self.fit_lifetime_called == True:
-                        plt.plot(self.x_mem[i], self.best_fit_mem[i],'k--')
+                    if self.fit_lifetime_called_w_irf == True or self.fit_lifetime_called_wo_irf == True:
+                        plt.plot(self.best_fit_mem_x[i], self.best_fit_mem[i],'k--')
 
                 plt.yscale('log')
                 plt.xlabel("Time (ns)", fontsize=20, fontweight='bold')
