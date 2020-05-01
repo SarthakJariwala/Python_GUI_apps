@@ -306,7 +306,7 @@ class MainWindow(TemplateBaseClass):
                 self.ui.plot.plot(t, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
                 
                 if fit_func == "Stretched Exponential": #stretch exponential tab
-                    tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
+                    tc, beta, a, avg_tau, PL_fit, noise = stretch_exp_fit(TRPL_interp, t)
                     self.out = np.empty((len(t), 3))
                     self.out[:,0] = t #time
                     self.out[:,1] = TRPL_interp #Raw PL 
@@ -316,11 +316,12 @@ class MainWindow(TemplateBaseClass):
                                                        "\nFit Method: " + "diff_ev" + #TODO : change when diff_ev and fmin_tnc implemented for non-irf
                                                        "\nAverage Lifetime = " + str(avg_tau)+ " ns"
                                                        "\nCharacteristic Tau = " + str(tc)+" ns"
-                                                       "\nBeta = "+str(beta))
+                                                       "\nBeta = "+str(beta)+
+                                                       "\nNoise = "+ str(noise))
                     self.ui.average_lifetime_spinBox.setValue(avg_tau)
                 
                 elif fit_func == "Double Exponential": #double exponential tab
-                    tau1, a1, tau2, a2, avg_tau, PL_fit = double_exp_fit(TRPL_interp, t)
+                    tau1, a1, tau2, a2, avg_tau, PL_fit, noise = double_exp_fit(TRPL_interp, t)
                     self.out = np.empty((len(t), 3))
                     self.out[:,0] = t #time
                     self.out[:,1] = TRPL_interp #Raw PL 
@@ -332,11 +333,12 @@ class MainWindow(TemplateBaseClass):
                                                        "\nTau 1 = " + str(tau1)+" ns"
                                                        "\nA 1 = " + str(a1)+
                                                        "\nTau 2 = " + str(tau2)+" ns"
-                                                       "\nA 2 = " + str(a2))
+                                                       "\nA 2 = " + str(a2)+
+                                                       "\nNoise = "+ str(noise))
                     #TODO - once tau_avg implemented, set average lifetime spinbox to tau_avg value
                 
                 elif fit_func == "Single Exponential": #single exponential tab
-                    tau, a, PL_fit = single_exp_fit(TRPL_interp, t)
+                    tau, a, PL_fit, noise = single_exp_fit(TRPL_interp, t)
                     self.out = np.empty((len(t), 3))
                     self.out[:,0] = t #time
                     self.out[:,1] = TRPL_interp #Raw PL 
@@ -345,7 +347,8 @@ class MainWindow(TemplateBaseClass):
                     self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
                                                        "\nFit Method: " + "diff_ev" +
                                                        "\nLifetime = " + str(tau)+ " ns"
-                                                       "\nA = " + str(a))
+                                                       "\nA = " + str(a)+
+                                                       "\nNoise = "+ str(noise))
                     self.ui.average_lifetime_spinBox.setValue(tau)
                 
                 #add fit params to data_list
