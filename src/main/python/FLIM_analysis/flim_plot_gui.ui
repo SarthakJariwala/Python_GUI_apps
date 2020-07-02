@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>738</width>
+    <height>876</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>FLIM Analysis</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="analysis_tab">
+      <attribute name="title">
+       <string>Analysis</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0" alignment="Qt::AlignLeft">
+          <widget class="QPushButton" name="load_scan_pushButton">
+           <property name="text">
+            <string>Load Scan</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="plot_intensity_sums_pushButton">
+             <property name="text">
+              <string>Plot</string>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="save_intensities_array_pushButton">
+             <property name="text">
+              <string>Save intensities array</string>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="save_intensities_image_pushButton">
+             <property name="text">
+              <string>Save intensities image</string>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="analyze_psf_pushButton">
+             <property name="text">
+              <string>Analyze PSF</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="4" column="0">
+          <widget class="ImageView" name="intensity_sums_viewBox">
+           <property name="minimumSize">
+            <size>
+             <width>500</width>
+             <height>300</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Histogram Intensity Sums</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Raw Histogram Data</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0">
+          <widget class="ImageView" name="raw_hist_data_viewBox">
+           <property name="minimumSize">
+            <size>
+             <width>500</width>
+             <height>300</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="1">
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="plot_raw_hist_data_pushButton">
+             <property name="text">
+              <string>Plot</string>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="analyze_lifetime_pushButton">
+             <property name="text">
+              <string>Analyze lifetime</string>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignLeft">
+            <widget class="QCheckBox" name="compare_checkBox">
+             <property name="text">
+              <string>Compare ROIs</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pkl_to_h5">
+      <attribute name="title">
+       <string>.pkl to .h5</string>
+      </attribute>
+      <widget class="QPushButton" name="import_pkl_pushButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>20</y>
+         <width>171</width>
+         <height>34</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Import .pkl file</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pkl_to_h5_pushButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>80</y>
+         <width>171</width>
+         <height>34</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>.pkl to .h5</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ImageView</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
