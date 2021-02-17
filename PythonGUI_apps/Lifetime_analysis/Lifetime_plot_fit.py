@@ -129,6 +129,10 @@ class MainWindow(TemplateBaseClass):
         skip_rows = self.skip_rows_window.ui.skip_rows_spinBox.value()
         if ".txt" in self.filename[0]:
             self.file = np.loadtxt(self.filename[0], skiprows=skip_rows)
+            
+            if self.file.ndim == 1: # if there is only one trace, reshape to 2D
+                self.file = self.file.reshape(self.file.shape[0], 1)
+    
         elif ".csv" in self.filename[0]:
             self.file = np.genfromtxt(self.filename[0], skip_header=skip_rows, delimiter=",")
 
@@ -149,6 +153,10 @@ class MainWindow(TemplateBaseClass):
         irf_skip_rows = self.irf_skip_rows_window.ui.skip_rows_spinBox.value()
         if ".txt" in self.irf_filename[0]:
             self.irf_file = np.loadtxt(self.irf_filename[0], skiprows=irf_skip_rows)
+            
+            if self.irf_file.ndim == 1: # if there is only one trace, reshape to 2d array
+                self.irf_file = self.irf_file.reshape(self.irf_file.shape[0], 1)
+                        
         elif ".csv" in self.irf_filename[0]:
             self.irf_file = np.genfrontxt(self.irf_filename[0], skip_header=irf_skip_rows, delimiter=",")
 
