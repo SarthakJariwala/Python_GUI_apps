@@ -25,12 +25,12 @@ except:
 # local module imports
 try:
     from Lifetime_analysis.Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
-    from Lifetime_analysis.picoharp_phd import read_picoharp_phd
+    from Lifetime_analysis.read_ph_phd import read_picoharp_phd
     from Lifetime_analysis.Fit_functions_with_irf import fit_exp_stretch_diffev, fit_exp_stretch_fmin_tnc, fit_multi_exp_diffev, fit_multi_exp_fmin_tnc
 except:
     from Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
     from Fit_functions_with_irf import fit_exp_stretch_diffev, fit_exp_stretch_fmin_tnc, fit_multi_exp_diffev, fit_multi_exp_fmin_tnc
-    from picoharp_phd import read_picoharp_phd
+    from read_ph_phd import read_picoharp_phd
 
 """Recylce params for plotting"""
 plt.rc('xtick', labelsize = 20)
