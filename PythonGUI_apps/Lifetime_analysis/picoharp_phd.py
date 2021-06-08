@@ -1,22 +1,27 @@
-# -*- coding: utf-8 -*-
 """
 Majority of this PicoHarp Parser was written by skyjur.
 Check out the original code here ---
 https://github.com/skyjur/picoharp300-curvefit-ui
 
-Modified by Sarthak --- 
-Created on Fri Apr  5 15:50:36 2019
-
-@author: Sarthak
+Modified by Sarthak Jariwala
+Fixed CurveHdr (Sarthak)
 """
 
-"""
-PicoHarp 300 file parser
-"""
 import datetime
 import numpy as np
-from ctypes import c_uint, c_ulong, c_char, c_int, c_int64, c_float, \
-                   Structure, sizeof, memmove, addressof
+from ctypes import (
+    Structure,
+    addressof,
+    c_char,
+    c_float,
+    c_int,
+    c_int32,
+    c_int64,
+    c_uint,
+    c_ulong,
+    memmove,
+    sizeof
+)
 
 DISPCURVES = 8
 MAXCURVES = 512
@@ -26,150 +31,151 @@ MAXCHANNELS = 65536
 class tParamStruct(Structure):
     _pack_ = 4
     _fields_ = [
-                ('Start', c_float),
-                ('Step', c_float),
-                ('End', c_float),
+        ("Start", c_float),
+        ("Step", c_float),
+        ("End", c_float),
     ]
 
 
 class tCurveMapping(Structure):
     _pack_ = 4
     _fields_ = [
-                ('MapTo', c_int),
-                ('Show', c_int),
+        ("MapTo", c_int),
+        ("Show", c_int),
     ]
 
 
 class TxtHdr(Structure):
     _pack_ = 4
     _fields_ = [
-                ('Ident', c_char * 16),
-                ('FormatVersion', c_char * 6),
-                ('CreatorName', c_char * 18),
-                ('CreatorVersion', c_char * 12),
-                ('FileTime', c_char * 18),
-                ('CRLF', c_char * 2),
-                ('CommentField', c_char * 256),
+        ("Ident", c_char * 16),
+        ("FormatVersion", c_char * 6),
+        ("CreatorName", c_char * 18),
+        ("CreatorVersion", c_char * 12),
+        ("FileTime", c_char * 18),
+        ("CRLF", c_char * 2),
+        ("CommentField", c_char * 256),
     ]
 
 
 class BinHdr(Structure):
     _pack_ = 4
     _fields_ = [
-                ('Curves', c_int),
-                ('BitsPerHistoBin', c_int),
-                ('RoutingChannels', c_int),
-                ('NumberOfBoards', c_int),
-                ('ActiveCurve', c_int),
-                ('MeasMode', c_int),
-                ('SubMode', c_int),
-                ('RangeNo', c_int),
-                ('Offset', c_int),
-                ('Tacq', c_int), # in m
-                ('StopAt', c_int),
-                ('StopOnOvfl', c_int),
-                ('Restart', c_int),
-                ('DispLinLog', c_int),
-                ('DispTimeFrom', c_int),
-                ('DispTimeTo', c_int),
-                ('DispCountsFrom', c_int),
-                ('DispCountsTo', c_int),
-                ('DispCurves', tCurveMapping * DISPCURVES),
-                ('Params', tParamStruct * 3),
-                ('RepeatMode', c_int),
-                ('RepeatsPerCurve', c_int),
-                ('RepeatTime', c_int),
-                ('RepeatWaitTime', c_int),
-                ('ScriptName', c_char * 20),
+        ("Curves", c_int),
+        ("BitsPerHistoBin", c_int),
+        ("RoutingChannels", c_int),
+        ("NumberOfBoards", c_int),
+        ("ActiveCurve", c_int),
+        ("MeasMode", c_int),
+        ("SubMode", c_int),
+        ("RangeNo", c_int),
+        ("Offset", c_int),
+        ("Tacq", c_int),  # in m
+        ("StopAt", c_int),
+        ("StopOnOvfl", c_int),
+        ("Restart", c_int),
+        ("DispLinLog", c_int),
+        ("DispTimeFrom", c_int),
+        ("DispTimeTo", c_int),
+        ("DispCountsFrom", c_int),
+        ("DispCountsTo", c_int),
+        ("DispCurves", tCurveMapping * DISPCURVES),
+        ("Params", tParamStruct * 3),
+        ("RepeatMode", c_int),
+        ("RepeatsPerCurve", c_int),
+        ("RepeatTime", c_int),
+        ("RepeatWaitTime", c_int),
+        ("ScriptName", c_char * 20),
     ]
 
 
 class BoardHdr(Structure):
     _pack_ = 4
     _fields_ = [
-                ('HardwareIdent', c_char * 16),
-                ('HardwareVersion', c_char * 8),
-                ('HardwareSerial', c_int),
-                ('SyncDivider', c_int),
-                ('CFDZeroCross0', c_int),
-                ('CFDLevel0', c_int),
-                ('CFDZeroCross1', c_int),
-                ('CFDLevel1', c_int),
-                ('Resolution', c_float),
-                ('RouterModelCode', c_int),
-                ('RouterEnabled', c_int),
-                ('RtChan1_InputType;', c_int),
-                ('RtChan1_InputLevel', c_int),
-                ('RtChan1_InputEdge', c_int),
-                ('RtChan1_CFDPresent', c_int),
-                ('RtChan1_CFDLevel', c_int),
-                ('RtChan1_CFDZeroCross', c_int),
-                ('RtChan2_InputType;', c_int),
-                ('RtChan2_InputLevel', c_int),
-                ('RtChan2_InputEdge', c_int),
-                ('RtChan2_CFDPresent', c_int),
-                ('RtChan2_CFDLevel', c_int),
-                ('RtChan2_CFDZeroCross', c_int),
-                ('RtChan3_InputType;', c_int),
-                ('RtChan3_InputLevel', c_int),
-                ('RtChan3_InputEdge', c_int),
-                ('RtChan3_CFDPresent', c_int),
-                ('RtChan3_CFDLevel', c_int),
-                ('RtChan3_CFDZeroCross', c_int),
-                ('RtChan4_InputType;', c_int),
-                ('RtChan4_InputLevel', c_int),
-                ('RtChan4_InputEdge', c_int),
-                ('RtChan4_CFDPresent', c_int),
-                ('RtChan4_CFDLevel', c_int),
-                ('RtChan4_CFDZeroCross', c_int),
+        ("HardwareIdent", c_char * 16),
+        ("HardwareVersion", c_char * 8),
+        ("HardwareSerial", c_int),
+        ("SyncDivider", c_int),
+        ("CFDZeroCross0", c_int),
+        ("CFDLevel0", c_int),
+        ("CFDZeroCross1", c_int),
+        ("CFDLevel1", c_int),
+        ("Resolution", c_float),
+        ("RouterModelCode", c_int),
+        ("RouterEnabled", c_int),
+        ("RtChan1_InputType;", c_int),
+        ("RtChan1_InputLevel", c_int),
+        ("RtChan1_InputEdge", c_int),
+        ("RtChan1_CFDPresent", c_int),
+        ("RtChan1_CFDLevel", c_int),
+        ("RtChan1_CFDZeroCross", c_int),
+        ("RtChan2_InputType;", c_int),
+        ("RtChan2_InputLevel", c_int),
+        ("RtChan2_InputEdge", c_int),
+        ("RtChan2_CFDPresent", c_int),
+        ("RtChan2_CFDLevel", c_int),
+        ("RtChan2_CFDZeroCross", c_int),
+        ("RtChan3_InputType;", c_int),
+        ("RtChan3_InputLevel", c_int),
+        ("RtChan3_InputEdge", c_int),
+        ("RtChan3_CFDPresent", c_int),
+        ("RtChan3_CFDLevel", c_int),
+        ("RtChan3_CFDZeroCross", c_int),
+        ("RtChan4_InputType;", c_int),
+        ("RtChan4_InputLevel", c_int),
+        ("RtChan4_InputEdge", c_int),
+        ("RtChan4_CFDPresent", c_int),
+        ("RtChan4_CFDLevel", c_int),
+        ("RtChan4_CFDZeroCross", c_int),
     ]
 
 
 class CurveHdr(Structure):
     _pack_ = 4
     _fields_ = [
-                ('CurveIndex', c_int),
-                ('TimeOfRecording', c_ulong),
-                ('HardwareIdent', c_char * 16),
-                ('HardwareVersion', c_char * 8),
-                ('HardwareSerial', c_int),
-                ('SyncDivider', c_int),
-                ('CFDZeroCross0', c_int),
-                ('CFDLevel0', c_int),
-                ('CFDZeroCross1', c_int),
-                ('CFDLevel1', c_int),
-                ('Offset', c_int),
-                ('RoutingChannel', c_int),
-                ('ExtDevices', c_int),
-                ('MeasMode', c_int),
-                ('SubMode', c_int),
-                ('P1', c_float),
-                ('P2', c_float),
-                ('P3', c_float),
-                ('RangeNo', c_int),
-                ('Resolution', c_float),
-                ('Channels', c_int),
-                ('Tacq', c_int),
-                ('StopAfter', c_int),
-                ('StopReason', c_int),
-                ('InpRate0', c_int),
-                ('InpRate1', c_int),
-                ('HistCountRate', c_int),
-                ('IntegralCount', c_int64),
-                ('reserved', c_int),
-                ('DataOffset', c_int),
-                ('RouterModelCode', c_int),
-                ('RouterEnabled', c_int),
-                ('RtChan_InputType;', c_int),
-                ('RtChan_InputLevel', c_int),
-                ('RtChan_InputEdge', c_int),
-                ('RtChan_CFDPresent', c_int),
-                ('RtChan_CFDLevel', c_int),
-                ('RtChan_CFDZeroCross', c_int),
+        ("CurveIndex", c_int32),
+        ("TimeOfRecording", c_uint),
+        ("HardwareIdent", c_char * 16),
+        ("HardwareVersion", c_char * 8),
+        ("HardwareSerial", c_int32),
+        ("SyncDivider", c_int32),
+        ("CFDZeroCross0", c_int32),
+        ("CFDLevel0", c_int32),
+        ("CFDZeroCross1", c_int32),
+        ("CFDLevel1", c_int32),
+        ("Offset", c_int32),
+        ("RoutingChannel", c_int32),
+        ("ExtDevices", c_int32),
+        ("MeasMode", c_int32),
+        ("SubMode", c_int32),
+        ("P1", c_float),
+        ("P2", c_float),
+        ("P3", c_float),
+        ("RangeNo", c_int32),
+        ("Resolution", c_float),
+        ("Channels", c_int32),
+        ("Tacq", c_int32),
+        ("StopAfter", c_int32),
+        ("StopReason", c_int32),
+        ("InpRate0", c_int32),
+        ("InpRate1", c_int32),
+        ("HistCountRate", c_int32),
+        ("IntegralCount", c_int64),
+        ("reserved", c_int32),
+        ("DataOffset", c_int32),
+        ("RouterModelCode", c_int32),
+        ("RouterEnabled", c_int32),
+        ("RtChan_InputType;", c_int32),
+        ("RtChan_InputLevel", c_int32),
+        ("RtChan_InputEdge", c_int32),
+        ("RtChan_CFDPresent", c_int32),
+        ("RtChan_CFDLevel", c_int32),
+        ("RtChan_CFDZeroCross", c_int32),
     ]
 
 
-class ParseError(Exception): pass
+class ParseError(Exception):
+    pass
 
 
 def _read(f, CType):
@@ -180,8 +186,8 @@ def _read(f, CType):
 
 
 def _validate_header(header):
-    if not header.Ident == 'PicoHarp 300' or not header.FormatVersion == '2.0':
-        raise ParseError('Does not look like a PicoHarp 300 file.')
+    if not header.Ident == "PicoHarp 300" or not header.FormatVersion == "2.0":
+        raise ParseError("Does not look like a PicoHarp 300 file.")
 
 
 class Curve(object):
@@ -189,23 +195,20 @@ class Curve(object):
     data = None
 
     def __repr__(self):
-        return 'Curve<resolution: %s, size: %s>' % (
-            self.res,
-            len(self.data)
-        )
+        return "Curve<resolution: %s, size: %s>" % (self.res, len(self.data))
 
 
 def timefmt(t):
     d = datetime.datetime.fromtimestamp(t)
-    return d.strftime('%a %b %d %H:%M:%S %Y')
+    return d.strftime("%a %b %d %H:%M:%S %Y")
 
 
 class PicoharpParser(object):
     _ready = False
 
     def __init__(self, filename):
-        if isinstance(filename, (str)):#, unicode)):
-            filename = open(filename, mode='rb')
+        if isinstance(filename, (str)):  # , unicode)):
+            filename = open(filename, mode="rb")
         self.f = filename
         self._prepare()
 
@@ -214,7 +217,7 @@ class PicoharpParser(object):
 
         header = self._header = _read(self.f, TxtHdr)
         """SJ commented this --- it was giving ParseError"""
-#        _validate_header(header) 
+        #        _validate_header(header)
 
         bin_header = self._bin_header = _read(self.f, BinHdr)
 
@@ -240,19 +243,26 @@ class PicoharpParser(object):
         array = np.fromfile(self.f, c_uint, header.Channels)
 
         return res, array
-    
+
+    def get_all_curves(self):
+        all_curves = []
+        for i in range(len(self._curves)):
+            all_curves.append(self.get_curve(i))
+
+        return all_curves
+
     def get_time_window_in_ns(self, curve_no):
         curve = self._curves[curve_no]
         rep_rate = curve.InpRate0
         res, _ = self.get_curve(curve_no)
-        time_window_s = (1/rep_rate)/res # in seconds
-        
-        return time_window_s * 1e9 # in nannoseconds
-    
+        time_window_s = (1 / rep_rate) / res  # in seconds
+
+        return time_window_s * 1e9  # in nannoseconds
+
     def get_integral_counts(self, curve_no):
         curve = self._curves[curve_no]
         integral_counts = curve.IntegralCount
-        
+
         return integral_counts
 
     def info(self):
@@ -262,7 +272,7 @@ class PicoharpParser(object):
         curves = self._curves
         r = []
         w = r.append
-        yesno = lambda x: 'true' if x else 'false'
+        yesno = lambda x: "true" if x else "false"
 
         w("Ident            : %s" % txthdr.Ident)
         w("Format Version   : %s" % txthdr.FormatVersion)
@@ -367,7 +377,7 @@ class PicoharpParser(object):
                 w("HardwareSerial    : %d" % curve.HardwareSerial)
                 w("SyncDivider       : %d" % curve.SyncDivider)
                 w("CFDZeroCross0     : %d" % curve.CFDZeroCross0)
-                w("CFDLevel0         : %d" % curve.CFDLevel0 )
+                w("CFDLevel0         : %d" % curve.CFDLevel0)
                 w("CFDZeroCross1     : %d" % curve.CFDZeroCross1)
                 w("CFDLevel1         : %d" % curve.CFDLevel1)
                 w("Offset            : %d" % curve.Offset)
@@ -401,8 +411,4 @@ class PicoharpParser(object):
                     w("RtChan_CFDLevel      : %d" % curve.RtChan_CFDLevel)
                     w("RtChan_CFDZeroCross  : %d" % curve.RtChan_CFDZeroCross)
 
-        return '\n'.join(r)
-
-def read_picoharp_phd(datafile):
-    parser = PicoharpParser(datafile)
-    return parser
+        return "\n".join(r)

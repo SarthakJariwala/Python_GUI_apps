@@ -25,12 +25,12 @@ except:
 # local module imports
 try:
     from Lifetime_analysis.Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
-    from Lifetime_analysis.picoharp_phd import read_picoharp_phd
+    from Lifetime_analysis.read_ph_phd import read_picoharp_phd
     from Lifetime_analysis.Fit_functions_with_irf import fit_exp_stretch_diffev, fit_exp_stretch_fmin_tnc, fit_multi_exp_diffev, fit_multi_exp_fmin_tnc
 except:
     from Fit_functions import stretch_exp_fit, double_exp_fit, single_exp_fit
     from Fit_functions_with_irf import fit_exp_stretch_diffev, fit_exp_stretch_fmin_tnc, fit_multi_exp_diffev, fit_multi_exp_fmin_tnc
-    from picoharp_phd import read_picoharp_phd
+    from read_ph_phd import read_picoharp_phd
 
 """Recylce params for plotting"""
 plt.rc('xtick', labelsize = 20)
@@ -95,10 +95,12 @@ class MainWindow(TemplateBaseClass):
         self.file = None
         self.out = None # output file after fitting
         self.data_list = []
-        self.fit_lifetime_called = False
+        self.fit_lifetime_called_w_irf = False
+        self.fit_lifetime_called_wo_irf = False
         self.x_mem = [] # containers for adding x data to memory
         self.y_mem = [] # containers for adding y data to memory
         self.best_fit_mem = [] # containers for adding best fit data to memory
+        self.best_fit_mem_x = [] # containers for adding best fit data to memory
         self.legend = [] # containers for adding legend to memory
 
         #variables accounting for data received from FLIM analysis
@@ -127,6 +129,10 @@ class MainWindow(TemplateBaseClass):
         skip_rows = self.skip_rows_window.ui.skip_rows_spinBox.value()
         if ".txt" in self.filename[0]:
             self.file = np.loadtxt(self.filename[0], skiprows=skip_rows)
+            
+            if self.file.ndim == 1: # if there is only one trace, reshape to 2D
+                self.file = self.file.reshape(self.file.shape[0], 1)
+    
         elif ".csv" in self.filename[0]:
             self.file = np.genfromtxt(self.filename[0], skip_header=skip_rows, delimiter=",")
 
@@ -147,6 +153,10 @@ class MainWindow(TemplateBaseClass):
         irf_skip_rows = self.irf_skip_rows_window.ui.skip_rows_spinBox.value()
         if ".txt" in self.irf_filename[0]:
             self.irf_file = np.loadtxt(self.irf_filename[0], skiprows=irf_skip_rows)
+            
+            if self.irf_file.ndim == 1: # if there is only one trace, reshape to 2d array
+                self.irf_file = self.irf_file.reshape(self.irf_file.shape[0], 1)
+                        
         elif ".csv" in self.irf_filename[0]:
             self.irf_file = np.genfrontxt(self.irf_filename[0], skip_header=irf_skip_rows, delimiter=",")
 
@@ -258,7 +268,8 @@ class MainWindow(TemplateBaseClass):
                 x,y = self.acquire_settings() #get data
                 
             self.ui.plot.plot(x, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
-            self.fit_lifetime_called = False
+            self.fit_lifetime_called_w_irf = False
+            self.fit_lifetime_called_wo_irf = False
 
             try:
                 self.ui.Result_textBrowser.setText("Integral Counts :\n" "{:.2E}".format(
@@ -303,7 +314,7 @@ class MainWindow(TemplateBaseClass):
                 self.ui.plot.plot(t, y, clear=self.ui.clear_plot_checkBox.isChecked(), pen=pg.mkPen(self.plot_color))
                 
                 if fit_func == "Stretched Exponential": #stretch exponential tab
-                    tc, beta, a, avg_tau, PL_fit = stretch_exp_fit(TRPL_interp, t)
+                    tc, beta, a, avg_tau, PL_fit, noise = stretch_exp_fit(TRPL_interp, t)
                     self.out = np.empty((len(t), 3))
                     self.out[:,0] = t #time
                     self.out[:,1] = TRPL_interp #Raw PL 
@@ -313,11 +324,12 @@ class MainWindow(TemplateBaseClass):
                                                        "\nFit Method: " + "diff_ev" + #TODO : change when diff_ev and fmin_tnc implemented for non-irf
                                                        "\nAverage Lifetime = " + str(avg_tau)+ " ns"
                                                        "\nCharacteristic Tau = " + str(tc)+" ns"
-                                                       "\nBeta = "+str(beta))
+                                                       "\nBeta = "+str(beta)+
+                                                       "\nNoise = "+ str(noise))
                     self.ui.average_lifetime_spinBox.setValue(avg_tau)
                 
                 elif fit_func == "Double Exponential": #double exponential tab
-                    tau1, a1, tau2, a2, avg_tau, PL_fit = double_exp_fit(TRPL_interp, t)
+                    tau1, a1, tau2, a2, avg_tau, PL_fit, noise = double_exp_fit(TRPL_interp, t)
                     self.out = np.empty((len(t), 3))
                     self.out[:,0] = t #time
                     self.out[:,1] = TRPL_interp #Raw PL 
@@ -329,11 +341,12 @@ class MainWindow(TemplateBaseClass):
                                                        "\nTau 1 = " + str(tau1)+" ns"
                                                        "\nA 1 = " + str(a1)+
                                                        "\nTau 2 = " + str(tau2)+" ns"
-                                                       "\nA 2 = " + str(a2))
+                                                       "\nA 2 = " + str(a2)+
+                                                       "\nNoise = "+ str(noise))
                     #TODO - once tau_avg implemented, set average lifetime spinbox to tau_avg value
                 
                 elif fit_func == "Single Exponential": #single exponential tab
-                    tau, a, PL_fit = single_exp_fit(TRPL_interp, t)
+                    tau, a, PL_fit, noise = single_exp_fit(TRPL_interp, t)
                     self.out = np.empty((len(t), 3))
                     self.out[:,0] = t #time
                     self.out[:,1] = TRPL_interp #Raw PL 
@@ -342,12 +355,14 @@ class MainWindow(TemplateBaseClass):
                     self.ui.Result_textBrowser.setText("Fit Results:\n\nFit Function: Single Exponential"
                                                        "\nFit Method: " + "diff_ev" +
                                                        "\nLifetime = " + str(tau)+ " ns"
-                                                       "\nA = " + str(a))
+                                                       "\nA = " + str(a)+
+                                                       "\nNoise = "+ str(noise))
                     self.ui.average_lifetime_spinBox.setValue(tau)
                 
                 #add fit params to data_list
                 self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-                self.fit_lifetime_called = True
+                self.fit_lifetime_called_wo_irf = True
+                self.fit_lifetime_called_w_irf = False
 
                 self.ui.plot.setLabel('left', 'Intensity', units='a.u.')
                 self.ui.plot.setLabel('bottom', 'Time (ns)')
@@ -475,7 +490,8 @@ class MainWindow(TemplateBaseClass):
 
                 #add fit params to data_list
                 self.data_list.append("Data Channel: " + str(self.ui.Data_channel_spinBox.value()) + "\n" + self.ui.Result_textBrowser.toPlainText())
-                self.fit_lifetime_called = True
+                self.fit_lifetime_called_w_irf = True
+                self.fit_lifetime_called_wo_irf = False
         except Exception as e:
             self.ui.Result_textBrowser.append(format(e))
 
@@ -548,12 +564,19 @@ class MainWindow(TemplateBaseClass):
         self.y_mem = []
         self.legend = []
         self.best_fit_mem = []
+        self.best_fit_mem_x = []
     
     def add_trace_to_mem(self):
         try:
-            if self.fit_lifetime_called == True:
+            if self.fit_lifetime_called_w_irf == True:
                 self.x_mem.append(self.out[:,0])
                 self.y_mem.append(self.out[:,1])
+                self.best_fit_mem_x.append(self.out[:,0])
+                self.best_fit_mem.append(self.out[:,2])
+            elif self.fit_lifetime_called_wo_irf == True:
+                self.x_mem.append(self.acquire_settings()[0])
+                self.y_mem.append(self.acquire_settings()[1])
+                self.best_fit_mem_x.append(self.out[:,0])
                 self.best_fit_mem.append(self.out[:,2])
             else:
                 self.x_mem.append(self.acquire_settings()[0])
@@ -578,8 +601,8 @@ class MainWindow(TemplateBaseClass):
                 plt.tick_params(direction='out', length=8, width=3.5)
                 for i in range(len(self.x_mem)):
                     plt.plot(self.x_mem[i], self.y_mem[i], label=str(self.legend[i]))
-                    if self.fit_lifetime_called == True:
-                        plt.plot(self.x_mem[i], self.best_fit_mem[i],'k--')
+                    if self.fit_lifetime_called_w_irf == True or self.fit_lifetime_called_wo_irf == True:
+                        plt.plot(self.best_fit_mem_x[i], self.best_fit_mem[i],'k--')
 
                 plt.yscale('log')
                 plt.xlabel("Time (ns)", fontsize=20, fontweight='bold')

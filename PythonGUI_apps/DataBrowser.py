@@ -85,8 +85,10 @@ class MainWindow(TemplateBaseClass):
         
 
 def run():
+    app = QtGui.QApplication(sys.argv)#.instance()
+    app.setStyle("Fusion")
     win = MainWindow()
-    QtGui.QApplication.instance().exec_()
+    sys.exit(app.exec_())
     return
 
 run()
