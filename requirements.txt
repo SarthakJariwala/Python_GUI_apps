@@ -53,7 +53,7 @@ numba==0.45.1
 numpy==1.16.4
 numpy-groupies==0.9.7
 olefile==0.46
-opencv-python==4.1.0.25
+opencv-python==4.1.1.26
 packaging==19.0
 pandas==0.25.0
 pandocfilters==1.4.2
