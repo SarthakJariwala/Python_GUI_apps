@@ -50,7 +50,7 @@ nbformat==4.4.0
 networkx==2.3
 notebook==6.1.5
 numba==0.45.1
-numpy==1.16.4
+numpy==1.22.0
 numpy-groupies==0.9.7
 olefile==0.46
 opencv-python==4.1.0.25
