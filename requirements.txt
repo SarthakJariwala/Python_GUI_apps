@@ -40,7 +40,7 @@ locket==0.2.0
 MarkupSafe==1.1.1
 matplotlib==3.1.1
 matplotlib-scalebar==0.6.0
-mistune==0.8.4
+mistune==2.0.3
 mkl-fft==1.0.12
 mkl-random==1.0.2
 mkl-service==2.0.2
